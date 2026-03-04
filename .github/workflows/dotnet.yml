@@ -1,0 +1,32 @@
+name: .NET
+
+on:
+  pull_request
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+          include-prerelease: true
+    
+      - name: Restore workloads
+        run: dotnet workload restore
+    
+      - name: Restore dependencies
+        run: dotnet restore
+    
+      - name: Build
+        run: dotnet build --no-restore
+    
+      - name: Test
+        if: ${{ hashFiles('**/*Tests.csproj') != '' }}
+        run: dotnet test --no-build --verbosity normal
