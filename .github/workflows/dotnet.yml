@@ -16,15 +16,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v6
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
       with:
         dotnet-version: 9.0.x
+    
+    - name: Restore workloads
+      run: dotnet workload restore
+    
     - name: Restore dependencies
       run: dotnet restore
-    - name: Install maui-android workload
-      run: dotnet workload install maui-android
+    
     - name: Build
       run: dotnet build --no-restore
+    
     - name: Test
       run: dotnet test --no-build --verbosity normal
