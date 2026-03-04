@@ -33,4 +33,5 @@ jobs:
       run: dotnet build --no-restore
     
     - name: Test
+      if: ${{ hashFiles('**/*Tests.csproj') != '' }}
       run: dotnet test --no-build --verbosity normal
