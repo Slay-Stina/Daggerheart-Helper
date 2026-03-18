@@ -6,6 +6,7 @@ body {
     font-size: var(--type-ramp-base-font-size);
     line-height: var(--type-ramp-base-line-height);
     margin: 0;
+    min-height: 100dvh;
 }
 
 .navmenu-icon {
@@ -16,11 +17,12 @@ body {
     min-height: calc(100dvh - 86px);
     color: var(--neutral-foreground-rest);
     align-items: stretch !important;
+    background: transparent;
 }
 
 .body-content {
     align-self: stretch;
-    height: calc(100dvh - 86px) !important;
+    min-height: calc(100dvh - 86px) !important;
     display: flex;
 }
 
