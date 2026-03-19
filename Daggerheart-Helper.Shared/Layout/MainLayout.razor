@@ -1,6 +1,16 @@
 ﻿@inherits LayoutComponentBase
 
-@Body
+<div class="background-container">
+    <FluentMainLayout NavMenuTitle="Navigation menu">
+        <Header><h3>Daggerheart Helper</h3></Header>
+        <NavMenuContent>
+            <FluentNavLink Href="/" Text="Home">Home</FluentNavLink>
+        </NavMenuContent>
+        <Body>
+            @Body
+        </Body>
+    </FluentMainLayout>
+</div>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
