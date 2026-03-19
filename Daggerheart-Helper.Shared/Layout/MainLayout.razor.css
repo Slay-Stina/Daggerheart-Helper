@@ -1,0 +1,7 @@
+.background-container {
+    min-height: 100dvh;
+    background-image: url('Images/dh-background.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+}
