@@ -5,10 +5,17 @@
 <FluentLayout>
     <FluentStack Orientation="Orientation.Vertical"
                  HorizontalAlignment="HorizontalAlignment.Center"
-                 VerticalAlignment="VerticalAlignment.Center">
-        <FluentButton>Create Character</FluentButton>
-        <FluentButton>My Character</FluentButton>
-        <FluentButton>DM Tools</FluentButton>
+                 VerticalAlignment="VerticalAlignment.Center"
+                 Width="500">
+        <FluentNavLink Href="/characterCreator">
+            <FluentButton IconStart="@(new Icons.Filled.Size20.PersonAdd())" >Create Character</FluentButton>
+        </FluentNavLink>
+        <FluentNavLink Href="/characters">
+            <FluentButton IconStart="@(new Icons.Filled.Size20.PeopleCommunity())" width="auto">My Characters</FluentButton>
+        </FluentNavLink>
+        <FluentNavLink Href="/dm-tools">
+            <FluentButton IconStart="@(new Icons.Filled.Size20.PersonLightning())">DM Tools</FluentButton>
+        </FluentNavLink>
     </FluentStack>
 </FluentLayout>
 
