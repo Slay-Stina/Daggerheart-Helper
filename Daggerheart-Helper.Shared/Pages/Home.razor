@@ -1,21 +1,32 @@
 ﻿@page "/"
+@inject NavigationManager NavigationManager
 
 <PageTitle>Home</PageTitle>
 
-<FluentLayout>
+<FluentLayout Style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
     <FluentStack Orientation="Orientation.Vertical"
                  HorizontalAlignment="HorizontalAlignment.Center"
                  VerticalAlignment="VerticalAlignment.Center"
-                 Width="500">
-        <FluentNavLink Href="/characterCreator">
-            <FluentButton IconStart="@(new Icons.Filled.Size20.PersonAdd())" >Create Character</FluentButton>
-        </FluentNavLink>
-        <FluentNavLink Href="/characters">
-            <FluentButton IconStart="@(new Icons.Filled.Size20.PeopleCommunity())" width="auto">My Characters</FluentButton>
-        </FluentNavLink>
-        <FluentNavLink Href="/dm-tools">
-            <FluentButton IconStart="@(new Icons.Filled.Size20.PersonLightning())">DM Tools</FluentButton>
-        </FluentNavLink>
+                 Width="300"
+                 VerticalGap="10">
+        <FluentButton Appearance="Appearance.Accent"
+                      IconStart="@(new Icons.Filled.Size20.PersonAdd())"
+                      OnClick="@(() => NavigationManager.NavigateTo("/CharacterCreator"))"
+                      Style="width: 100%;">
+            Create Character
+        </FluentButton>
+        <FluentButton Appearance="Appearance.Accent"
+                      IconStart="@(new Icons.Filled.Size20.PeopleCommunity())"
+                      OnClick="@(() => NavigationManager.NavigateTo("/Characters"))"
+                      Style="width: 100%;">
+            My Characters
+        </FluentButton>
+        <FluentButton Appearance="Appearance.Accent"
+                      IconStart="@(new Icons.Filled.Size20.PersonLightning())"
+                      OnClick="@(() => NavigationManager.NavigateTo("/dm-tools"))"
+                      Style="width: 100%;">
+            DM Tools
+        </FluentButton>
     </FluentStack>
 </FluentLayout>
 
