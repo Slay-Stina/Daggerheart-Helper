@@ -4,7 +4,10 @@
     <FluentMainLayout NavMenuTitle="Navigation menu">
         <Header><h3>Daggerheart Helper</h3></Header>
         <NavMenuContent>
-            <FluentNavLink Href="/" Text="Home">Home</FluentNavLink>
+            <FluentNavLink Href="/" IconStart="@(new Icons.Filled.Size20.Home())">Home</FluentNavLink>
+            <FluentNavLink Href="/CharacterCreator" IconStart="@(new Icons.Filled.Size20.PersonAdd())">Character Creator</FluentNavLink>
+            <FluentNavLink Href="/Characters" IconStart="@(new Icons.Filled.Size20.PeopleCommunity())">My Characters</FluentNavLink>
+            <FluentNavLink Href="/dm-tools" IconStart="@(new Icons.Filled.Size20.PersonLightning())">DM Tools</FluentNavLink>
         </NavMenuContent>
         <Body>
             @Body
