@@ -7,5 +7,6 @@ public enum TraitType
     Finesse,
     Instinct,
     Presence,
-    Knowledge
+    Knowledge,
+    Evasion
 }
