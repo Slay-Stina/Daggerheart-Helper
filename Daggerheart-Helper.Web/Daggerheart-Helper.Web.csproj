@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Daggerheart-Helper.Shared\Daggerheart-Helper.Shared.csproj"/>
+        <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.14.0"/>
