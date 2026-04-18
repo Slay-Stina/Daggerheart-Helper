@@ -4,7 +4,7 @@ namespace Core.Entities;
 
 public class Ability
 {
-    public Guid Id { get; init; }
+    public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public Domain Domain { get; set; }
     public int Level { get; set; }
