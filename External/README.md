@@ -1,13 +1,13 @@
 # External Dependencies
 
-Denna mapp innehåller externa kodkällor som versioneras separat.
+This folder contains external code sources that are versioned separately.
 
 ## daggerheart-srd
-- Plats: `External/daggerheart-srd`
-- Typ: git submodule
+- Location: `External/daggerheart-srd`
+- Type: git submodule
 - Upstream: `https://github.com/seansbox/daggerheart-srd`
 
-Initiera submodules efter clone:
+Initialize submodules after cloning:
 
 ```bash
 git submodule update --init --recursive
