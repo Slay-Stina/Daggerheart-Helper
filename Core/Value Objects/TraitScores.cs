@@ -1,4 +1,4 @@
-namespace Core.Value_Objects;
+namespace Core.ValueObjects;
 
 public record TraitScores(
     int Agility, 

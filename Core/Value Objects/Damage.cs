@@ -1,5 +1,5 @@
 using Core.Enums;
 
-namespace Core.Value_Objects;
+namespace Core.ValueObjects;
 
 public record Damage(Dice Dice,int Bonus, DamageType Type);

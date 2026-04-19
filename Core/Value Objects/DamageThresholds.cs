@@ -1,4 +1,4 @@
-namespace Core.Value_Objects;
+namespace Core.ValueObjects;
 
 public record DamageThresholds(int Minor, int Major, int Severe)
 {
@@ -6,4 +6,3 @@ public record DamageThresholds(int Minor, int Major, int Severe)
     {
     }
 }
-
