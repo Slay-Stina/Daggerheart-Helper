@@ -197,9 +197,9 @@ public class DaggerheartDbContext : DbContext
                             .Select(Enum.Parse<Domain>)
                             .ToList())
                 .Metadata.SetValueComparer(new ValueComparer<List<Domain>>(
-                    (left, right) => left != null && right != null && left.SequenceEqual(right),
-                    domains => domains.Aggregate(0, (hash, domain) => HashCode.Combine(hash, domain.GetHashCode())),
-                    domains => domains.ToList()));
+                    (left, right) => (left == null && right == null) || (left != null && right != null && left.SequenceEqual(right)),
+                    domains => domains == null ? 0 : domains.Aggregate(0, (hash, domain) => HashCode.Combine(hash, domain.GetHashCode())),
+                    domains => domains == null ? new List<Domain>() : domains.ToList()));
             entity.OwnsOne(x => x.SuggestedTraits, owned =>
             {
                 owned.Property(x => x.Agility).HasColumnName($"{nameof(GameClass.SuggestedTraits)}_{nameof(TraitScores.Agility)}");
@@ -304,5 +304,3 @@ public class DaggerheartDbContext : DbContext
         });
     }
 }
-
-
