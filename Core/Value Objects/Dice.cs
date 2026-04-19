@@ -1,3 +1,3 @@
-namespace Core.Value_Objects;
+namespace Core.ValueObjects;
 
 public record Dice(int NumberOfDice, int NumberOfSides);

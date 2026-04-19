@@ -1,5 +1,5 @@
 using Core.Enums;
-using Core.Value_Objects;
+using Core.ValueObjects;
 using Range = Core.Enums.Range;
 
 namespace Core.Entities;

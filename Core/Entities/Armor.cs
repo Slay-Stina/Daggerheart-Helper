@@ -1,5 +1,5 @@
 using Core.Enums;
-using Core.Value_Objects;
+using Core.ValueObjects;
 
 namespace Core.Entities;
 

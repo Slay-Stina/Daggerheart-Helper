@@ -7,7 +7,7 @@ public class DaggerheartDbContextFactory : IDesignTimeDbContextFactory<Daggerhea
 {
     public DaggerheartDbContext CreateDbContext(string[] args)
     {
-        var connectionString = Environment.GetEnvironmentVariable("DAGGERHEART_DB")
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
             ?? "Data Source=daggerheart.db";
 
         var optionsBuilder = new DbContextOptionsBuilder<DaggerheartDbContext>();
@@ -16,4 +16,3 @@ public class DaggerheartDbContextFactory : IDesignTimeDbContextFactory<Daggerhea
         return new DaggerheartDbContext(optionsBuilder.Options);
     }
 }
-

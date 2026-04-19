@@ -1,6 +1,8 @@
 using Core.Entities;
-using Core.Value_Objects;
+using Core.Enums;
+using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Infrastructure.Persistence;
 
@@ -186,6 +188,18 @@ public class DaggerheartDbContext : DbContext
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
             entity.Property(x => x.Description).IsRequired();
+            entity.Property(x => x.Domains)
+                .HasConversion(
+                    domains => string.Join(',', domains),
+                    stored => string.IsNullOrWhiteSpace(stored)
+                        ? new List<Domain>()
+                        : stored.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(Enum.Parse<Domain>)
+                            .ToList())
+                .Metadata.SetValueComparer(new ValueComparer<List<Domain>>(
+                    (left, right) => left != null && right != null && left.SequenceEqual(right),
+                    domains => domains.Aggregate(0, (hash, domain) => HashCode.Combine(hash, domain.GetHashCode())),
+                    domains => domains.ToList()));
             entity.OwnsOne(x => x.SuggestedTraits, owned =>
             {
                 owned.Property(x => x.Agility).HasColumnName($"{nameof(GameClass.SuggestedTraits)}_{nameof(TraitScores.Agility)}");
@@ -231,10 +245,6 @@ public class DaggerheartDbContext : DbContext
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
             entity.Property(x => x.Description).IsRequired();
-            entity.HasOne(x => x.GameClass)
-                .WithMany(x => x.Subclasses)
-                .HasForeignKey(x => x.GameClassId)
-                .OnDelete(DeleteBehavior.Cascade);
             entity.HasMany(x => x.Features)
                 .WithMany(x => x.Subclasses)
                 .UsingEntity<Dictionary<string, object>>(
@@ -294,6 +304,5 @@ public class DaggerheartDbContext : DbContext
         });
     }
 }
-
 
 
