@@ -191,14 +191,10 @@ public class DaggerheartDbContext : DbContext
             entity.Property(x => x.Domains)
                 .HasConversion(
                     domains => string.Join(',', domains),
-                    stored => string.IsNullOrWhiteSpace(stored)
-                        ? new List<Domain>()
-                        : stored.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                            .Select(Enum.Parse<Domain>)
-                            .ToList())
+                    stored => DeserializeDomains(stored))
                 .Metadata.SetValueComparer(new ValueComparer<List<Domain>>(
                     (left, right) => (left == null && right == null) || (left != null && right != null && left.SequenceEqual(right)),
-                    domains => domains == null ? 0 : domains.Aggregate(0, (hash, domain) => HashCode.Combine(hash, domain.GetHashCode())),
+                    domains => domains == null ? 0 : domains.Aggregate(0, (hash, domain) => HashCode.Combine(hash, (int)domain)),
                     domains => domains == null ? new List<Domain>() : domains.ToList()));
             entity.OwnsOne(x => x.SuggestedTraits, owned =>
             {
@@ -302,5 +298,26 @@ public class DaggerheartDbContext : DbContext
                         join.ToTable("WeaponFeatures");
                     });
         });
+    }
+
+    private static List<Domain> DeserializeDomains(string? stored)
+    {
+        if (string.IsNullOrWhiteSpace(stored))
+        {
+            return new List<Domain>();
+        }
+
+        var domains = new List<Domain>();
+        foreach (var rawDomain in stored.Split(',', StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (!Enum.TryParse<Domain>(rawDomain, true, out var domain))
+            {
+                throw new InvalidOperationException($"Invalid domain value '{rawDomain}' found in persisted data.");
+            }
+
+            domains.Add(domain);
+        }
+
+        return domains;
     }
 }
