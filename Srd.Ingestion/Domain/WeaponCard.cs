@@ -1,6 +1,5 @@
 using Core.Enums;
 using Core.ValueObjects;
-using Range = Core.Enums.Range;
 
 namespace Srd.Ingestion.Domain;
 
@@ -10,7 +9,7 @@ public sealed record WeaponCard(
     Burden Burden,
     WeaponPriority Priority,
     TraitType Trait,
-    Range Range,
+    RangeType RangeType,
     DamageType DamageKind,
     Damage Damage,
     IReadOnlyList<FeatureBlock> Features);

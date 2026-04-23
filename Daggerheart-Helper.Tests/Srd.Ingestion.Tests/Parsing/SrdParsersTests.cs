@@ -3,7 +3,6 @@ using Core.ValueObjects;
 using Srd.Ingestion.Parsing;
 using Srd.Ingestion.Raw;
 using Xunit;
-using Range = Core.Enums.Range;
 
 namespace DaggerheartHelper.Tests.Srd.Ingestion.Tests.Parsing;
 
@@ -44,12 +43,12 @@ public class SrdParsersTests
     }
 
     [Theory]
-    [InlineData("Melee", Range.Melee)]
-    [InlineData("Very Close", Range.VeryClose)]
-    [InlineData("Close", Range.Close)]
-    [InlineData("Far", Range.Far)]
-    [InlineData("Very Far", Range.VeryFar)]
-    public void ParseRange_ReturnsExpectedEnumValue(string value, Range expected)
+    [InlineData("Melee", RangeType.Melee)]
+    [InlineData("Very Close", RangeType.VeryClose)]
+    [InlineData("Close", RangeType.Close)]
+    [InlineData("Far", RangeType.Far)]
+    [InlineData("Very Far", RangeType.VeryFar)]
+    public void ParseRange_ReturnsExpectedEnumValue(string value, RangeType expected)
     {
         Assert.Equal(expected, SrdParsers.ParseRange(value));
     }

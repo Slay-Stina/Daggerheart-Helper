@@ -26,7 +26,7 @@ public static class SrdEntityMapper
             Tier = ParseTier(card.Tier),
             Trait = card.Trait,
             Burden = card.Burden,
-            Range = card.Range,
+            RangeType = card.RangeType,
             Category = card.Priority,
             Damage = card.Damage,
             Description = string.Empty,
@@ -39,7 +39,7 @@ public static class SrdEntityMapper
         return new Ability
         {
             Title = card.Name,
-            Domain = card.Domain,
+            DomainType = card.Domain,
             Level = card.Level,
             RecallCost = card.RecallCost,
             Type = card.Type,

@@ -30,12 +30,12 @@ public class SrdEntityMapperTests
     [Fact]
     public void ToEntity_MapsAbilityCardToAbilityEntity()
     {
-        var card = new AbilityCard("Rune Ward", Domain.Arcana, 1, 0, AbilityType.Spell, "Text");
+        var card = new AbilityCard("Rune Ward", DomainType.Arcana, 1, 0, AbilityType.Spell, "Text");
 
         var entity = card.ToEntity();
 
         Assert.Equal("Rune Ward", entity.Title);
-        Assert.Equal(Domain.Arcana, entity.Domain);
+        Assert.Equal(DomainType.Arcana, entity.DomainType);
         Assert.Equal(1, entity.Level);
         Assert.Equal(0, entity.RecallCost);
         Assert.Equal(AbilityType.Spell, entity.Type);
