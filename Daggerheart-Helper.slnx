@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="Core/Core.csproj" />
   <Project Path="Daggerheart-Helper.Shared/Daggerheart-Helper.Shared.csproj" />
+  <Project Path="Daggerheart-Helper.Tests/Daggerheart-Helper.Tests.csproj" />
   <Project Path="Daggerheart-Helper.Web/Daggerheart-Helper.Web.csproj" />
   <Project Path="Infrastructure/Infrastructure.csproj" />
   <Project Path="Daggerheart-Helper/Daggerheart-Helper.csproj" />
