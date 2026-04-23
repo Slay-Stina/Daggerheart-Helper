@@ -6,7 +6,7 @@ namespace DaggerheartHelper.Tests.Srd.Ingestion.Tests.Loading;
 public class SrdJsonLoaderTests
 {
     [Fact]
-    public async Task LoadAsync_ParsesKnownEntriesFromRealSRDFiles()
+    public async Task LoadAsync_ParsesKnownEntries()
     {
         var loader = new SrdJsonLoader();
         var catalog = await loader.LoadAsync(TestRepoPaths.SrdJsonDirectory);
@@ -35,6 +35,22 @@ public class SrdJsonLoaderTests
         Assert.Equal(1, runeWard.Level);
         Assert.Equal(0, runeWard.RecallCost);
         Assert.Equal(Core.Enums.AbilityType.Spell, runeWard.Type);
+    }
+
+    [Fact]
+    public async Task LoadAsync_ParsesKnownEntriesFromExternalSrd_WhenPresent()
+    {
+        if (!TestRepoPaths.HasExternalSrdJson)
+        {
+            return;
+        }
+
+        var loader = new SrdJsonLoader();
+        var catalog = await loader.LoadAsync(TestRepoPaths.SrdJsonDirectory);
+
+        Assert.NotEmpty(catalog.Armors);
+        Assert.NotEmpty(catalog.Weapons);
+        Assert.NotEmpty(catalog.Abilities);
     }
 }
 

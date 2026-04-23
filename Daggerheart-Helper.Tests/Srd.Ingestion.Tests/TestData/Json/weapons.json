@@ -1,0 +1,13 @@
+[
+  {
+    "name": "Broadsword",
+    "tier": "1",
+    "burden": "One-Handed",
+    "damage": "d8 phy",
+    "trait": "Agility",
+    "range": "Melee",
+    "primary_or_secondary": "Primary",
+    "physical_or_magical": "Physical"
+  }
+]
+

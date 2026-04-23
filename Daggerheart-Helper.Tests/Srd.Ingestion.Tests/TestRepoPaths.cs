@@ -4,18 +4,24 @@ internal static class TestRepoPaths
 {
     private const string SentinelPath = "External/daggerheart-srd/.build/03_json/armor.json";
 
-    public static string RepositoryRoot => FindRepositoryRoot();
+    public static string LocalSrdJsonDirectory => Path.Combine(AppContext.BaseDirectory, "Srd.Ingestion.Tests", "TestData", "Json");
 
-    public static string SrdJsonDirectory => Path.Combine(RepositoryRoot, "External", "daggerheart-srd", ".build", "03_json");
+    public static string SrdJsonDirectory =>
+        TryFindRepositoryRoot(out var root)
+            ? Path.Combine(root, "External", "daggerheart-srd", ".build", "03_json")
+            : LocalSrdJsonDirectory;
 
-    private static string FindRepositoryRoot()
+    public static bool HasExternalSrdJson => TryFindRepositoryRoot(out _);
+
+    private static bool TryFindRepositoryRoot(out string root)
     {
         var current = new DirectoryInfo(AppContext.BaseDirectory);
         while (current is not null)
         {
             if (File.Exists(Path.Combine(current.FullName, SentinelPath)))
             {
-                return current.FullName;
+                root = current.FullName;
+                return true;
             }
 
             current = current.Parent;
@@ -25,10 +31,12 @@ internal static class TestRepoPaths
         var siblingRoot = FindSiblingWorktreeRoot();
         if (siblingRoot is not null)
         {
-            return siblingRoot;
+            root = siblingRoot;
+            return true;
         }
 
-        throw new DirectoryNotFoundException($"Could not locate repository root containing '{SentinelPath}'.");
+        root = string.Empty;
+        return false;
     }
 
     private static string? FindSiblingWorktreeRoot()
