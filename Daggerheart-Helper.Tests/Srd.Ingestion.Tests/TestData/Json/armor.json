@@ -1,0 +1,15 @@
+[
+  {
+    "base_score": "3",
+    "base_thresholds": "5 / 11",
+    "feature": [
+      {
+        "name": "Flexible",
+        "text": "+1 to Evasion"
+      }
+    ],
+    "name": "Gambeson Armor",
+    "tier": "1"
+  }
+]
+

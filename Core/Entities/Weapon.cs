@@ -1,6 +1,5 @@
 using Core.Enums;
 using Core.ValueObjects;
-using Range = Core.Enums.Range;
 
 namespace Core.Entities;
 
@@ -12,7 +11,7 @@ public class Weapon
     public TraitType Trait { get; set; }
     public required Damage Damage { get; set; }
     public Burden Burden { get; set; }
-    public Range Range { get; set; }
+    public RangeType RangeType { get; set; }
     public WeaponPriority Category { get; set; }
     public List<Feature> Features { get; set; } = new();
     public Tier Tier { get; set; }

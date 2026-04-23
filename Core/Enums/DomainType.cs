@@ -1,6 +1,6 @@
 namespace Core.Enums;
 
-public enum Domain
+public enum DomainType
 {
     Arcana,
     Blade,

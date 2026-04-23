@@ -1,0 +1,11 @@
+[
+  {
+    "name": "Rune Ward",
+    "domain": "Arcana",
+    "level": "1",
+    "recall": "0",
+    "type": "Spell",
+    "text": "Ward text"
+  }
+]
+
