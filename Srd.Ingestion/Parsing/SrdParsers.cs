@@ -3,8 +3,6 @@ using Core.Enums;
 using Srd.Ingestion.Domain;
 using Srd.Ingestion.Raw;
 using Core.ValueObjects;
-using Range = Core.Enums.Range;
-using DomainEnum = Core.Enums.Domain;
 
 namespace Srd.Ingestion.Parsing;
 
@@ -81,13 +79,13 @@ public static partial class SrdParsers
         _ => throw new FormatException($"Unsupported weapon priority: '{value}'.")
     };
 
-    public static Range ParseRange(string value) => value.Trim() switch
+    public static RangeType ParseRange(string value) => value.Trim() switch
     {
-        "Melee" => Range.Melee,
-        "Very Close" => Range.VeryClose,
-        "Close" => Range.Close,
-        "Far" => Range.Far,
-        "Very Far" => Range.VeryFar,
+        "Melee" => RangeType.Melee,
+        "Very Close" => RangeType.VeryClose,
+        "Close" => RangeType.Close,
+        "Far" => RangeType.Far,
+        "Very Far" => RangeType.VeryFar,
         _ => throw new FormatException($"Unsupported range: '{value}'.")
     };
 
@@ -100,7 +98,7 @@ public static partial class SrdParsers
 
     public static TraitType ParseTrait(string value) => ParseEnum<TraitType>(value, "trait");
 
-    public static DomainEnum ParseDomain(string value) => ParseEnum<DomainEnum>(value, "domain");
+    public static DomainType ParseDomain(string value) => ParseEnum<DomainType>(value, "domain");
 
     public static AbilityType ParseAbilityType(string value) => ParseEnum<AbilityType>(value, "type");
 

@@ -1,6 +1,6 @@
 namespace Core.Enums;
 
-public enum Range
+public enum RangeType
 {
     Melee,
     VeryClose,
