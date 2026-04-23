@@ -4,4 +4,5 @@
   <Project Path="Daggerheart-Helper.Web/Daggerheart-Helper.Web.csproj" />
   <Project Path="Infrastructure/Infrastructure.csproj" />
   <Project Path="Daggerheart-Helper/Daggerheart-Helper.csproj" />
+  <Project Path="Srd.Ingestion/Srd.Ingestion.csproj" />
 </Solution>
