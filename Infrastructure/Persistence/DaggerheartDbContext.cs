@@ -35,7 +35,7 @@ public class DaggerheartDbContext : DbContext
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Title).IsRequired().HasMaxLength(200);
             entity.Property(x => x.FeatureDescription).IsRequired();
-            entity.HasIndex(x => new { x.Domain, x.Level });
+            entity.HasIndex(x => new { Domain = x.DomainType, x.Level });
         });
 
         modelBuilder.Entity<Armor>(entity =>
@@ -192,10 +192,10 @@ public class DaggerheartDbContext : DbContext
                 .HasConversion(
                     domains => string.Join(',', domains),
                     stored => DeserializeDomains(stored))
-                .Metadata.SetValueComparer(new ValueComparer<List<Domain>>(
+                .Metadata.SetValueComparer(new ValueComparer<List<DomainType>>(
                     (left, right) => (left == null && right == null) || (left != null && right != null && left.SequenceEqual(right)),
                     domains => domains == null ? 0 : domains.Aggregate(0, (hash, domain) => HashCode.Combine(hash, (int)domain)),
-                    domains => domains == null ? new List<Domain>() : domains.ToList()));
+                    domains => domains == null ? new List<DomainType>() : domains.ToList()));
             entity.OwnsOne(x => x.SuggestedTraits, owned =>
             {
                 owned.Property(x => x.Agility).HasColumnName($"{nameof(GameClass.SuggestedTraits)}_{nameof(TraitScores.Agility)}");
@@ -300,17 +300,17 @@ public class DaggerheartDbContext : DbContext
         });
     }
 
-    private static List<Domain> DeserializeDomains(string? stored)
+    private static List<DomainType> DeserializeDomains(string? stored)
     {
         if (string.IsNullOrWhiteSpace(stored))
         {
-            return new List<Domain>();
+            return new List<DomainType>();
         }
 
-        var domains = new List<Domain>();
+        var domains = new List<DomainType>();
         foreach (var rawDomain in stored.Split(',', StringSplitOptions.RemoveEmptyEntries))
         {
-            if (!Enum.TryParse<Domain>(rawDomain, true, out var domain))
+            if (!Enum.TryParse<DomainType>(rawDomain, true, out var domain))
             {
                 throw new InvalidOperationException($"Invalid domain value '{rawDomain}' found in persisted data.");
             }
