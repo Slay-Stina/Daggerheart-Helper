@@ -27,11 +27,11 @@ public class SrdJsonLoaderTests
         Assert.Equal(Core.Enums.Burden.OneHanded, broadsword.Burden);
         Assert.Equal(Core.Enums.WeaponPriority.Primary, broadsword.Priority);
         Assert.Equal(Core.Enums.TraitType.Agility, broadsword.Trait);
-        Assert.Equal(Core.Enums.Range.Melee, broadsword.Range);
+        Assert.Equal(Core.Enums.RangeType.Melee, broadsword.RangeType);
         Assert.Equal(new Core.ValueObjects.Damage(new Core.ValueObjects.Dice(1, 8), 0, Core.Enums.DamageType.Physical), broadsword.Damage);
 
         var runeWard = Assert.Single(catalog.Abilities, x => x.Name == "Rune Ward");
-        Assert.Equal(Core.Enums.Domain.Arcana, runeWard.Domain);
+        Assert.Equal(Core.Enums.DomainType.Arcana, runeWard.Domain);
         Assert.Equal(1, runeWard.Level);
         Assert.Equal(0, runeWard.RecallCost);
         Assert.Equal(Core.Enums.AbilityType.Spell, runeWard.Type);
