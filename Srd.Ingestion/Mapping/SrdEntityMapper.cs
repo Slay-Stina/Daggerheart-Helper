@@ -47,12 +47,25 @@ public static class SrdEntityMapper
         };
     }
 
+    public static Heritage ToEntity(this HeritageCard card)
+    {
+        return new Heritage
+        {
+            Name = card.Name,
+            Description = card.Description,
+            Features = card.Features.Select(ToEntity).ToList(),
+            Note = card.Note
+        };
+    }
+
     public static List<Armor> ToEntities(this IEnumerable<ArmorCard> cards) => cards.Select(ToEntity).ToList();
 
     public static List<Weapon> ToEntities(this IEnumerable<WeaponCard> cards) => cards.Select(ToEntity).ToList();
 
     public static List<Ability> ToEntities(this IEnumerable<AbilityCard> cards) => cards.Select(ToEntity).ToList();
 
+    public static List<Heritage> ToEntities(this IEnumerable<HeritageCard> cards) => cards.Select(ToEntity).ToList();
+    
     private static Feature ToEntity(FeatureBlock feature)
     {
         return new Feature
