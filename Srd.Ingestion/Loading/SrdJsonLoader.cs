@@ -17,11 +17,16 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
         var armors = await LoadFileAsync<RawArmorDto>(jsonDirectoryPath, "armor.json", cancellationToken);
         var weapons = await LoadFileAsync<RawWeaponDto>(jsonDirectoryPath, "weapons.json", cancellationToken);
         var abilities = await LoadFileAsync<RawAbilityDto>(jsonDirectoryPath, "abilities.json", cancellationToken);
-
+        var ancestries = await LoadFileAsync<RawAncestryDto>(jsonDirectoryPath, "ancestries.json", cancellationToken);
+        var communities = await LoadFileAsync<RawCommunityDto>(jsonDirectoryPath, "communities.json", cancellationToken);
+        
         return new SrdCatalog(
             armors.Select(ToArmorCard).ToList(),
             weapons.Select(ToWeaponCard).ToList(),
-            abilities.Select(ToAbilityCard).ToList());
+            abilities.Select(ToAbilityCard).ToList(),
+            ancestries.Select(ToAncestryCard).ToList(),
+            communities.Select(ToCommunityCard).ToList()
+            );
     }
 
     private static async Task<List<T>> LoadFileAsync<T>(string directory, string fileName, CancellationToken cancellationToken)
@@ -76,6 +81,23 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             SrdParsers.ParseInt(raw.Recall, "recall"),
             SrdParsers.ParseAbilityType(raw.Type),
             raw.Text.Trim());
+    }
+    
+    private static AncestryCard ToAncestryCard(RawAncestryDto raw)
+    {
+        return new AncestryCard(
+            raw.Name.Trim(),
+            raw.Description.Trim(),
+            SrdParsers.ParseFeatures(raw.Features));
+    }
+    
+    private static CommunityCard ToCommunityCard(RawCommunityDto raw)
+    {
+        return new CommunityCard(
+            raw.Name.Trim(),
+            raw.Description.Trim(),
+            SrdParsers.ParseFeatures(raw.Feature),
+            raw.Note.Trim());
     }
 }
 
