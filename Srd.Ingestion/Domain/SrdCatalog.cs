@@ -5,5 +5,7 @@ public sealed record SrdCatalog(
     IReadOnlyList<WeaponCard> Weapons,
     IReadOnlyList<AbilityCard> Abilities,
     IReadOnlyList<AncestryCard> Ancestries,
-    IReadOnlyList<CommunityCard>  Communities);
+    IReadOnlyList<CommunityCard> Communities,
+    IReadOnlyList<SubclassCard> Subclasses,
+    IReadOnlyList<ClassCard> Classes);
 
