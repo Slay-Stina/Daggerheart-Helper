@@ -54,15 +54,23 @@ public class SrdParsersTests
     }
 
     [Fact]
-    public void ParseFeatures_TrimsAndPreservesQuestion()
+    public void ParseFeatures_TrimsAndReturnCorrectValues()
     {
         var features = SrdParsers.ParseFeatures(
             [
-                new RawFeatureDto { Name = " Flexible ", Text = " +1 to Evasion ", Question = "Why? " }
+                new RawFeatureDto { Name = " Flexible ", Text = " +1 to Evasion " }
             ]);
 
         Assert.Single(features);
-        Assert.Equal(new global::Srd.Ingestion.Domain.FeatureBlock("Flexible", "+1 to Evasion", "Why?"), features[0]);
+        Assert.Equal(new global::Srd.Ingestion.Domain.FeatureBlock("Flexible", "+1 to Evasion"), features[0]);
+    }
+
+    [Fact]
+    public void ParseTraitScores_TrimsAndReturnCorrectValues()
+    {
+        TraitScores traitScores = new TraitScores(0, 0, -1, 1, 1, 2);
+        
+        Assert.Equal( SrdParsers.ParseTraitScores("0, 0, -1, +1, +1, +2"), traitScores);
     }
 }
 

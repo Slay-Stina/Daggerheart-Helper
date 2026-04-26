@@ -6,6 +6,14 @@ namespace Srd.Ingestion.Mapping;
 
 public static class SrdEntityMapper
 {
+    public static List<Armor> ToEntities(this IEnumerable<ArmorCard> cards) => cards.Select(ToEntity).ToList();
+
+    public static List<Weapon> ToEntities(this IEnumerable<WeaponCard> cards) => cards.Select(ToEntity).ToList();
+
+    public static List<Ability> ToEntities(this IEnumerable<AbilityCard> cards) => cards.Select(ToEntity).ToList();
+
+    public static List<Heritage> ToEntities(this IEnumerable<HeritageCard> cards) => cards.Select(ToEntity).ToList();
+    
     public static Armor ToEntity(this ArmorCard card)
     {
         return new Armor
@@ -58,13 +66,38 @@ public static class SrdEntityMapper
         };
     }
 
-    public static List<Armor> ToEntities(this IEnumerable<ArmorCard> cards) => cards.Select(ToEntity).ToList();
+    public static Subclass ToEntity(this SubclassCard card)
+    {
+        return new Subclass
+        {
+            Name = card.Name,
+            Description = card.Description,
+            Features = card.Features.Select(ToEntity).ToList(),
+            SpellCastingTraitType = card.SpellcastTrait
+        };
+    }
 
-    public static List<Weapon> ToEntities(this IEnumerable<WeaponCard> cards) => cards.Select(ToEntity).ToList();
+    public static GameClass ToEntity(this ClassCard card)
+    {
+        return new GameClass
+        {
+            Name = card.Name,
+            Description = card.Description,
+            BaseEvasion = card.BaseEvasion,
+            BaseHealth = card.BaseHp,
+            Domains = card.Domains,
+            SuggestedTraits = null,
+            SuggestedArmor = null,
+            SuggestedWeapons = null,
+            Subclasses = null,
+            Features = card.Features.Select(ToEntity)
+                .ToList(),
+            BackgroundQuestions = null,
+            ConnectionQuestions = null,
+            Items = null,
 
-    public static List<Ability> ToEntities(this IEnumerable<AbilityCard> cards) => cards.Select(ToEntity).ToList();
-
-    public static List<Heritage> ToEntities(this IEnumerable<HeritageCard> cards) => cards.Select(ToEntity).ToList();
+        };
+    }
     
     private static Feature ToEntity(FeatureBlock feature)
     {
