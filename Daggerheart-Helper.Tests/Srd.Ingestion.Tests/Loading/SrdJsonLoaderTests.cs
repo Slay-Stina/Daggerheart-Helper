@@ -14,6 +14,10 @@ public class SrdJsonLoaderTests
         Assert.NotEmpty(catalog.Armors);
         Assert.NotEmpty(catalog.Weapons);
         Assert.NotEmpty(catalog.Abilities);
+        Assert.NotEmpty(catalog.Subclasses);
+        Assert.NotEmpty(catalog.Classes);
+        Assert.NotEmpty(catalog.Ancestries);
+        Assert.NotEmpty(catalog.Communities);
 
         var gambeson = Assert.Single(catalog.Armors, x => x.Name == "Gambeson Armor");
         Assert.Equal(1, gambeson.Tier);

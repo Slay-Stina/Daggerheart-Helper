@@ -9,8 +9,5 @@ public sealed class RawFeatureDto
 
     [JsonPropertyName("text")]
     public string Text { get; set; } = string.Empty;
-
-    [JsonPropertyName("question")]
-    public string? Question { get; set; }
 }
 

@@ -59,7 +59,7 @@ public static partial class SrdParsers
         }
 
         return features
-            .Select(f => new FeatureBlock(f.Name.Trim(), f.Text.Trim(), f.Question?.Trim()))
+            .Select(f => new FeatureBlock(f.Name.Trim(), f.Text.Trim()))
             .ToList();
     }
 
@@ -105,7 +105,7 @@ public static partial class SrdParsers
     private static TEnum ParseEnum<TEnum>(string value, string fieldName)
         where TEnum : struct, Enum
     {
-        if (Enum.TryParse<TEnum>(value.Trim(), ignoreCase: true, out var parsed))
+        if (!string.IsNullOrEmpty(value) && Enum.TryParse<TEnum>(value.Trim(), ignoreCase: true, out var parsed))
         {
             return parsed;
         }
@@ -131,6 +131,26 @@ public static partial class SrdParsers
             : ParseInt(match.Groups["bonus"].Value, "damage.bonus");
 
         return (new Dice(diceCount, sides), bonus, match.Groups["kind"].Value);
+    }
+
+    public static IReadOnlyList<string> ParseItems(string rawItems) => rawItems.Split(" or a ");
+
+    public static IReadOnlyList<string> ParseQuestions(List<RawQuestion>? rawQuestions) =>
+        (rawQuestions is null || rawQuestions.Count == 0) ? [] :
+            rawQuestions.Select(question => question.Text.Trim()).ToList();
+
+    public static TraitScores ParseTraitScores(string rawSuggestedTraits)
+    {
+        var parsedTraits = rawSuggestedTraits.Split(',')
+            .Select(s => ParseInt(s, "trait"))
+            .ToArray();
+        return new TraitScores(
+            parsedTraits[0],
+            parsedTraits[1],
+            parsedTraits[2],
+            parsedTraits[3],
+            parsedTraits[4],
+            parsedTraits[5]);
     }
 }
 

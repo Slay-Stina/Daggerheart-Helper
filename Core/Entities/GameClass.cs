@@ -5,14 +5,19 @@ namespace Core.Entities;
 
 public class GameClass
 {
-    public Guid Id { get; set; }
-    public string Name { get; set; } = String.Empty;
-    public string Description { get; set; } = String.Empty;
-    public int BaseEvasion { get; set; }
-    public int BaseHealth { get; set; }
-    public List<DomainType> Domains { get; set; } = new();
-    public TraitScores SuggestedTraits { get; set; } = new(0,0,0,0,0,0);
-    public DamageThresholds StartingThresholds { get; set; } = new(0,0);
-    public List<Subclass> Subclasses { get; set; } = new();
-    public List<Feature> Features { get; set; } = new();
+    public Guid Id { get; init; }
+    public string Name { get; init; } = String.Empty;
+    public string Description { get; init; } = String.Empty;
+    public int BaseEvasion { get; init; }
+    public int BaseHealth { get; init; }
+    public DomainType Domain1 { get; init; }
+    public DomainType Domain2 { get; init; }
+    public TraitScores SuggestedTraits { get; init; } = new( 0,0,0,0,0,0);
+    public Armor SuggestedArmor { get; init; } = new();
+    public List<Weapon> SuggestedWeapons { get; init; } = new();
+    public List<Subclass> Subclasses { get; init; } = new();
+    public List<Feature> Features { get; init; } = new();
+    public IReadOnlyList<string> BackgroundQuestions { get; init; } = null!;
+    public IReadOnlyList<string> ConnectionQuestions { get; init; } = null!;
+    public IReadOnlyList<string> Items { get; init; } = null!;
 }
