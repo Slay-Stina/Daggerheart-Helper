@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Core.Entities;
 using Core.Enums;
 using Srd.Ingestion.Domain;
@@ -62,7 +63,8 @@ public static class SrdEntityMapper
             Name = card.Name,
             Description = card.Description,
             Features = card.Features.Select(ToEntity).ToList(),
-            Note = card.Note
+            Note = card.Note,
+            HeritageType = card.HeritageType
         };
     }
 
@@ -85,7 +87,8 @@ public static class SrdEntityMapper
             Description = card.Description,
             BaseEvasion = card.BaseEvasion,
             BaseHealth = card.BaseHp,
-            Domains = card.Domains,
+            Domain1 = card.Domain1,
+            Domain2 = card.Domain2,
             SuggestedTraits = null,
             SuggestedArmor = null,
             SuggestedWeapons = null,

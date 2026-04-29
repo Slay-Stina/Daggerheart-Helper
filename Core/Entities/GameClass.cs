@@ -10,7 +10,8 @@ public class GameClass
     public string Description { get; init; } = String.Empty;
     public int BaseEvasion { get; init; }
     public int BaseHealth { get; init; }
-    public IReadOnlyList<DomainType> Domains { get; init; } = null!;
+    public DomainType Domain1 { get; init; }
+    public DomainType Domain2 { get; init; }
     public TraitScores SuggestedTraits { get; init; } = new( 0,0,0,0,0,0);
     public Armor SuggestedArmor { get; init; } = new();
     public List<Weapon> SuggestedWeapons { get; init; } = new();
