@@ -5,10 +5,10 @@ namespace Srd.Ingestion.Raw;
 public sealed class RawClassDto
 {
     [JsonPropertyName("background")]
-    public List<Question> BackgroundQuestions { get; set; } = null!;
+    public List<RawQuestion> BackgroundQuestions { get; set; } = null!;
 
     [JsonPropertyName("connections")]
-    public List<Question> ConnectionQuestions { get; set; } = null!;
+    public List<RawQuestion> ConnectionQuestions { get; set; } = null!;
 
     [JsonPropertyName("description")]
     public string Description { get; set; } = string.Empty;
@@ -59,7 +59,7 @@ public sealed class RawClassDto
     public string SuggestedTraits { get; set; } = string.Empty;
 }
 
-public class Question
+public class RawQuestion
 {
     public string Text { get; set; } = string.Empty;
 }
