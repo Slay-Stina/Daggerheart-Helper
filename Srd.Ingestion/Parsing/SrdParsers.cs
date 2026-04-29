@@ -133,20 +133,11 @@ public static partial class SrdParsers
         return (new Dice(diceCount, sides), bonus, match.Groups["kind"].Value);
     }
 
-    public static IReadOnlyList<string> ParseItems(string rawItems)
-    {
-        return rawItems.Split(" or a ");
-    }
+    public static IReadOnlyList<string> ParseItems(string rawItems) => rawItems.Split(" or a ");
 
-    public static IReadOnlyList<string> ParseQuestions(List<Question>? rawQuestions)
-    {
-        if (rawQuestions is null || rawQuestions.Count == 0)
-        {
-            return [];
-        }
-
-        return rawQuestions.Select(question => question.Text.Trim()).ToList();
-    }
+    public static IReadOnlyList<string> ParseQuestions(List<RawQuestion>? rawQuestions) =>
+        (rawQuestions is null || rawQuestions.Count == 0) ? [] :
+            rawQuestions.Select(question => question.Text.Trim()).ToList();
 
     public static TraitScores ParseTraitScores(string rawSuggestedTraits)
     {
