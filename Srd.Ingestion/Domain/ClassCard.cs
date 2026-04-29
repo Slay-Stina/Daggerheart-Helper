@@ -6,7 +6,8 @@ namespace Srd.Ingestion.Domain;
 public sealed record ClassCard(
     string Name,
     string Description,
-    IReadOnlyList<DomainType> Domains,
+    DomainType Domain1,
+    DomainType Domain2,
     int BaseHp,
     int BaseEvasion,
     TraitScores SuggestedTraitScores,

@@ -100,7 +100,8 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
         return new AncestryCard(
             raw.Name.Trim(),
             raw.Description.Trim(),
-            SrdParsers.ParseFeatures(raw.Features));
+            SrdParsers.ParseFeatures(raw.Features),
+            HeritageType.Ancestry);
     }
     
     private static CommunityCard ToCommunityCard(RawCommunityDto raw)
@@ -109,7 +110,8 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             raw.Name.Trim(),
             raw.Description.Trim(),
             SrdParsers.ParseFeatures(raw.Feature),
-            raw.Note.Trim());
+            raw.Note.Trim(),
+            HeritageType.Community);
     }
     
     private static ClassCard ToClassCard(RawClassDto raw)
@@ -117,11 +119,8 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
         return new ClassCard(
             raw.Name.Trim(),
             raw.Description.Trim(),
-            new List<DomainType>()
-            {
-                SrdParsers.ParseDomain(raw.Domain1),
-                SrdParsers.ParseDomain(raw.Domain2)
-            },
+            SrdParsers.ParseDomain(raw.Domain1),
+            SrdParsers.ParseDomain(raw.Domain2),
             SrdParsers.ParseInt(raw.BaseHp, "hp"),
             SrdParsers.ParseInt(raw.BaseEvasion, "evasion"),
             SrdParsers.ParseTraitScores(raw.SuggestedTraits),

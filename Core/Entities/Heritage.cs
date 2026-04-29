@@ -1,3 +1,5 @@
+using Core.Enums;
+
 namespace Core.Entities;
 
 public class Heritage
@@ -7,4 +9,5 @@ public class Heritage
     public string Description { get; set; } = string.Empty;
     public List<Feature> Features { get; set; } = new();
     public string? Note { get; set; }
+    public HeritageType HeritageType { get; set; }
 }
