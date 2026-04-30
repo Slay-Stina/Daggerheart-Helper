@@ -2,7 +2,6 @@ using Core.Entities;
 using Core.Enums;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Infrastructure.Persistence;
 
@@ -20,6 +19,7 @@ public class DaggerheartDbContext : DbContext
     public DbSet<GameClass> GameClasses => Set<GameClass>();
     public DbSet<Subclass> Subclasses => Set<Subclass>();
     public DbSet<Weapon> Weapons => Set<Weapon>();
+    public DbSet<Heritage> Heritages => Set<Heritage>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -152,6 +152,16 @@ public class DaggerheartDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(x => x.SecondaryWeaponId)
                 .OnDelete(DeleteBehavior.SetNull);
+            
+            entity.HasOne(x => x.Ancestry)
+                .WithMany()
+                .HasForeignKey(x => x.AncestryId)
+                .OnDelete(DeleteBehavior.SetNull);
+            
+            entity.HasOne(x => x.Community)
+                .WithMany()
+                .HasForeignKey(x => x.CommunityId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Feature>(entity =>
@@ -188,14 +198,8 @@ public class DaggerheartDbContext : DbContext
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
             entity.Property(x => x.Description).IsRequired();
-            entity.Property(x => x.Domains)
-                .HasConversion(
-                    domains => string.Join(',', domains),
-                    stored => DeserializeDomains(stored))
-                .Metadata.SetValueComparer(new ValueComparer<List<DomainType>>(
-                    (left, right) => (left == null && right == null) || (left != null && right != null && left.SequenceEqual(right)),
-                    domains => domains == null ? 0 : domains.Aggregate(0, (hash, domain) => HashCode.Combine(hash, (int)domain)),
-                    domains => domains == null ? new List<DomainType>() : domains.ToList()));
+            entity.Property(x => x.Domain1).HasConversion<DomainType>();
+            entity.Property(x => x.Domain2).HasConversion<DomainType>();
             entity.OwnsOne(x => x.SuggestedTraits, owned =>
             {
                 owned.Property(x => x.Agility).HasColumnName($"{nameof(GameClass.SuggestedTraits)}_{nameof(TraitScores.Agility)}");
@@ -204,12 +208,6 @@ public class DaggerheartDbContext : DbContext
                 owned.Property(x => x.Instinct).HasColumnName($"{nameof(GameClass.SuggestedTraits)}_{nameof(TraitScores.Instinct)}");
                 owned.Property(x => x.Presence).HasColumnName($"{nameof(GameClass.SuggestedTraits)}_{nameof(TraitScores.Presence)}");
                 owned.Property(x => x.Knowledge).HasColumnName($"{nameof(GameClass.SuggestedTraits)}_{nameof(TraitScores.Knowledge)}");
-            });
-            entity.OwnsOne(x => x.StartingThresholds, owned =>
-            {
-                owned.Property(x => x.Minor).HasColumnName($"{nameof(GameClass.StartingThresholds)}_{nameof(DamageThresholds.Minor)}");
-                owned.Property(x => x.Major).HasColumnName($"{nameof(GameClass.StartingThresholds)}_{nameof(DamageThresholds.Major)}");
-                owned.Property(x => x.Severe).HasColumnName($"{nameof(GameClass.StartingThresholds)}_{nameof(DamageThresholds.Severe)}");
             });
             entity.HasMany(x => x.Subclasses)
                 .WithOne(x => x.GameClass)
@@ -325,26 +323,5 @@ public class DaggerheartDbContext : DbContext
                         join.ToTable("WeaponFeatures");
                     });
         });
-    }
-
-    private static List<DomainType> DeserializeDomains(string? stored)
-    {
-        if (string.IsNullOrWhiteSpace(stored))
-        {
-            return new List<DomainType>();
-        }
-
-        var domains = new List<DomainType>();
-        foreach (var rawDomain in stored.Split(',', StringSplitOptions.RemoveEmptyEntries))
-        {
-            if (!Enum.TryParse<DomainType>(rawDomain, true, out var domain))
-            {
-                throw new InvalidOperationException($"Invalid domain value '{rawDomain}' found in persisted data.");
-            }
-
-            domains.Add(domain);
-        }
-
-        return domains;
     }
 }
