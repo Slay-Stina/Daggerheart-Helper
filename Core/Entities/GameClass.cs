@@ -17,6 +17,7 @@ public class GameClass
     public List<Weapon> SuggestedWeapons { get; init; } = new();
     public List<Subclass> Subclasses { get; init; } = new();
     public List<Feature> Features { get; init; } = new();
+    public Feature HopeFeature { get; init; } = new();
     public IReadOnlyList<string> BackgroundQuestions { get; init; } = null!;
     public IReadOnlyList<string> ConnectionQuestions { get; init; } = null!;
     public IReadOnlyList<string> Items { get; init; } = null!;

@@ -126,6 +126,7 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             SrdParsers.ParseTraitScores(raw.SuggestedTraits),
             Subclasses.Where(s => s.Name == raw.SubClass1 && s.Name == raw.SubClass2).ToList(),
             SrdParsers.ParseFeatures(raw.Features),
+            SrdParsers.ParseFeature(new RawFeatureDto() { Name = raw.HopeFeatureName, Text = raw.HopeFeatureText }),
             SrdParsers.ParseItems(raw.Items),
             SrdParsers.ParseQuestions(raw.BackgroundQuestions),
             SrdParsers.ParseQuestions(raw.ConnectionQuestions),

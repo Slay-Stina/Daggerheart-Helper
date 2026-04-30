@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Core.Entities;
 using Core.Enums;
 using Srd.Ingestion.Domain;
@@ -89,16 +88,15 @@ public static class SrdEntityMapper
             BaseHealth = card.BaseHp,
             Domain1 = card.Domain1,
             Domain2 = card.Domain2,
-            SuggestedTraits = null,
-            SuggestedArmor = null,
-            SuggestedWeapons = null,
-            Subclasses = null,
-            Features = card.Features.Select(ToEntity)
-                .ToList(),
-            BackgroundQuestions = null,
-            ConnectionQuestions = null,
-            Items = null,
-
+            SuggestedTraits = card.SuggestedTraitScores,
+            SuggestedArmor = card.SuggestedArmor.ToEntity(),
+            SuggestedWeapons = card.SuggestedWeapons.ToEntities(),
+            Subclasses = card.Subclasses.Select(ToEntity).ToList(),
+            Features = card.Features.Select(ToEntity).ToList(),
+            HopeFeature = ToEntity(card.HopeFeature),
+            BackgroundQuestions = card.BackgroundQuestions,
+            ConnectionQuestions = card.ConnectionQuestions,
+            Items = card.Items,
         };
     }
     
