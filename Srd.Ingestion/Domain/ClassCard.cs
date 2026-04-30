@@ -13,6 +13,7 @@ public sealed record ClassCard(
     TraitScores SuggestedTraitScores,
     IReadOnlyList<SubclassCard> Subclasses,
     IReadOnlyList<FeatureBlock> Features,
+    FeatureBlock HopeFeature,
     IReadOnlyList<string> Items,
     IReadOnlyList<string> BackgroundQuestions,
     IReadOnlyList<string> ConnectionQuestions,

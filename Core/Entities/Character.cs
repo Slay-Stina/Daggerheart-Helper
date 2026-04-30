@@ -16,6 +16,11 @@ public class Character
     public GameClass? Multiclass { get; set; }
     public Guid? MulticlassSubclassId { get; set; }
     public Subclass? MulticlassSubclass { get; set; }
+
+    public Guid AncestryId { get; set; }
+    public Heritage Ancestry { get; set; } = null!;
+    public Guid CommunityId { get; set; }
+    public Heritage Community { get; set; } = null!;
     
     public TraitScores Traits { get; set; } = new(0, 0,0,0,0,0);
     public DamageThresholds DamageThresholds { get; set; } = new(0,0,0);
