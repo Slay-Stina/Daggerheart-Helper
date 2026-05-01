@@ -6,6 +6,14 @@ namespace Srd.Ingestion.Mapping;
 
 public static class SrdEntityMapper
 {
+    public static List<Armor> ToEntities(this IEnumerable<ArmorCard> cards) => cards.Select(ToEntity).ToList();
+
+    public static List<Weapon> ToEntities(this IEnumerable<WeaponCard> cards) => cards.Select(ToEntity).ToList();
+
+    public static List<Ability> ToEntities(this IEnumerable<AbilityCard> cards) => cards.Select(ToEntity).ToList();
+
+    public static List<Heritage> ToEntities(this IEnumerable<HeritageCard> cards) => cards.Select(ToEntity).ToList();
+    
     public static Armor ToEntity(this ArmorCard card)
     {
         return new Armor
@@ -47,12 +55,51 @@ public static class SrdEntityMapper
         };
     }
 
-    public static List<Armor> ToEntities(this IEnumerable<ArmorCard> cards) => cards.Select(ToEntity).ToList();
+    public static Heritage ToEntity(this HeritageCard card)
+    {
+        return new Heritage
+        {
+            Name = card.Name,
+            Description = card.Description,
+            Features = card.Features.Select(ToEntity).ToList(),
+            Note = card.Note,
+            HeritageType = card.HeritageType
+        };
+    }
 
-    public static List<Weapon> ToEntities(this IEnumerable<WeaponCard> cards) => cards.Select(ToEntity).ToList();
+    public static Subclass ToEntity(this SubclassCard card)
+    {
+        return new Subclass
+        {
+            Name = card.Name,
+            Description = card.Description,
+            Features = card.Features.Select(ToEntity).ToList(),
+            SpellCastingTraitType = card.SpellcastTrait
+        };
+    }
 
-    public static List<Ability> ToEntities(this IEnumerable<AbilityCard> cards) => cards.Select(ToEntity).ToList();
-
+    public static GameClass ToEntity(this ClassCard card)
+    {
+        return new GameClass
+        {
+            Name = card.Name,
+            Description = card.Description,
+            BaseEvasion = card.BaseEvasion,
+            BaseHealth = card.BaseHp,
+            Domain1 = card.Domain1,
+            Domain2 = card.Domain2,
+            SuggestedTraits = card.SuggestedTraitScores,
+            SuggestedArmor = card.SuggestedArmor.ToEntity(),
+            SuggestedWeapons = card.SuggestedWeapons.ToEntities(),
+            Subclasses = card.Subclasses.Select(ToEntity).ToList(),
+            Features = card.Features.Select(ToEntity).ToList(),
+            HopeFeature = ToEntity(card.HopeFeature),
+            BackgroundQuestions = card.BackgroundQuestions,
+            ConnectionQuestions = card.ConnectionQuestions,
+            Items = card.Items,
+        };
+    }
+    
     private static Feature ToEntity(FeatureBlock feature)
     {
         return new Feature

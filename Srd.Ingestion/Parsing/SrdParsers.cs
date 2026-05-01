@@ -51,6 +51,11 @@ public static partial class SrdParsers
         return new Damage(parsed.Dice, parsed.Bonus, damageType);
     }
 
+    public static FeatureBlock ParseFeature(RawFeatureDto feature)
+    {
+        return new FeatureBlock(feature.Name.Trim(), feature.Text.Trim());
+    }
+
     public static IReadOnlyList<FeatureBlock> ParseFeatures(List<RawFeatureDto>? features)
     {
         if (features is null || features.Count == 0)
@@ -59,8 +64,7 @@ public static partial class SrdParsers
         }
 
         return features
-            .Select(f => new FeatureBlock(f.Name.Trim(), f.Text.Trim(), f.Question?.Trim()))
-            .ToList();
+            .Select(ParseFeature).ToList();
     }
 
     public static int ParseTier(string value) => ParseInt(value, "tier");
@@ -105,7 +109,7 @@ public static partial class SrdParsers
     private static TEnum ParseEnum<TEnum>(string value, string fieldName)
         where TEnum : struct, Enum
     {
-        if (Enum.TryParse<TEnum>(value.Trim(), ignoreCase: true, out var parsed))
+        if (!string.IsNullOrEmpty(value) && Enum.TryParse<TEnum>(value.Trim(), ignoreCase: true, out var parsed))
         {
             return parsed;
         }
@@ -131,6 +135,26 @@ public static partial class SrdParsers
             : ParseInt(match.Groups["bonus"].Value, "damage.bonus");
 
         return (new Dice(diceCount, sides), bonus, match.Groups["kind"].Value);
+    }
+
+    public static IReadOnlyList<string> ParseItems(string rawItems) => rawItems.Split(" or a ");
+
+    public static IReadOnlyList<string> ParseQuestions(List<RawQuestion>? rawQuestions) =>
+        (rawQuestions is null || rawQuestions.Count == 0) ? [] :
+            rawQuestions.Select(question => question.Text.Trim()).ToList();
+
+    public static TraitScores ParseTraitScores(string rawSuggestedTraits)
+    {
+        var parsedTraits = rawSuggestedTraits.Split(',')
+            .Select(s => ParseInt(s, "trait"))
+            .ToArray();
+        return new TraitScores(
+            parsedTraits[0],
+            parsedTraits[1],
+            parsedTraits[2],
+            parsedTraits[3],
+            parsedTraits[4],
+            parsedTraits[5]);
     }
 }
 

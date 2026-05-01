@@ -1,0 +1,25 @@
+﻿[
+  {
+    "description": "Play the Troubadour if you want to play music to bolster your allies.",
+    "foundation": [
+      {
+        "name": "Gifted Performer",
+        "text": "You can play three different types of songs, once each per long rest; describe how you perform for others to gain the listed benefit:\n\n- _Relaxing Song:_ You and all allies within Close range clear a Hit Point.\n- _Epic Song:_ Make a target within Close range temporarily _Vulnerable._\n- _Heartbreaking Song:_ You and all allies within Close range gain a Hope."
+      }
+    ],
+    "mastery": [
+      {
+        "name": "Virtuoso",
+        "text": "You are among the greatest of your craft and your skill is boundless. You can perform each of your \"Gifted Performer\" feature's songs twice per long rest."
+      }
+    ],
+    "name": "Troubadour",
+    "specialization": [
+      {
+        "name": "Maestro",
+        "text": "Your rallying songs steel the courage of those who listen. When you give a Rally Die to an ally, they can gain a Hope or clear a Stress."
+      }
+    ],
+    "spellcast_trait": "Presence"
+  }
+]
