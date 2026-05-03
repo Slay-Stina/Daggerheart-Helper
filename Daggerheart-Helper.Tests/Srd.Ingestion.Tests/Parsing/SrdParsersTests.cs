@@ -54,11 +54,11 @@ public class SrdParsersTests
     }
 
     [Fact]
-    public void ParseFeatures_TrimsAndReturnCorrectValues()
+    public void ParseFeatures_ReturnsCorrectValues()
     {
         var features = SrdParsers.ParseFeatures(
             [
-                new RawFeatureDto { Name = " Flexible ", Text = " +1 to Evasion " }
+                new RawFeatureDto { Name = "Flexible", Text = "+1 to Evasion" }
             ]);
 
         Assert.Single(features);

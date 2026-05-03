@@ -1,6 +1,8 @@
+using System.Text.Json;
 using Core.Entities;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Infrastructure.Persistence;
 
@@ -23,6 +25,7 @@ public class DaggerheartDbContext : DbContext
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.Properties<Enum>().HaveConversion<string>();
+        configurationBuilder.Properties<List<string>>().HaveConversion<JsonStringListConverter>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -197,6 +200,11 @@ public class DaggerheartDbContext : DbContext
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
             entity.Property(x => x.Description).IsRequired();
+            entity.Property(x => x.BaseEvasion).IsRequired();
+            entity.Property(x => x.BaseHealth).IsRequired();
+            entity.Property(x => x.Domain1).IsRequired();
+            entity.Property(x => x.Domain2).IsRequired();
+
             entity.OwnsOne(x => x.SuggestedTraits, owned =>
             {
                 owned.Property(x => x.Agility).HasColumnName($"{nameof(GameClass.SuggestedTraits)}_{nameof(TraitScores.Agility)}");
@@ -206,10 +214,34 @@ public class DaggerheartDbContext : DbContext
                 owned.Property(x => x.Presence).HasColumnName($"{nameof(GameClass.SuggestedTraits)}_{nameof(TraitScores.Presence)}");
                 owned.Property(x => x.Knowledge).HasColumnName($"{nameof(GameClass.SuggestedTraits)}_{nameof(TraitScores.Knowledge)}");
             });
+
+            entity.HasOne(x => x.SuggestedArmor)
+                .WithMany()
+                .HasForeignKey("SuggestedArmorId")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.HopeFeature)
+                .WithMany()
+                .HasForeignKey("HopeFeatureId")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(x => x.SuggestedWeapons)
+                .WithMany()
+                .UsingEntity<Dictionary<string, object>>(
+                    "GameClassSuggestedWeapons",
+                    r => r.HasOne<Weapon>().WithMany().HasForeignKey("WeaponId").OnDelete(DeleteBehavior.Cascade),
+                    l => l.HasOne<GameClass>().WithMany().HasForeignKey("GameClassId").OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("GameClassId", "WeaponId");
+                        j.ToTable("GameClassSuggestedWeapons");
+                    });
+
             entity.HasMany(x => x.Subclasses)
                 .WithOne(x => x.GameClass)
                 .HasForeignKey(x => x.GameClassId)
                 .OnDelete(DeleteBehavior.Cascade);
+
             entity.HasMany(x => x.Features)
                 .WithMany(x => x.GameClasses)
                 .UsingEntity<Dictionary<string, object>>(
@@ -320,5 +352,14 @@ public class DaggerheartDbContext : DbContext
                         join.ToTable("WeaponFeatures");
                     });
         });
+    }
+
+    private class JsonStringListConverter : ValueConverter<List<string>, string>
+    {
+        public JsonStringListConverter() : base(
+            v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
+            v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null!) ?? new List<string>())
+        {
+        }
     }
 }
