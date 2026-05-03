@@ -7,7 +7,7 @@ public sealed class RawClassDto
     [JsonPropertyName("background")]
     public List<RawQuestion> BackgroundQuestions { get; set; } = null!;
 
-    [JsonPropertyName("connections")]
+    [JsonPropertyName("connection")]
     public List<RawQuestion> ConnectionQuestions { get; set; } = null!;
 
     [JsonPropertyName("description")]
@@ -61,5 +61,6 @@ public sealed class RawClassDto
 
 public class RawQuestion
 {
+    [JsonPropertyName("question")]
     public string Text { get; set; } = string.Empty;
 }

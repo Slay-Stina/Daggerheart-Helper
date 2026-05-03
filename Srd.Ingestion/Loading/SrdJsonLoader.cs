@@ -8,10 +8,6 @@ namespace Srd.Ingestion.Loading;
 
 public sealed class SrdJsonLoader : ISrdJsonLoader
 {
-    private static List<SubclassCard> Subclasses { get; set; } = new();
-    private static List<ArmorCard> Armors { get; set; } = new();
-    private static List<WeaponCard> Weapons { get; set; } = new();
-    
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true
@@ -19,25 +15,25 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
 
     public async Task<SrdCatalog> LoadAsync(string jsonDirectoryPath, CancellationToken cancellationToken = default)
     {
-        var armors = await LoadFileAsync<RawArmorDto>(jsonDirectoryPath, "armor.json", cancellationToken);
-        var weapons = await LoadFileAsync<RawWeaponDto>(jsonDirectoryPath, "weapons.json", cancellationToken);
-        var abilities = await LoadFileAsync<RawAbilityDto>(jsonDirectoryPath, "abilities.json", cancellationToken);
-        var ancestries = await LoadFileAsync<RawAncestryDto>(jsonDirectoryPath, "ancestries.json", cancellationToken);
-        var communities = await LoadFileAsync<RawCommunityDto>(jsonDirectoryPath, "communities.json", cancellationToken);
-        var subclasses = await LoadFileAsync<RawSubclassDto>(jsonDirectoryPath, "subclasses.json", cancellationToken);
-        var classes = await LoadFileAsync<RawClassDto>(jsonDirectoryPath, "classes.json", cancellationToken);
-        Subclasses = subclasses.Select(ToSubclassCard).ToList();
-        Armors = armors.Select(ToArmorCard).ToList();
-        Weapons = weapons.Select(ToWeaponCard).ToList();
+        var rawArmors = await LoadFileAsync<RawArmorDto>(jsonDirectoryPath, "armor.json", cancellationToken);
+        var rawWeapons = await LoadFileAsync<RawWeaponDto>(jsonDirectoryPath, "weapons.json", cancellationToken);
+        var rawAbilities = await LoadFileAsync<RawAbilityDto>(jsonDirectoryPath, "abilities.json", cancellationToken);
+        var rawAncestries = await LoadFileAsync<RawAncestryDto>(jsonDirectoryPath, "ancestries.json", cancellationToken);
+        var rawCommunities = await LoadFileAsync<RawCommunityDto>(jsonDirectoryPath, "communities.json", cancellationToken);
+        var rawSubclasses = await LoadFileAsync<RawSubclassDto>(jsonDirectoryPath, "subclasses.json", cancellationToken);
+        var rawClasses = await LoadFileAsync<RawClassDto>(jsonDirectoryPath, "classes.json", cancellationToken);
+        var subclasses = rawSubclasses.Select(ToSubclassCard).ToList();
+        var armors = rawArmors.Select(ToArmorCard).ToList();
+        var weapons = rawWeapons.Select(ToWeaponCard).ToList();
         
         return new SrdCatalog(
-            Armors,
-            Weapons,
-            abilities.Select(ToAbilityCard).ToList(),
-            ancestries.Select(ToAncestryCard).ToList(),
-            communities.Select(ToCommunityCard).ToList(),
-            Subclasses,
-            classes.Select(ToClassCard).ToList()
+            armors,
+            weapons,
+            rawAbilities.Select(ToAbilityCard).ToList(),
+            rawAncestries.Select(ToAncestryCard).ToList(),
+            rawCommunities.Select(ToCommunityCard).ToList(),
+            subclasses,
+            rawClasses.Select(raw => ToClassCard(raw, subclasses, weapons, armors)).ToList()
             );
     }
 
@@ -114,7 +110,7 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             HeritageType.Community);
     }
     
-    private static ClassCard ToClassCard(RawClassDto raw)
+    private static ClassCard ToClassCard(RawClassDto raw, List<SubclassCard> subclasses, List<WeaponCard> weapons, List<ArmorCard> armors)
     {
         return new ClassCard(
             raw.Name.Trim(),
@@ -124,25 +120,23 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             SrdParsers.ParseInt(raw.BaseHp, "hp"),
             SrdParsers.ParseInt(raw.BaseEvasion, "evasion"),
             SrdParsers.ParseTraitScores(raw.SuggestedTraits),
-            Subclasses.Where(s => s.Name == raw.SubClass1 && s.Name == raw.SubClass2).ToList(),
+            subclasses.Where(s => s.Name == raw.SubClass1 || s.Name == raw.SubClass2).ToList(),
             SrdParsers.ParseFeatures(raw.Features),
             SrdParsers.ParseFeature(new RawFeatureDto() { Name = raw.HopeFeatureName, Text = raw.HopeFeatureText }),
-            SrdParsers.ParseItems(raw.Items),
+            SrdParsers.ParseItems(raw.Items).ToList(),
             SrdParsers.ParseQuestions(raw.BackgroundQuestions),
             SrdParsers.ParseQuestions(raw.ConnectionQuestions),
-            Armors.SingleOrDefault(a => a.Name == raw.SuggestedArmor)!,
-            Weapons.Where( w => w.Name == raw.SuggestedPrimary && w.Name == raw.SuggestedSecondary).ToList()
+            armors.Single(a => a.Name == raw.SuggestedArmor),
+            weapons.Where( w => w.Name == raw.SuggestedPrimary || w.Name == raw.SuggestedSecondary).ToList()
             );
     }
     
     private static SubclassCard ToSubclassCard(RawSubclassDto raw)
     {
-        var rawFeatures = new List<RawFeatureDto>()
-        {
-            raw.Foundation[0],
-            raw.Specialization[0],
-            raw.Mastery[0]
-        };
+        var rawFeatures = raw.Foundation
+            .Concat(raw.Specialization)
+            .Concat(raw.Mastery).ToList();
+
         return new SubclassCard(
             raw.Name.Trim(),
             raw.Description.Trim(),

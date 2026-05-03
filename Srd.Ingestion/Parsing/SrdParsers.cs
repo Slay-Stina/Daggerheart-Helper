@@ -137,24 +137,26 @@ public static partial class SrdParsers
         return (new Dice(diceCount, sides), bonus, match.Groups["kind"].Value);
     }
 
-    public static IReadOnlyList<string> ParseItems(string rawItems) => rawItems.Split(" or a ");
+    public static List<string> ParseItems(string rawItems) => rawItems.Split(" or a ").ToList();
 
-    public static IReadOnlyList<string> ParseQuestions(List<RawQuestion>? rawQuestions) =>
+    public static List<string> ParseQuestions(List<RawQuestion>? rawQuestions) =>
         (rawQuestions is null || rawQuestions.Count == 0) ? [] :
             rawQuestions.Select(question => question.Text.Trim()).ToList();
 
     public static TraitScores ParseTraitScores(string rawSuggestedTraits)
     {
         var parsedTraits = rawSuggestedTraits.Split(',')
-            .Select(s => ParseInt(s, "trait"))
+            .Select(s => ParseInt(s.Trim(), "trait"))
             .ToArray();
-        return new TraitScores(
+        return parsedTraits.Length == 6 
+            ? new TraitScores(
             parsedTraits[0],
             parsedTraits[1],
             parsedTraits[2],
             parsedTraits[3],
             parsedTraits[4],
-            parsedTraits[5]);
+            parsedTraits[5]) 
+            : throw new FormatException($"Invalid traits '{rawSuggestedTraits}'.");
     }
 }
 
