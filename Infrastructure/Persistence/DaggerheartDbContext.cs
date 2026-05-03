@@ -1,8 +1,8 @@
+using System.Text.Json;
 using Core.Entities;
-using Core.Enums;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Infrastructure.Persistence;
 
@@ -20,10 +20,12 @@ public class DaggerheartDbContext : DbContext
     public DbSet<GameClass> GameClasses => Set<GameClass>();
     public DbSet<Subclass> Subclasses => Set<Subclass>();
     public DbSet<Weapon> Weapons => Set<Weapon>();
+    public DbSet<Heritage> Heritages => Set<Heritage>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.Properties<Enum>().HaveConversion<string>();
+        configurationBuilder.Properties<List<string>>().HaveConversion<JsonStringListConverter>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -152,6 +154,16 @@ public class DaggerheartDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(x => x.SecondaryWeaponId)
                 .OnDelete(DeleteBehavior.SetNull);
+            
+            entity.HasOne(x => x.Ancestry)
+                .WithMany()
+                .HasForeignKey(x => x.AncestryId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            entity.HasOne(x => x.Community)
+                .WithMany()
+                .HasForeignKey(x => x.CommunityId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Feature>(entity =>
@@ -188,14 +200,11 @@ public class DaggerheartDbContext : DbContext
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
             entity.Property(x => x.Description).IsRequired();
-            entity.Property(x => x.Domains)
-                .HasConversion(
-                    domains => string.Join(',', domains),
-                    stored => DeserializeDomains(stored))
-                .Metadata.SetValueComparer(new ValueComparer<List<DomainType>>(
-                    (left, right) => (left == null && right == null) || (left != null && right != null && left.SequenceEqual(right)),
-                    domains => domains == null ? 0 : domains.Aggregate(0, (hash, domain) => HashCode.Combine(hash, (int)domain)),
-                    domains => domains == null ? new List<DomainType>() : domains.ToList()));
+            entity.Property(x => x.BaseEvasion).IsRequired();
+            entity.Property(x => x.BaseHealth).IsRequired();
+            entity.Property(x => x.Domain1).IsRequired();
+            entity.Property(x => x.Domain2).IsRequired();
+
             entity.OwnsOne(x => x.SuggestedTraits, owned =>
             {
                 owned.Property(x => x.Agility).HasColumnName($"{nameof(GameClass.SuggestedTraits)}_{nameof(TraitScores.Agility)}");
@@ -205,16 +214,34 @@ public class DaggerheartDbContext : DbContext
                 owned.Property(x => x.Presence).HasColumnName($"{nameof(GameClass.SuggestedTraits)}_{nameof(TraitScores.Presence)}");
                 owned.Property(x => x.Knowledge).HasColumnName($"{nameof(GameClass.SuggestedTraits)}_{nameof(TraitScores.Knowledge)}");
             });
-            entity.OwnsOne(x => x.StartingThresholds, owned =>
-            {
-                owned.Property(x => x.Minor).HasColumnName($"{nameof(GameClass.StartingThresholds)}_{nameof(DamageThresholds.Minor)}");
-                owned.Property(x => x.Major).HasColumnName($"{nameof(GameClass.StartingThresholds)}_{nameof(DamageThresholds.Major)}");
-                owned.Property(x => x.Severe).HasColumnName($"{nameof(GameClass.StartingThresholds)}_{nameof(DamageThresholds.Severe)}");
-            });
+
+            entity.HasOne(x => x.SuggestedArmor)
+                .WithMany()
+                .HasForeignKey("SuggestedArmorId")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.HopeFeature)
+                .WithMany()
+                .HasForeignKey("HopeFeatureId")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(x => x.SuggestedWeapons)
+                .WithMany()
+                .UsingEntity<Dictionary<string, object>>(
+                    "GameClassSuggestedWeapons",
+                    r => r.HasOne<Weapon>().WithMany().HasForeignKey("WeaponId").OnDelete(DeleteBehavior.Cascade),
+                    l => l.HasOne<GameClass>().WithMany().HasForeignKey("GameClassId").OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("GameClassId", "WeaponId");
+                        j.ToTable("GameClassSuggestedWeapons");
+                    });
+
             entity.HasMany(x => x.Subclasses)
                 .WithOne(x => x.GameClass)
                 .HasForeignKey(x => x.GameClassId)
                 .OnDelete(DeleteBehavior.Cascade);
+
             entity.HasMany(x => x.Features)
                 .WithMany(x => x.GameClasses)
                 .UsingEntity<Dictionary<string, object>>(
@@ -262,6 +289,33 @@ public class DaggerheartDbContext : DbContext
                     });
         });
 
+        modelBuilder.Entity<Heritage>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
+            entity.Property(x => x.Description).IsRequired();
+            entity.Property(x => x.HeritageType).IsRequired();
+            entity.HasMany(x => x.Features)
+                .WithMany(x => x.Heritages)
+                .UsingEntity<Dictionary<string, object>>(
+                    "HeritageFeatures",
+                    right => right
+                        .HasOne<Feature>()
+                        .WithMany()
+                        .HasForeignKey("FeatureId")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    left => left
+                        .HasOne<Heritage>()
+                        .WithMany()
+                        .HasForeignKey("HeritageId")
+                        .OnDelete(DeleteBehavior.Cascade),
+                    join =>
+                    {
+                        join.HasKey("HeritageId", "FeatureId");
+                        join.ToTable("HeritageFeatures");
+                    });
+        });
+
 
         modelBuilder.Entity<Weapon>(entity =>
         {
@@ -300,24 +354,12 @@ public class DaggerheartDbContext : DbContext
         });
     }
 
-    private static List<DomainType> DeserializeDomains(string? stored)
+    private class JsonStringListConverter : ValueConverter<List<string>, string>
     {
-        if (string.IsNullOrWhiteSpace(stored))
+        public JsonStringListConverter() : base(
+            v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
+            v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null!) ?? new List<string>())
         {
-            return new List<DomainType>();
         }
-
-        var domains = new List<DomainType>();
-        foreach (var rawDomain in stored.Split(',', StringSplitOptions.RemoveEmptyEntries))
-        {
-            if (!Enum.TryParse<DomainType>(rawDomain, true, out var domain))
-            {
-                throw new InvalidOperationException($"Invalid domain value '{rawDomain}' found in persisted data.");
-            }
-
-            domains.Add(domain);
-        }
-
-        return domains;
     }
 }

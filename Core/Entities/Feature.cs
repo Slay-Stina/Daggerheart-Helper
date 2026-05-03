@@ -10,4 +10,5 @@ public class Feature
     public List<Weapon> Weapons { get; set; } = new();
     public List<Armor> Armors { get; set; } = new();
     public List<FeatureEffect> FeatureEffects { get; set; } = new();
+    public List<Heritage> Heritages { get; set; } = new();
 }

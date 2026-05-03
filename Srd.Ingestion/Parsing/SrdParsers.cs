@@ -51,6 +51,11 @@ public static partial class SrdParsers
         return new Damage(parsed.Dice, parsed.Bonus, damageType);
     }
 
+    public static FeatureBlock ParseFeature(RawFeatureDto feature)
+    {
+        return new FeatureBlock(feature.Name, feature.Text);
+    }
+
     public static IReadOnlyList<FeatureBlock> ParseFeatures(List<RawFeatureDto>? features)
     {
         if (features is null || features.Count == 0)
@@ -59,40 +64,39 @@ public static partial class SrdParsers
         }
 
         return features
-            .Select(f => new FeatureBlock(f.Name.Trim(), f.Text.Trim(), f.Question?.Trim()))
-            .ToList();
+            .Select(ParseFeature).ToList();
     }
 
     public static int ParseTier(string value) => ParseInt(value, "tier");
 
-    public static Burden ParseBurden(string value) => value.Trim() switch
+    public static Burden ParseBurden(string value) => value switch
     {
-        "One-Handed" => Burden.OneHanded,
-        "Two-Handed" => Burden.TwoHanded,
+        _ when string.Equals(value, "One-Handed", StringComparison.OrdinalIgnoreCase) => Burden.OneHanded,
+        _ when string.Equals(value, "Two-Handed", StringComparison.OrdinalIgnoreCase) => Burden.TwoHanded,
         _ => throw new FormatException($"Unsupported burden: '{value}'.")
     };
 
-    public static WeaponPriority ParseWeaponPriority(string value) => value.Trim() switch
+    public static WeaponPriority ParseWeaponPriority(string value) => value switch
     {
-        "Primary" => WeaponPriority.Primary,
-        "Secondary" => WeaponPriority.Secondary,
+        _ when string.Equals(value, "Primary", StringComparison.OrdinalIgnoreCase) => WeaponPriority.Primary,
+        _ when string.Equals(value, "Secondary", StringComparison.OrdinalIgnoreCase) => WeaponPriority.Secondary,
         _ => throw new FormatException($"Unsupported weapon priority: '{value}'.")
     };
 
-    public static RangeType ParseRange(string value) => value.Trim() switch
+    public static RangeType ParseRange(string value) => value switch
     {
-        "Melee" => RangeType.Melee,
-        "Very Close" => RangeType.VeryClose,
-        "Close" => RangeType.Close,
-        "Far" => RangeType.Far,
-        "Very Far" => RangeType.VeryFar,
+        _ when string.Equals(value, "Melee", StringComparison.OrdinalIgnoreCase) => RangeType.Melee,
+        _ when string.Equals(value, "Very Close", StringComparison.OrdinalIgnoreCase) => RangeType.VeryClose,
+        _ when string.Equals(value, "Close", StringComparison.OrdinalIgnoreCase) => RangeType.Close,
+        _ when string.Equals(value, "Far", StringComparison.OrdinalIgnoreCase) => RangeType.Far,
+        _ when string.Equals(value, "Very Far", StringComparison.OrdinalIgnoreCase) => RangeType.VeryFar,
         _ => throw new FormatException($"Unsupported range: '{value}'.")
     };
 
-    public static DamageType ParseDamageKind(string value) => value.Trim() switch
+    public static DamageType ParseDamageKind(string value) => value switch
     {
-        "Physical" => DamageType.Physical,
-        "Magical" => DamageType.Magic,
+        _ when string.Equals(value, "Physical", StringComparison.OrdinalIgnoreCase) => DamageType.Physical,
+        _ when string.Equals(value, "Magical", StringComparison.OrdinalIgnoreCase) => DamageType.Magic,
         _ => throw new FormatException($"Unsupported damage kind: '{value}'.")
     };
 
@@ -105,7 +109,7 @@ public static partial class SrdParsers
     private static TEnum ParseEnum<TEnum>(string value, string fieldName)
         where TEnum : struct, Enum
     {
-        if (Enum.TryParse<TEnum>(value.Trim(), ignoreCase: true, out var parsed))
+        if (!string.IsNullOrEmpty(value) && Enum.TryParse<TEnum>(value, ignoreCase: true, out var parsed))
         {
             return parsed;
         }
@@ -115,7 +119,7 @@ public static partial class SrdParsers
 
     private static (Dice Dice, int Bonus, string Kind) ParseDamageParts(string value)
     {
-        var match = DamageRegex().Match(value.Trim());
+        var match = DamageRegex().Match(value);
         if (!match.Success)
         {
             throw new FormatException($"Invalid damage expression: '{value}'.");
@@ -131,6 +135,30 @@ public static partial class SrdParsers
             : ParseInt(match.Groups["bonus"].Value, "damage.bonus");
 
         return (new Dice(diceCount, sides), bonus, match.Groups["kind"].Value);
+    }
+
+    public static List<string> ParseItems(string rawItems) => 
+        string.IsNullOrEmpty(rawItems) ? 
+            new List<string>() : rawItems.Split(" or a ").ToList();
+
+    public static List<string> ParseQuestions(List<RawQuestion>? rawQuestions) =>
+        (rawQuestions is null || rawQuestions.Count == 0) ? [] :
+            rawQuestions.Select(question => question.Text).ToList();
+
+    public static TraitScores ParseTraitScores(string rawSuggestedTraits)
+    {
+        var parsedTraits = rawSuggestedTraits.Split(',')
+            .Select(s => ParseInt(s.Trim(), "trait"))
+            .ToArray();
+        return parsedTraits.Length == 6 
+            ? new TraitScores(
+            parsedTraits[0],
+            parsedTraits[1],
+            parsedTraits[2],
+            parsedTraits[3],
+            parsedTraits[4],
+            parsedTraits[5]) 
+            : throw new FormatException($"Invalid traits '{rawSuggestedTraits}'.");
     }
 }
 

@@ -54,15 +54,51 @@ public class SrdParsersTests
     }
 
     [Fact]
-    public void ParseFeatures_TrimsAndPreservesQuestion()
+    public void ParseFeatures_ReturnsCorrectValues()
     {
         var features = SrdParsers.ParseFeatures(
             [
-                new RawFeatureDto { Name = " Flexible ", Text = " +1 to Evasion ", Question = "Why? " }
+                new RawFeatureDto { Name = "Flexible", Text = "+1 to Evasion" }
             ]);
 
         Assert.Single(features);
-        Assert.Equal(new global::Srd.Ingestion.Domain.FeatureBlock("Flexible", "+1 to Evasion", "Why?"), features[0]);
+        Assert.Equal(new global::Srd.Ingestion.Domain.FeatureBlock("Flexible", "+1 to Evasion"), features[0]);
+    }
+
+    [Fact]
+    public void ParseTraitScores_TrimsAndReturnCorrectValues()
+    {
+        TraitScores traitScores = new TraitScores(0, 0, -1, 1, 1, 2);
+        
+        Assert.Equal( SrdParsers.ParseTraitScores("0, 0, -1, +1, +1, +2"), traitScores);
+    }
+
+    [Fact]
+    public void ParseQuestions_ParsesListAndReturnsCorrectValues()
+    {
+        var question = new RawQuestion() {Text = "Question"};
+        var questionList = new List<RawQuestion>()
+        {
+            question,
+            question,
+            question
+        };
+        var expected = new List<string> {question.Text, question.Text,  question.Text};
+        var result = SrdParsers.ParseQuestions(questionList);
+        
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void ParseItems_SplitsAndReturnsCorrectValues()
+    {
+        IReadOnlyList<string> expected = new List<string>()
+        {
+            "Item 1",
+            "Item 2"
+        };
+        var actual = SrdParsers.ParseItems("Item 1 or a Item 2");
+        Assert.Equal(expected, actual);
     }
 }
 

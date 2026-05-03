@@ -15,8 +15,8 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          global-json-file: global.json
-          include-prerelease: true
+          dotnet-version: '9.0.x'
+          include-prerelease: false
     
       - name: Restore workloads
         run: dotnet workload restore
