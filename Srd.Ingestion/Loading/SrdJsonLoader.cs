@@ -39,7 +39,7 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             );
     }
 
-    private static async Task<List<T>> LoadFileAsync<T>(string directory, string fileName, CancellationToken cancellationToken)
+    public static async Task<List<T>> LoadFileAsync<T>(string directory, string fileName, CancellationToken cancellationToken)
     {
         var fullPath = Path.Combine(directory, fileName);
         if (!File.Exists(fullPath))
@@ -124,7 +124,7 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             SrdParsers.ParseTraitScores(raw.SuggestedTraits),
             subclasses.Where(s => string.Equals(s.Name, raw.SubClass1, StringComparison.OrdinalIgnoreCase) || 
                                  string.Equals(s.Name, raw.SubClass2, StringComparison.OrdinalIgnoreCase)).ToList(),
-            SrdParsers.ParseFeatures(raw.Features),
+            SrdParsers.ParseFeature(raw.ClassFeature[0]),
             SrdParsers.ParseFeature(new RawFeatureDto() { Name = raw.HopeFeatureName, Text = raw.HopeFeatureText }),
             SrdParsers.ParseItems(raw.Items).ToList(),
             SrdParsers.ParseQuestions(raw.BackgroundQuestions),
@@ -137,14 +137,12 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
     
     private static SubclassCard ToSubclassCard(RawSubclassDto raw)
     {
-        var rawFeatures = raw.Foundation
-            .Concat(raw.Specialization)
-            .Concat(raw.Mastery).ToList();
-
         return new SubclassCard(
             raw.Name,
             raw.Description,
             string.IsNullOrEmpty(raw.SpellcastTrait) ? null : SrdParsers.ParseTrait(raw.SpellcastTrait),
-            SrdParsers.ParseFeatures(rawFeatures));
+            SrdParsers.ParseFeature(raw.Foundation[0]), 
+            SrdParsers.ParseFeature(raw.Specialization[0]), 
+            SrdParsers.ParseFeature(raw.Mastery[0]));
     }
 }
