@@ -219,6 +219,11 @@ public class DaggerheartDbContext : DbContext
                 .WithMany()
                 .HasForeignKey("SuggestedArmorId")
                 .OnDelete(DeleteBehavior.Restrict);
+            
+            entity.HasOne(x => x.ClassFeature)
+                .WithMany()
+                .HasForeignKey("ClassFeatureId")
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(x => x.HopeFeature)
                 .WithMany()
@@ -241,26 +246,6 @@ public class DaggerheartDbContext : DbContext
                 .WithOne(x => x.GameClass)
                 .HasForeignKey(x => x.GameClassId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasMany(x => x.Features)
-                .WithMany(x => x.GameClasses)
-                .UsingEntity<Dictionary<string, object>>(
-                    "GameClassFeatures",
-                    right => right
-                        .HasOne<Feature>()
-                        .WithMany()
-                        .HasForeignKey("FeatureId")
-                        .OnDelete(DeleteBehavior.Cascade),
-                    left => left
-                        .HasOne<GameClass>()
-                        .WithMany()
-                        .HasForeignKey("GameClassId")
-                        .OnDelete(DeleteBehavior.Cascade),
-                    join =>
-                    {
-                        join.HasKey("GameClassId", "FeatureId");
-                        join.ToTable("GameClassFeatures");
-                    });
         });
 
         modelBuilder.Entity<Subclass>(entity =>
@@ -268,25 +253,21 @@ public class DaggerheartDbContext : DbContext
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
             entity.Property(x => x.Description).IsRequired();
-            entity.HasMany(x => x.Features)
-                .WithMany(x => x.Subclasses)
-                .UsingEntity<Dictionary<string, object>>(
-                    "SubclassFeatures",
-                    right => right
-                        .HasOne<Feature>()
-                        .WithMany()
-                        .HasForeignKey("FeatureId")
-                        .OnDelete(DeleteBehavior.Cascade),
-                    left => left
-                        .HasOne<Subclass>()
-                        .WithMany()
-                        .HasForeignKey("SubclassId")
-                        .OnDelete(DeleteBehavior.Cascade),
-                    join =>
-                    {
-                        join.HasKey("SubclassId", "FeatureId");
-                        join.ToTable("SubclassFeatures");
-                    });
+            
+            entity.HasOne(x => x.Foundation)
+                .WithMany()
+                .HasForeignKey("FoundationId")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.Specialization)
+                .WithMany()
+                .HasForeignKey("SpecializationId")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.Mastery)
+                .WithMany()
+                .HasForeignKey("MasteryId")
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Heritage>(entity =>
