@@ -14,8 +14,8 @@ public sealed record ClassCard(
     IReadOnlyList<SubclassCard> Subclasses,
     IReadOnlyList<FeatureBlock> Features,
     FeatureBlock HopeFeature,
-    IReadOnlyList<string> Items,
-    IReadOnlyList<string> BackgroundQuestions,
-    IReadOnlyList<string> ConnectionQuestions,
+    List<string> Items,
+    List<string> BackgroundQuestions,
+    List<string> ConnectionQuestions,
     ArmorCard SuggestedArmor,
     IReadOnlyList<WeaponCard> SuggestedWeapons);

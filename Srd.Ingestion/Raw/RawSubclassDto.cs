@@ -20,5 +20,5 @@ public sealed class RawSubclassDto
     public RawFeatureDto[] Specialization { get; set; } = null!;
     
     [JsonPropertyName("spellcast_trait")]
-    public string? SpellcastTrait { get; set; } = string.Empty;
+    public string? SpellcastTrait { get; set; }
 }

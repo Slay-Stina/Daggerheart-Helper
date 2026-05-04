@@ -16,9 +16,9 @@ public class GameClass
     public Armor SuggestedArmor { get; init; } = new();
     public List<Weapon> SuggestedWeapons { get; init; } = new();
     public List<Subclass> Subclasses { get; init; } = new();
-    public List<Feature> Features { get; init; } = new();
+    public Feature ClassFeature { get; init; } = new();
     public Feature HopeFeature { get; init; } = new();
-    public IReadOnlyList<string> BackgroundQuestions { get; init; } = null!;
-    public IReadOnlyList<string> ConnectionQuestions { get; init; } = null!;
-    public IReadOnlyList<string> Items { get; init; } = null!;
+    public List<string> BackgroundQuestions { get; init; } = new();
+    public List<string> ConnectionQuestions { get; init; } = new();
+    public List<string> Items { get; init; } = new();
 }
