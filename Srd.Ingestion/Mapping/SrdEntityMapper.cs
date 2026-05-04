@@ -73,7 +73,9 @@ public static class SrdEntityMapper
         {
             Name = card.Name,
             Description = card.Description,
-            Features = card.Features.Select(ToEntity).ToList(),
+            Foundation = ToEntity(card.Foundation),
+            Specialization = ToEntity(card.Specialization),
+            Mastery =  ToEntity(card.Mastery),
             SpellCastingTraitType = card.SpellcastTrait
         };
     }
@@ -92,7 +94,7 @@ public static class SrdEntityMapper
             SuggestedArmor = card.SuggestedArmor.ToEntity(),
             SuggestedWeapons = card.SuggestedWeapons.ToEntities(),
             Subclasses = card.Subclasses.Select(ToEntity).ToList(),
-            Features = card.Features.Select(ToEntity).ToList(),
+            ClassFeature = ToEntity(card.ClassFeature),
             HopeFeature = ToEntity(card.HopeFeature),
             BackgroundQuestions = card.BackgroundQuestions,
             ConnectionQuestions = card.ConnectionQuestions,
