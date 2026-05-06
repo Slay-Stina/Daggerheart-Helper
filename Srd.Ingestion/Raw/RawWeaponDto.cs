@@ -29,6 +29,6 @@ public sealed class RawWeaponDto
     public string PhysicalOrMagical { get; set; } = string.Empty;
 
     [JsonPropertyName("feature")]
-    public List<RawFeatureDto>? Features { get; set; }
+    public List<RawFeatureDto>? Feature { get; set; }
 }
 

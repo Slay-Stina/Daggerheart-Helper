@@ -13,6 +13,6 @@ public class Weapon
     public Burden Burden { get; set; }
     public RangeType RangeType { get; set; }
     public WeaponPriority Category { get; set; }
-    public List<Feature> Features { get; set; } = new();
-    public Tier Tier { get; set; }
+    public Feature? Feature { get; set; }
+    public int Tier { get; set; }
 }
