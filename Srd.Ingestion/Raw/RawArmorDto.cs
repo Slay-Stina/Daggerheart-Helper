@@ -17,6 +17,6 @@ public sealed class RawArmorDto
     public string BaseThresholds { get; set; } = string.Empty;
 
     [JsonPropertyName("feature")]
-    public List<RawFeatureDto>? Features { get; set; }
+    public List<RawFeatureDto>? Feature { get; set; }
 }
 

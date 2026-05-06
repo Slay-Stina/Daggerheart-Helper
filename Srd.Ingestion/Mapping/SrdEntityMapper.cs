@@ -1,5 +1,4 @@
 using Core.Entities;
-using Core.Enums;
 using Srd.Ingestion.Domain;
 
 namespace Srd.Ingestion.Mapping;
@@ -19,10 +18,10 @@ public static class SrdEntityMapper
         return new Armor
         {
             Name = card.Name,
-            Tier = ParseTier(card.Tier),
+            Tier = card.Tier,
             ArmorScore = card.ArmorScore,
             DamageThresholds = card.DamageThresholds,
-            Features = card.Features.Select(ToEntity).ToList()
+            Feature = ToEntity(card.Feature)
         };
     }
 
@@ -31,14 +30,14 @@ public static class SrdEntityMapper
         return new Weapon
         {
             Name = card.Name,
-            Tier = ParseTier(card.Tier),
+            Tier = card.Tier,
             Trait = card.Trait,
             Burden = card.Burden,
             RangeType = card.RangeType,
             Category = card.Priority,
             Damage = card.Damage,
             Description = string.Empty,
-            Features = card.Features.Select(ToEntity).ToList()
+            Feature = ToEntity(card.Feature)
         };
     }
 
@@ -61,7 +60,7 @@ public static class SrdEntityMapper
         {
             Name = card.Name,
             Description = card.Description,
-            Features = card.Features.Select(ToEntity).ToList(),
+            Features = card.Features.Select(ToEntity).ToList()!,
             Note = card.Note,
             HeritageType = card.HeritageType
         };
@@ -73,9 +72,9 @@ public static class SrdEntityMapper
         {
             Name = card.Name,
             Description = card.Description,
-            Foundation = ToEntity(card.Foundation),
-            Specialization = ToEntity(card.Specialization),
-            Mastery =  ToEntity(card.Mastery),
+            Foundation = ToEntity(card.Foundation)!,
+            Specialization = ToEntity(card.Specialization)!,
+            Mastery =  ToEntity(card.Mastery)!,
             SpellCastingTraitType = card.SpellcastTrait
         };
     }
@@ -94,30 +93,22 @@ public static class SrdEntityMapper
             SuggestedArmor = card.SuggestedArmor.ToEntity(),
             SuggestedWeapons = card.SuggestedWeapons.ToEntities(),
             Subclasses = card.Subclasses.Select(ToEntity).ToList(),
-            ClassFeature = ToEntity(card.ClassFeature),
-            HopeFeature = ToEntity(card.HopeFeature),
+            ClassFeature = ToEntity(card.ClassFeature)!,
+            HopeFeature = ToEntity(card.HopeFeature)!,
             BackgroundQuestions = card.BackgroundQuestions,
             ConnectionQuestions = card.ConnectionQuestions,
             Items = card.Items,
         };
     }
     
-    private static Feature ToEntity(FeatureBlock feature)
+    private static Feature? ToEntity(FeatureBlock? feature)
     {
-        return new Feature
+        return feature is null ? null :
+            new Feature
         {
             Name = feature.Name,
             Description = feature.Text
         };
     }
-
-    private static Tier ParseTier(int tier) => tier switch
-    {
-        1 => Tier.Tier1,
-        2 => Tier.Tier2,
-        3 => Tier.Tier3,
-        4 => Tier.Tier4,
-        _ => throw new ArgumentOutOfRangeException(nameof(tier), tier, "Tier must be between 1 and 4.")
-    };
 }
 
