@@ -12,7 +12,7 @@ public sealed record ClassCard(
     int BaseEvasion,
     TraitScores SuggestedTraitScores,
     IReadOnlyList<SubclassCard> Subclasses,
-    IReadOnlyList<FeatureBlock> Features,
+    FeatureBlock ClassFeature,
     FeatureBlock HopeFeature,
     List<string> Items,
     List<string> BackgroundQuestions,

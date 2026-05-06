@@ -1,5 +1,6 @@
 using Core.Enums;
 using Core.ValueObjects;
+using Srd.Ingestion.Domain;
 using Srd.Ingestion.Parsing;
 using Srd.Ingestion.Raw;
 using Xunit;
@@ -61,8 +62,19 @@ public class SrdParsersTests
                 new RawFeatureDto { Name = "Flexible", Text = "+1 to Evasion" }
             ]);
 
-        Assert.Single(features);
-        Assert.Equal(new global::Srd.Ingestion.Domain.FeatureBlock("Flexible", "+1 to Evasion"), features[0]);
+        Assert.Single(features!);
+        Assert.Equal(new FeatureBlock("Flexible", "+1 to Evasion"), features?[0]);
+    }
+    
+    [Fact]
+    public void ParseFeature_ReturnsCorrectValues()
+    {
+        var feature = SrdParsers.ParseFeature(new RawFeatureDto()
+        { Name = "Flexible", Text = "+1 to Evasion" });
+        
+        Assert.Null(SrdParsers.ParseFeature(null));
+        Assert.NotNull(feature);
+        Assert.Equal(new FeatureBlock("Flexible", "+1 to Evasion"), feature);
     }
 
     [Fact]
