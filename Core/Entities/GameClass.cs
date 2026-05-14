@@ -13,11 +13,14 @@ public class GameClass
     public DomainType Domain1 { get; init; }
     public DomainType Domain2 { get; init; }
     public TraitScores SuggestedTraits { get; init; } = new( 0,0,0,0,0,0);
-    public Armor SuggestedArmor { get; init; } = new();
+    public Armor? SuggestedArmor { get; init; }
     public List<Weapon> SuggestedWeapons { get; init; } = new();
     public List<Subclass> Subclasses { get; init; } = new();
-    public List<Feature> Features { get; init; } = new();
-    public Feature HopeFeature { get; init; } = new();
+    public List<Feature> ClassFeatures { get; init; } = new();
+    
+    public int? HopeFeatureId { get; init; }
+    public Feature? HopeFeature { get; init; }
+    
     public List<string> BackgroundQuestions { get; init; } = new();
     public List<string> ConnectionQuestions { get; init; } = new();
     public List<string> Items { get; init; } = new();

@@ -6,5 +6,6 @@ public sealed record SubclassCard(
     string Name,
     string Description,
     TraitType? SpellcastTrait,
-    IReadOnlyList<FeatureBlock> Features
-    );
+    FeatureBlock Foundation,
+    FeatureBlock Specialization,
+    FeatureBlock Mastery);

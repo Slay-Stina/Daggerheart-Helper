@@ -45,15 +45,10 @@ public static partial class SrdParsers
         return new Damage(parsed.Dice, parsed.Bonus, kind);
     }
 
-    public static Damage ParseDamage(string value, DamageType damageType)
+    public static FeatureBlock? ParseFeature(RawFeatureDto? feature)
     {
-        var parsed = ParseDamageParts(value);
-        return new Damage(parsed.Dice, parsed.Bonus, damageType);
-    }
-
-    public static FeatureBlock ParseFeature(RawFeatureDto feature)
-    {
-        return new FeatureBlock(feature.Name, feature.Text);
+        return feature is null ? null :
+        new FeatureBlock(feature.Name, feature.Text);
     }
 
     public static IReadOnlyList<FeatureBlock> ParseFeatures(List<RawFeatureDto>? features)
@@ -64,7 +59,9 @@ public static partial class SrdParsers
         }
 
         return features
-            .Select(ParseFeature).ToList();
+            .Select(ParseFeature)
+            .OfType<FeatureBlock>()
+            .ToList();
     }
 
     public static int ParseTier(string value) => ParseInt(value, "tier");

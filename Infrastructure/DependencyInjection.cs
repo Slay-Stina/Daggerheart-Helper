@@ -1,6 +1,7 @@
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Srd.Ingestion.Loading;
 
 namespace Infrastructure;
 
@@ -14,6 +15,7 @@ public static class DependencyInjection
         }
 
         services.AddDbContext<DaggerheartDbContext>(options => options.UseSqlite(connectionString));
+        services.AddScoped<ISrdJsonLoader, SrdJsonLoader>();
         return services;
     }
 }

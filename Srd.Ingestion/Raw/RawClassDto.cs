@@ -23,7 +23,7 @@ public sealed class RawClassDto
     public string BaseEvasion { get; set; } = string.Empty;
 
     [JsonPropertyName("feature")]
-    public List<RawFeatureDto> Features { get; set; } = new();
+    public RawFeatureDto[] ClassFeature { get; set; } = null!;
 
     [JsonPropertyName("hope_feature_name")]
     public string  HopeFeatureName { get; set; } = string.Empty;

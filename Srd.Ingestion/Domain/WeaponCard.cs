@@ -10,8 +10,7 @@ public sealed record WeaponCard(
     WeaponPriority Priority,
     TraitType Trait,
     RangeType RangeType,
-    DamageType DamageKind,
     Damage Damage,
-    IReadOnlyList<FeatureBlock> Features);
+    FeatureBlock? Feature);
 
 

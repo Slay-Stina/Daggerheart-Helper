@@ -7,6 +7,6 @@ public sealed record ArmorCard(
     int Tier,
     int ArmorScore,
     DamageThresholds DamageThresholds,
-    IReadOnlyList<FeatureBlock> Features);
+    FeatureBlock? Feature);
 
 
