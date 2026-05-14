@@ -36,7 +36,6 @@ public static class SrdEntityMapper
             RangeType = card.RangeType,
             Category = card.Priority,
             Damage = card.Damage,
-            Description = string.Empty,
             Feature = ToEntity(card.Feature)
         };
     }
@@ -74,7 +73,7 @@ public static class SrdEntityMapper
             Description = card.Description,
             Foundation = ToEntity(card.Foundation)!,
             Specialization = ToEntity(card.Specialization)!,
-            Mastery =  ToEntity(card.Mastery)!,
+            Mastery = ToEntity(card.Mastery)!,
             SpellCastingTraitType = card.SpellcastTrait
         };
     }
@@ -93,7 +92,7 @@ public static class SrdEntityMapper
             SuggestedArmor = card.SuggestedArmor.ToEntity(),
             SuggestedWeapons = card.SuggestedWeapons.ToEntities(),
             Subclasses = card.Subclasses.Select(ToEntity).ToList(),
-            ClassFeature = ToEntity(card.ClassFeature)!,
+            ClassFeatures = card.ClassFeatures.Select(f => ToEntity(f)!).ToList(),
             HopeFeature = ToEntity(card.HopeFeature)!,
             BackgroundQuestions = card.BackgroundQuestions,
             ConnectionQuestions = card.ConnectionQuestions,

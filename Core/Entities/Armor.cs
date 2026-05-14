@@ -10,5 +10,7 @@ public class Armor
     public string Name { get; set; } = string.Empty;
     public DamageThresholds DamageThresholds { get; set; } = new(0,0);
     public int ArmorScore { get; set; }
+    
+    public int? FeatureId { get; set; }
     public Feature? Feature { get; set; }
 }

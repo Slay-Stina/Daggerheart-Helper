@@ -26,9 +26,9 @@ public sealed class RawWeaponDto
     public string PrimaryOrSecondary { get; set; } = string.Empty;
 
     [JsonPropertyName("physical_or_magical")]
-    public string PhysicalOrMagical { get; set; } = string.Empty;
+    public string PhysicalOrMagical { get; set; } = string.Empty;  // Loaded from JSON but not used; damage type is parsed from Damage field
 
     [JsonPropertyName("feature")]
-    public List<RawFeatureDto>? Feature { get; set; }
+    public RawFeatureDto[]? Feature { get; set; }
 }
 
