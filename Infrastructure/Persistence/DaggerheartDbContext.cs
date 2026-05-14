@@ -45,7 +45,10 @@ public class DaggerheartDbContext : DbContext
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
             entity.Property(x => x.ArmorScore).IsRequired();
-            entity.Property(x => x.Feature);
+            entity.HasOne(x => x.Feature)
+                .WithMany(f => f.Armors)
+                .HasForeignKey("FeatureId")
+                .OnDelete(DeleteBehavior.Restrict);
             entity.OwnsOne(x => x.DamageThresholds, owned =>
             {
                 owned.Property(x => x.Minor).HasColumnName("MinorThreshold");
@@ -154,6 +157,36 @@ public class DaggerheartDbContext : DbContext
             entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
             entity.Property(x => x.Description).IsRequired();
 
+            entity.HasOne(x => x.GameClassAsClassFeature)
+                .WithMany(x => x.ClassFeatures)
+                .HasForeignKey(x => x.GameClassIdAsClassFeature)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.GameClassAsHopeFeature)
+                .WithOne(x => x.HopeFeature)
+                .HasForeignKey<GameClass>(x => x.HopeFeatureId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.Subclass)
+                .WithMany()
+                .HasForeignKey(x => x.SubclassId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.Heritage)
+                .WithMany(x => x.Features)
+                .HasForeignKey(x => x.HeritageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(x => x.Weapons)
+                .WithOne(x => x.Feature)
+                .HasForeignKey(x => x.FeatureId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasMany(x => x.Armors)
+                .WithOne(x => x.Feature)
+                .HasForeignKey(x => x.FeatureId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             entity.HasMany(x => x.FeatureEffects)
                 .WithOne(x => x.Feature)
                 .HasForeignKey(x => x.FeatureId)
@@ -186,7 +219,6 @@ public class DaggerheartDbContext : DbContext
             entity.Property(x => x.BaseHealth).IsRequired();
             entity.Property(x => x.Domain1).IsRequired();
             entity.Property(x => x.Domain2).IsRequired();
-            entity.Property(x => x.HopeFeature);
 
             entity.OwnsOne(x => x.SuggestedTraits, owned =>
             {
@@ -203,11 +235,10 @@ public class DaggerheartDbContext : DbContext
                 .HasForeignKey("SuggestedArmorId")
                 .OnDelete(DeleteBehavior.Restrict);
             
-            entity.HasOne(x => x.ClassFeature)
-                .WithMany()
-                .HasForeignKey("ClassFeatureId")
-                .OnDelete(DeleteBehavior.Restrict);
-
+            entity.HasMany(x => x.ClassFeatures)
+                .WithOne(x => x.GameClassAsClassFeature)
+                .HasForeignKey(x => x.GameClassIdAsClassFeature)
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasMany(x => x.SuggestedWeapons)
                 .WithMany()
@@ -255,25 +286,11 @@ public class DaggerheartDbContext : DbContext
             entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
             entity.Property(x => x.Description).IsRequired();
             entity.Property(x => x.HeritageType).IsRequired();
+            
             entity.HasMany(x => x.Features)
-                .WithMany(x => x.Heritages)
-                .UsingEntity<Dictionary<string, object>>(
-                    "HeritageFeatures",
-                    right => right
-                        .HasOne<Feature>()
-                        .WithMany()
-                        .HasForeignKey("FeatureId")
-                        .OnDelete(DeleteBehavior.Cascade),
-                    left => left
-                        .HasOne<Heritage>()
-                        .WithMany()
-                        .HasForeignKey("HeritageId")
-                        .OnDelete(DeleteBehavior.Cascade),
-                    join =>
-                    {
-                        join.HasKey("HeritageId", "FeatureId");
-                        join.ToTable("HeritageFeatures");
-                    });
+                .WithOne(x => x.Heritage)
+                .HasForeignKey(x => x.HeritageId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
 
@@ -281,8 +298,10 @@ public class DaggerheartDbContext : DbContext
         {
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
-            entity.Property(x => x.Description).IsRequired();
-            entity.Property(x => x.Feature);
+            entity.HasOne(x => x.Feature)
+                .WithMany(f =>  f.Weapons)
+                .HasForeignKey("FeatureId")
+                .OnDelete(DeleteBehavior.Restrict);
             entity.OwnsOne(x => x.Damage, damage =>
             {
                 damage.Property(x => x.Bonus).HasColumnName("DamageBonus");
