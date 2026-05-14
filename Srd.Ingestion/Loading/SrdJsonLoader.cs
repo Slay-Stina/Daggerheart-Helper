@@ -97,7 +97,7 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
         return new AncestryCard(
             raw.Name,
             raw.Description,
-            SrdParsers.ParseFeatures(raw.Features)!,
+            SrdParsers.ParseFeatures(raw.Features),
             HeritageType.Ancestry);
     }
     
@@ -106,7 +106,7 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
         return new CommunityCard(
             raw.Name,
             raw.Description,
-            SrdParsers.ParseFeatures(raw.Feature)!,
+            SrdParsers.ParseFeatures(raw.Feature),
             raw.Note,
             HeritageType.Community);
     }

@@ -51,15 +51,17 @@ public static partial class SrdParsers
         new FeatureBlock(feature.Name, feature.Text);
     }
 
-    public static IReadOnlyList<FeatureBlock?>? ParseFeatures(List<RawFeatureDto>? features)
+    public static IReadOnlyList<FeatureBlock> ParseFeatures(List<RawFeatureDto>? features)
     {
         if (features is null || features.Count == 0)
         {
-            return null;
+            return [];
         }
 
         return features
-            .Select(ParseFeature).ToList();
+            .Select(ParseFeature)
+            .OfType<FeatureBlock>()
+            .ToList();
     }
 
     public static int ParseTier(string value) => ParseInt(value, "tier");

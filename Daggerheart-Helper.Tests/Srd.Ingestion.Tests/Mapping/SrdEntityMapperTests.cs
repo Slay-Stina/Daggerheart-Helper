@@ -50,7 +50,7 @@ public class SrdEntityMapperTests
         var card = new ClassCard("Bard", "ClassDescription",
             DomainType.Grace, DomainType.Codex, 10, 5,
             new TraitScores(0, 0, -1, 1, 1, 2),
-            new List<SubclassCard>(), feature, feature,
+            new List<SubclassCard>(), new List<FeatureBlock>(), feature,
             stringlist, stringlist, stringlist, 
             new ArmorCard("ArmorName",1,1, 
                 new DamageThresholds(1,2),null),

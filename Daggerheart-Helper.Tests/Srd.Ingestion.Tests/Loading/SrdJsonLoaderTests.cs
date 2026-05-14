@@ -46,7 +46,7 @@ public class SrdJsonLoaderTests
         Assert.Equal("Gifted Performer", troubadour.Foundation.Name);
         
         var bard = Assert.Single(catalog.Classes, x => x.Name == "Bard");
-        Assert.Equal("Rally", bard.ClassFeature.Name);
+        Assert.Equal("Rally", bard.ClassFeatures?.Find(x => x.Name == "Rally")?.Name);
         Assert.Equal(10, bard.BaseEvasion);
         Assert.Equal(DomainType.Grace, bard.Domain1);
         Assert.Equal(bard.Subclasses.Single(s => s.Name == "Troubadour"), troubadour);

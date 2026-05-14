@@ -37,7 +37,7 @@ public class DaggerheartDbContext : DbContext
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Title).IsRequired().HasMaxLength(200);
             entity.Property(x => x.FeatureDescription).IsRequired();
-            entity.HasIndex(x => new { Domain = x.DomainType, x.Level });
+            entity.HasIndex(x => new { x.DomainType, x.Level });
         });
 
         modelBuilder.Entity<Armor>(entity =>
@@ -278,6 +278,11 @@ public class DaggerheartDbContext : DbContext
                 .WithMany()
                 .HasForeignKey("MasteryId")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.GameClass)
+                .WithMany(x => x.Subclasses)
+                .HasForeignKey(x => x.GameClassId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Heritage>(entity =>
