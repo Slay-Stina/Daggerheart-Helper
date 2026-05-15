@@ -2,6 +2,7 @@ using System.Text.Json;
 using Core.Entities;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Infrastructure.Persistence;
@@ -51,9 +52,9 @@ public class DaggerheartDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
             entity.OwnsOne(x => x.DamageThresholds, owned =>
             {
-                owned.Property(x => x.Minor).HasColumnName("MinorThreshold");
-                owned.Property(x => x.Major).HasColumnName("MajorThreshold");
-                owned.Property(x => x.Severe).HasColumnName("SevereThreshold");
+                owned.Property(x => x.Minor).HasColumnName("MinorThreshold").HasDefaultValue(0);
+                owned.Property(x => x.Major).HasColumnName("MajorThreshold").HasDefaultValue(0);
+                owned.Property(x => x.Severe).HasColumnName("SevereThreshold").HasDefaultValue(0);
             });
         });
 
@@ -76,7 +77,7 @@ public class DaggerheartDbContext : DbContext
 
             entity.OwnsOne(x => x.DamageThresholds, owned =>
             {
-                owned.Property(x => x.Minor).HasColumnName("DamageThresholdMinor");
+                owned.Property(x => x.Minor).HasColumnName("DamageThresholdMinor").HasDefaultValue(0);
                 owned.Property(x => x.Major).HasColumnName("DamageThresholdMajor");
                 owned.Property(x => x.Severe).HasColumnName("DamageThresholdSevere");
             });
@@ -230,6 +231,16 @@ public class DaggerheartDbContext : DbContext
                 owned.Property(x => x.Knowledge).HasColumnName($"{nameof(GameClass.SuggestedTraits)}_{nameof(TraitScores.Knowledge)}");
             });
 
+            entity.Property(x => x.BackgroundQuestions)
+                .HasConversion<JsonStringListConverter>()
+                .Metadata.SetValueComparer(GetListValueComparer());
+            entity.Property(x => x.ConnectionQuestions)
+                .HasConversion<JsonStringListConverter>()
+                .Metadata.SetValueComparer(GetListValueComparer());
+            entity.Property(x => x.Items)
+                .HasConversion<JsonStringListConverter>()
+                .Metadata.SetValueComparer(GetListValueComparer());
+
             entity.HasOne(x => x.SuggestedArmor)
                 .WithMany()
                 .HasForeignKey("SuggestedArmorId")
@@ -309,15 +320,21 @@ public class DaggerheartDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
             entity.OwnsOne(x => x.Damage, damage =>
             {
-                damage.Property(x => x.Bonus).HasColumnName("DamageBonus");
-                damage.Property(x => x.Type).HasColumnName("DamageType");
-                damage.OwnsOne(x => x.Dice, dice =>
-                {
-                    dice.Property(x => x.NumberOfDice).HasColumnName("DamageDiceCount");
-                    dice.Property(x => x.NumberOfSides).HasColumnName("DamageDiceSides");
-                });
+                damage.Property(x => x.NumberOfDice).HasColumnName("DamageDiceCount").HasDefaultValue(1);
+                damage.Property(x => x.NumberOfSides).HasColumnName("DamageDiceSides").HasDefaultValue(1);
+                damage.Property(x => x.Bonus).HasColumnName("DamageBonus").HasDefaultValue(0);
+                damage.Property(x => x.Type).HasColumnName("DamageType").IsRequired();
             });
         });
+    }
+
+    private static ValueComparer<List<string>> GetListValueComparer()
+    {
+        return new ValueComparer<List<string>>(
+            (a, b) => (a ?? new List<string>()).SequenceEqual(b ?? new List<string>()),
+            c => c.Aggregate(0, (h, v) => HashCode.Combine(h, v.GetHashCode())),
+            c => new List<string>(c)
+        );
     }
 
     private class JsonStringListConverter : ValueConverter<List<string>, string>
