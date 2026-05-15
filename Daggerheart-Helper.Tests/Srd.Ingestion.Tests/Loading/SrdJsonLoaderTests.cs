@@ -33,7 +33,7 @@ public class SrdJsonLoaderTests
         Assert.Equal(WeaponPriority.Primary, broadsword.Priority);
         Assert.Equal(TraitType.Agility, broadsword.Trait);
         Assert.Equal(RangeType.Melee, broadsword.RangeType);
-        Assert.Equal(new(new(1, 8), 0, DamageType.Physical), broadsword.Damage);
+        Assert.Equal(new(1, 8, 0, DamageType.Physical), broadsword.Damage);
 
         var runeWard = Assert.Single(catalog.Abilities, x => x.Name == "Rune Ward");
         Assert.Equal(DomainType.Arcana, runeWard.Domain);
@@ -46,7 +46,7 @@ public class SrdJsonLoaderTests
         Assert.Equal("Gifted Performer", troubadour.Foundation.Name);
         
         var bard = Assert.Single(catalog.Classes, x => x.Name == "Bard");
-        Assert.Equal("Rally", bard.ClassFeatures?.Find(x => x.Name == "Rally")?.Name);
+        Assert.Equal("Rally", bard.ClassFeatures.Find(x => x.Name == "Rally")?.Name);
         Assert.Equal(10, bard.BaseEvasion);
         Assert.Equal(DomainType.Grace, bard.Domain1);
         Assert.Equal(bard.Subclasses.Single(s => s.Name == "Troubadour"), troubadour);

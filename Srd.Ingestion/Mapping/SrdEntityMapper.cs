@@ -67,21 +67,38 @@ public static class SrdEntityMapper
 
     public static Subclass ToEntity(this SubclassCard card)
     {
+        // generate id early so features can reference subclass
+        var id = Guid.NewGuid();
+        var foundation = ToEntity(card.Foundation)!;
+        var specialization = ToEntity(card.Specialization)!;
+        var mastery = ToEntity(card.Mastery)!;
+
+
         return new Subclass
         {
+            Id = id,
             Name = card.Name,
             Description = card.Description,
-            Foundation = ToEntity(card.Foundation)!,
-            Specialization = ToEntity(card.Specialization)!,
-            Mastery = ToEntity(card.Mastery)!,
+            Foundation = foundation,
+            Specialization = specialization,
+            Mastery = mastery,
             SpellCastingTraitType = card.SpellcastTrait
         };
     }
 
     public static GameClass ToEntity(this ClassCard card)
     {
+        var id = Guid.NewGuid();
+
+        var classFeatures = card.ClassFeatures.Select(f => ToEntity(f)!).ToList();
+        foreach (var cf in classFeatures)
+            cf.GameClassIdAsClassFeature = id;
+
+        var hopeFeature = ToEntity(card.HopeFeature)!;
+
         return new GameClass
         {
+            Id = id,
             Name = card.Name,
             Description = card.Description,
             BaseEvasion = card.BaseEvasion,
@@ -90,10 +107,44 @@ public static class SrdEntityMapper
             Domain2 = card.Domain2,
             SuggestedTraits = card.SuggestedTraitScores,
             SuggestedArmor = card.SuggestedArmor.ToEntity(),
-            SuggestedWeapons = card.SuggestedWeapons.ToEntities(),
+            SuggestedWeapons = new List<Weapon>(),
             Subclasses = card.Subclasses.Select(ToEntity).ToList(),
-            ClassFeatures = card.ClassFeatures.Select(f => ToEntity(f)!).ToList(),
-            HopeFeature = ToEntity(card.HopeFeature)!,
+            ClassFeatures = classFeatures,
+            HopeFeature = hopeFeature,
+            BackgroundQuestions = card.BackgroundQuestions,
+            ConnectionQuestions = card.ConnectionQuestions,
+            Items = card.Items,
+        };
+    }
+    
+    public static GameClass ToEntity(this ClassCard card, Dictionary<string, Armor> armorByName, Dictionary<string, Weapon> weaponsByName)
+    {
+        var id = Guid.NewGuid();
+
+        var classFeatures = card.ClassFeatures.Select(f => ToEntity(f)!).ToList();
+        foreach (var cf in classFeatures)
+            cf.GameClassIdAsClassFeature = id;
+
+        var hopeFeature = ToEntity(card.HopeFeature)!;
+
+        return new GameClass
+        {
+            Id = id,
+            Name = card.Name,
+            Description = card.Description,
+            BaseEvasion = card.BaseEvasion,
+            BaseHealth = card.BaseHp,
+            Domain1 = card.Domain1,
+            Domain2 = card.Domain2,
+            SuggestedTraits = card.SuggestedTraitScores,
+            SuggestedArmor = armorByName.TryGetValue(card.SuggestedArmor.Name, out var armor) ? armor : null,
+            SuggestedWeapons = card.SuggestedWeapons
+                .Where(w => weaponsByName.ContainsKey(w.Name))
+                .Select(w => weaponsByName[w.Name])
+                .ToList(),
+            Subclasses = card.Subclasses.Select(ToEntity).ToList(),
+            ClassFeatures = classFeatures,
+            HopeFeature = hopeFeature,
             BackgroundQuestions = card.BackgroundQuestions,
             ConnectionQuestions = card.ConnectionQuestions,
             Items = card.Items,

@@ -32,7 +32,7 @@ public class SrdParsersTests
     {
         var result = SrdParsers.ParseDamage("d10+3 phy");
 
-        Assert.Equal(new Damage(new Dice(1, 10), 3, DamageType.Physical), result);
+        Assert.Equal(new Damage(1, 10, 3, DamageType.Physical), result);
     }
 
     [Theory]
