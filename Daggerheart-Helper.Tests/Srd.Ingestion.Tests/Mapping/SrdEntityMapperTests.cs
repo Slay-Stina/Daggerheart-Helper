@@ -62,7 +62,7 @@ public class SrdEntityMapperTests
         Assert.Equal("ClassDescription", entity.Description);
         Assert.Equal(DomainType.Grace, entity.Domain1);
         Assert.Equal(10, entity.BaseHealth);
-        Assert.Equal("ArmorName", entity.SuggestedArmor?.Name);
+        Assert.Equal(card.SuggestedArmor.Name, entity.SuggestedArmor?.Name);
         Assert.Null(entity.SuggestedArmor?.Feature);
     }
 

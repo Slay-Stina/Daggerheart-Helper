@@ -106,7 +106,7 @@ public static class SrdEntityMapper
             Domain1 = card.Domain1,
             Domain2 = card.Domain2,
             SuggestedTraits = card.SuggestedTraitScores,
-            SuggestedArmor = null,
+            SuggestedArmor = card.SuggestedArmor.ToEntity(),
             SuggestedWeapons = new List<Weapon>(),
             Subclasses = card.Subclasses.Select(ToEntity).ToList(),
             ClassFeatures = classFeatures,
