@@ -1,6 +1,8 @@
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Application.Services;
+using Infrastructure.Services;
 using Srd.Ingestion.Loading;
 
 namespace Infrastructure;
@@ -16,6 +18,16 @@ public static class DependencyInjection
 
         services.AddDbContextFactory<DaggerheartDbContext>(options => options.UseSqlite(connectionString));
         services.AddScoped<ISrdJsonLoader, SrdJsonLoader>();
+        return services;
+    }
+
+    public static IServiceCollection AddCatalogServices(this IServiceCollection services)
+    {
+        services.AddScoped<IAbilityCatalogQueries, AbilityCatalogQueries>();
+        services.AddScoped<IArmorCatalogQueries, ArmorCatalogQueries>();
+        services.AddScoped<IClassCatalogQueries, ClassCatalogQueries>();
+        services.AddScoped<IHeritageCatalogQueries, HeritageCatalogQueries>();
+        services.AddScoped<IWeaponCatalogQueries, WeaponCatalogQueries>();
         return services;
     }
 }
