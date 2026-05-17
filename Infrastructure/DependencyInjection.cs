@@ -14,7 +14,7 @@ public static class DependencyInjection
             throw new ArgumentException("Connection string cannot be null or whitespace.", nameof(connectionString));
         }
 
-        services.AddDbContext<DaggerheartDbContext>(options => options.UseSqlite(connectionString));
+        services.AddDbContextFactory<DaggerheartDbContext>(options => options.UseSqlite(connectionString));
         services.AddScoped<ISrdJsonLoader, SrdJsonLoader>();
         return services;
     }

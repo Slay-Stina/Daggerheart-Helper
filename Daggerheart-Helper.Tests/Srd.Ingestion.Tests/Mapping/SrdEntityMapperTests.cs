@@ -46,12 +46,12 @@ public class SrdEntityMapperTests
     public void ToEntity_MapsClassCardToClassEntity()
     {
         var feature = new FeatureBlock("FeatureName", "FeatureText");
-        var stringlist = new List<string> { "string1", "string2", "string3" };
+        var stringList = new List<string> { "string1", "string2", "string3" };
         var card = new ClassCard("Bard", "ClassDescription",
             DomainType.Grace, DomainType.Codex, 10, 5,
             new TraitScores(0, 0, -1, 1, 1, 2),
             new List<SubclassCard>(), new List<FeatureBlock>(), feature,
-            stringlist, stringlist, stringlist, 
+            stringList, stringList, stringList, 
             new ArmorCard("ArmorName",1,1, 
                 new DamageThresholds(1,2),null),
             new List<WeaponCard>());
@@ -62,8 +62,8 @@ public class SrdEntityMapperTests
         Assert.Equal("ClassDescription", entity.Description);
         Assert.Equal(DomainType.Grace, entity.Domain1);
         Assert.Equal(10, entity.BaseHealth);
-        Assert.Equal("ArmorName", entity.SuggestedArmor.Name);
-        Assert.Null(entity.SuggestedArmor.Feature);
+        Assert.Equal(card.SuggestedArmor.Name, entity.SuggestedArmor?.Name);
+        Assert.Null(entity.SuggestedArmor?.Feature);
     }
 
     [Fact]
@@ -81,10 +81,11 @@ public class SrdEntityMapperTests
         Assert.Equal("SubclassDescription", entity.Description);
         Assert.Equal(TraitType.Presence, entity.SpellCastingTraitType);
         Assert.Equal("FeatureName", entity.Foundation.Name);
+        Assert.Null(entity.Foundation.SubclassId);
     }
 
     [Fact]
-    public void ToEntity_MapsAncestryAndCommunitCardsToHeritageEntity()
+    public void ToEntity_MapsAncestryAndCommunityCardsToHeritageEntity()
     {
         var ancestry = new AncestryCard(
             "AncestryName",
@@ -123,7 +124,7 @@ public class SrdEntityMapperTests
             WeaponPriority.Primary,
             TraitType.Agility,
             RangeType.Melee,
-            new Damage(new Dice(1, 8), 0, DamageType.Physical), 
+            new Damage(1, 8, 0, DamageType.Physical), 
             null
         );
         
@@ -133,6 +134,5 @@ public class SrdEntityMapperTests
         Assert.Equal(1, entity.Tier);
     }
 }
-
 
 

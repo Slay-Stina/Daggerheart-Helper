@@ -38,11 +38,14 @@ public static partial class SrdParsers
     {
         var parsed = ParseDamageParts(value);
 
-        var kind = parsed.Kind.Equals("mag", StringComparison.OrdinalIgnoreCase)
-            ? DamageType.Magic
-            : DamageType.Physical;
+        // If both kind and altkind exist, use PhysicalOrMagical
+        var damageType = parsed.AltKind != null
+            ? DamageType.PhysicalOrMagical
+            : parsed.Kind.Equals("mag", StringComparison.OrdinalIgnoreCase)
+                ? DamageType.Magical
+                : DamageType.Physical;
 
-        return new Damage(parsed.Dice, parsed.Bonus, kind);
+        return new Damage(parsed.Dice.NumberOfDice, parsed.Dice.NumberOfSides, parsed.Bonus, damageType);
     }
 
     public static FeatureBlock? ParseFeature(RawFeatureDto? feature)
@@ -93,7 +96,7 @@ public static partial class SrdParsers
     public static DamageType ParseDamageKind(string value) => value switch
     {
         _ when string.Equals(value, "Physical", StringComparison.OrdinalIgnoreCase) => DamageType.Physical,
-        _ when string.Equals(value, "Magical", StringComparison.OrdinalIgnoreCase) => DamageType.Magic,
+        _ when string.Equals(value, "Magical", StringComparison.OrdinalIgnoreCase) => DamageType.Magical,
         _ => throw new FormatException($"Unsupported damage kind: '{value}'.")
     };
 
@@ -114,7 +117,7 @@ public static partial class SrdParsers
         throw new FormatException($"Unsupported {fieldName}: '{value}'.");
     }
 
-    private static (Dice Dice, int Bonus, string Kind) ParseDamageParts(string value)
+    private static (Dice Dice, int Bonus, string Kind, string? AltKind) ParseDamageParts(string value)
     {
         var match = DamageRegex().Match(value);
         if (!match.Success)
@@ -130,8 +133,12 @@ public static partial class SrdParsers
         var bonus = string.IsNullOrWhiteSpace(match.Groups["bonus"].Value)
             ? 0
             : ParseInt(match.Groups["bonus"].Value, "damage.bonus");
+        
+        var altKind = string.IsNullOrWhiteSpace(match.Groups["altkind"].Value)
+            ? null
+            : match.Groups["altkind"].Value;
 
-        return (new Dice(diceCount, sides), bonus, match.Groups["kind"].Value);
+        return (new Dice(diceCount, sides), bonus, match.Groups["kind"].Value, altKind);
     }
 
     public static List<string> ParseItems(string rawItems) => 
@@ -158,6 +165,5 @@ public static partial class SrdParsers
             : throw new FormatException($"Invalid traits '{rawSuggestedTraits}'.");
     }
 }
-
 
 
