@@ -4,11 +4,11 @@ namespace Core.Entities;
 
 public class Ability
 {
-    public Guid Id { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public DomainType DomainType { get; set; }
-    public int Level { get; set; }
-    public int RecallCost { get; set; }
-    public AbilityType Type { get; set; }
-    public string FeatureDescription { get; set; } = string.Empty;
+    public Guid Id { get; init; }
+    public string Title { get; init; } = string.Empty;
+    public DomainType DomainType { get; init; }
+    public int Level { get; init; }
+    public int RecallCost { get; init; }
+    public AbilityType Type { get; init; }
+    public string FeatureDescription { get; init; } = string.Empty;
 }   

@@ -5,16 +5,16 @@ namespace Core.Entities;
 
 public class Weapon
 {
-    public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public TraitType Trait { get; set; }
-    public required Damage Damage { get; set; }
-    public Burden Burden { get; set; }
-    public RangeType RangeType { get; set; }
-    public WeaponPriority Category { get; set; }
+    public Guid Id { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public TraitType Trait { get; init; }
+    public required Damage Damage { get; init; }
+    public Burden Burden { get; init; }
+    public RangeType RangeType { get; init; }
+    public WeaponPriority Category { get; init; }
     
-    public int? FeatureId { get; set; }
+    public Guid? FeatureId { get; init; }
     public Feature? Feature { get; set; }
     
-    public int Tier { get; set; }
+    public int Tier { get; init; }
 }

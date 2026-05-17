@@ -4,20 +4,20 @@ namespace Core.Entities;
 
 public class Subclass
 {
-    public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public TraitType? SpellCastingTraitType { get; set; }
+    public Guid Id { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public string Description { get; init; } = string.Empty;
+    public TraitType? SpellCastingTraitType { get; init; }
     
-    public int FoundationId { get; set; }
-    public Feature Foundation { get; set; } = null!;
+    public Guid FoundationId { get; init; }
+    public Feature Foundation { get; init; } = null!;
     
-    public int SpecializationId { get; set; }
-    public Feature Specialization { get; set; } = null!;
+    public Guid SpecializationId { get; init; }
+    public Feature Specialization { get; init; } = null!;
     
-    public int MasteryId { get; set; }
-    public Feature Mastery { get; set; } = null!;
+    public Guid MasteryId { get; init; }
+    public Feature Mastery { get; init; } = null!;
     
-    public Guid GameClassId { get; set; }
-    public GameClass? GameClass { get; set; }
+    public Guid GameClassId { get; init; }
+    public GameClass? GameClass { get; init; }
 }

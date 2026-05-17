@@ -24,15 +24,15 @@ public class Character
     
     public TraitScores Traits { get; set; } = new(0, 0,0,0,0,0);
     public DamageThresholds DamageThresholds { get; set; } = new(0,0);
-    public int Evasion { get; private set; }
+    public int Evasion { get; set; }
     public int ProficiencyBonus { get; set; }
     public int Proficiency => (Level + 2) / 3;
 
-    public int? EquippedArmorId { get; set; }
+    public Guid? EquippedArmorId { get; set; }
     public Armor? EquippedArmor { get; set; }
-    public int? PrimaryWeaponId { get; set; }
+    public Guid? PrimaryWeaponId { get; set; }
     public Weapon? PrimaryWeapon { get; set; }
-    public int? SecondaryWeaponId { get; set; }
+    public Guid? SecondaryWeaponId { get; set; }
     public Weapon? SecondaryWeapon { get; set; }
     
     public ResourcePool HitPoints { get; set; } = new(5, 5);
