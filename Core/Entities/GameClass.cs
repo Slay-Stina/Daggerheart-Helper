@@ -18,7 +18,7 @@ public class GameClass
     public List<Subclass> Subclasses { get; init; } = new();
     public List<Feature> ClassFeatures { get; init; } = new();
     
-    public int? HopeFeatureId { get; init; }
+    public Guid? HopeFeatureId { get; init; }
     public Feature? HopeFeature { get; init; }
     
     public List<string> BackgroundQuestions { get; init; } = new();

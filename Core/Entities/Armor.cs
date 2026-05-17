@@ -1,16 +1,15 @@
-using Core.Enums;
 using Core.ValueObjects;
 
 namespace Core.Entities;
 
 public class Armor
 {
-    public int Id { get; set; }
-    public int Tier { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public DamageThresholds DamageThresholds { get; set; } = new(0,0);
-    public int ArmorScore { get; set; }
+    public Guid Id { get; init; }
+    public int Tier { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public DamageThresholds DamageThresholds { get; init; } = new(0,0);
+    public int ArmorScore { get; init; }
     
-    public int? FeatureId { get; set; }
+    public Guid? FeatureId { get; init; }
     public Feature? Feature { get; set; }
 }

@@ -4,17 +4,17 @@ namespace Core.Entities;
 
 public class FeatureEffect
 {
-    public int Id { get; set; }
-    public int FeatureId { get; set; }
-    public Feature Feature { get; set; } = null!;
+    public Guid Id { get; init; }
+    public Guid FeatureId { get; init; }
+    public Feature Feature { get; init; } = null!;
 
-    public FeatureEffectType EffectType { get; set; }
-    public FeatureEffectTarget Target { get; set; }
-    public FeatureEffectTiming Timing { get; set; } = FeatureEffectTiming.Passive;
+    public FeatureEffectType EffectType { get; init; }
+    public FeatureEffectTarget Target { get; init; }
+    public FeatureEffectTiming Timing { get; init; } = FeatureEffectTiming.Passive;
 
-    public TraitType? TraitType { get; set; }
-    public int? IntValue { get; set; }
-    public string? Condition { get; set; }
-    public string? Description { get; set; }
+    public TraitType? TraitType { get; init; }
+    public int? IntValue { get; init; }
+    public string? Condition { get; init; }
+    public string? Description { get; init; }
 }
 
