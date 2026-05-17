@@ -23,7 +23,7 @@ public class Character
     public Heritage Community { get; set; } = null!;
     
     public TraitScores Traits { get; set; } = new(0, 0,0,0,0,0);
-    public DamageThresholds DamageThresholds { get; set; } = new(0,0,0);
+    public DamageThresholds DamageThresholds { get; set; } = new(0,0);
     public int Evasion { get; private set; }
     public int ProficiencyBonus { get; set; }
     public int Proficiency => (Level + 2) / 3;

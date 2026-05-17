@@ -81,6 +81,7 @@ public class SrdEntityMapperTests
         Assert.Equal("SubclassDescription", entity.Description);
         Assert.Equal(TraitType.Presence, entity.SpellCastingTraitType);
         Assert.Equal("FeatureName", entity.Foundation.Name);
+        Assert.Null(entity.Foundation.SubclassId);
     }
 
     [Fact]
@@ -133,6 +134,5 @@ public class SrdEntityMapperTests
         Assert.Equal(1, entity.Tier);
     }
 }
-
 
 

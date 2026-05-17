@@ -38,11 +38,11 @@ public static partial class SrdParsers
     {
         var parsed = ParseDamageParts(value);
 
-        // If both kind and altkind exist, use PhysicalAndMagical
+        // If both kind and altkind exist, use PhysicalOrMagical
         var damageType = parsed.AltKind != null
-            ? DamageType.PhysicalAndMagical
+            ? DamageType.PhysicalOrMagical
             : parsed.Kind.Equals("mag", StringComparison.OrdinalIgnoreCase)
-                ? DamageType.Magic
+                ? DamageType.Magical
                 : DamageType.Physical;
 
         return new Damage(parsed.Dice.NumberOfDice, parsed.Dice.NumberOfSides, parsed.Bonus, damageType);
@@ -96,7 +96,7 @@ public static partial class SrdParsers
     public static DamageType ParseDamageKind(string value) => value switch
     {
         _ when string.Equals(value, "Physical", StringComparison.OrdinalIgnoreCase) => DamageType.Physical,
-        _ when string.Equals(value, "Magical", StringComparison.OrdinalIgnoreCase) => DamageType.Magic,
+        _ when string.Equals(value, "Magical", StringComparison.OrdinalIgnoreCase) => DamageType.Magical,
         _ => throw new FormatException($"Unsupported damage kind: '{value}'.")
     };
 
@@ -165,6 +165,5 @@ public static partial class SrdParsers
             : throw new FormatException($"Invalid traits '{rawSuggestedTraits}'.");
     }
 }
-
 
 

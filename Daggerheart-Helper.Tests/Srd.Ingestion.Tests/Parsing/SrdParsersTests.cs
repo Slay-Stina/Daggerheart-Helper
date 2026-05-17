@@ -27,12 +27,15 @@ public class SrdParsersTests
         Assert.Equal(new DamageThresholds(5, 11), result);
     }
 
-    [Fact]
-    public void ParseDamage_ReturnsDiceBonusAndKind()
+    [Theory]
+    [InlineData("d8+2 mag", 1, 8, 2, DamageType.Magical)]
+    [InlineData("2d10+3 phy", 2, 10, 3, DamageType.Physical)]
+    [InlineData("3d12+4 phy or mag", 3, 12, 4, DamageType.PhysicalOrMagical)]
+    public void ParseDamage_ReturnsDiceBonusAndKind(string damageString, int numberOfDice, int numberOfSides, int bonus, DamageType damageType)
     {
-        var result = SrdParsers.ParseDamage("d10+3 phy");
+        var result = SrdParsers.ParseDamage(damageString);
 
-        Assert.Equal(new Damage(1, 10, 3, DamageType.Physical), result);
+        Assert.Equal(new Damage(numberOfDice, numberOfSides, bonus, damageType), result);
     }
 
     [Theory]
@@ -62,8 +65,8 @@ public class SrdParsersTests
                 new RawFeatureDto { Name = "Flexible", Text = "+1 to Evasion" }
             ]);
 
-        Assert.Single(features!);
-        Assert.Equal(new FeatureBlock("Flexible", "+1 to Evasion"), features?[0]);
+        Assert.Single(features);
+        Assert.Equal(new FeatureBlock("Flexible", "+1 to Evasion"), features[0]);
     }
     
     [Fact]

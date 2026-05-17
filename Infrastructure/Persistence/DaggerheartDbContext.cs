@@ -7,12 +7,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Infrastructure.Persistence;
 
-public class DaggerheartDbContext : DbContext
+public class DaggerheartDbContext(DbContextOptions<DaggerheartDbContext> options) : DbContext(options)
 {
-    public DaggerheartDbContext(DbContextOptions<DaggerheartDbContext> options) : base(options)
-    {
-    }
-
     public DbSet<Ability> Abilities => Set<Ability>();
     public DbSet<Armor> Armors => Set<Armor>();
     public DbSet<Character> Characters => Set<Character>();
@@ -48,11 +44,10 @@ public class DaggerheartDbContext : DbContext
             entity.Property(x => x.ArmorScore).IsRequired();
             entity.HasOne(x => x.Feature)
                 .WithMany(f => f.Armors)
-                .HasForeignKey("FeatureId")
+                .HasForeignKey(x => x.FeatureId)
                 .OnDelete(DeleteBehavior.Restrict);
             entity.OwnsOne(x => x.DamageThresholds, owned =>
             {
-                owned.Property(x => x.Minor).HasColumnName("MinorThreshold").HasDefaultValue(0);
                 owned.Property(x => x.Major).HasColumnName("MajorThreshold").HasDefaultValue(0);
                 owned.Property(x => x.Severe).HasColumnName("SevereThreshold").HasDefaultValue(0);
             });
@@ -77,9 +72,8 @@ public class DaggerheartDbContext : DbContext
 
             entity.OwnsOne(x => x.DamageThresholds, owned =>
             {
-                owned.Property(x => x.Minor).HasColumnName("DamageThresholdMinor").HasDefaultValue(0);
-                owned.Property(x => x.Major).HasColumnName("DamageThresholdMajor");
-                owned.Property(x => x.Severe).HasColumnName("DamageThresholdSevere");
+                owned.Property(x => x.Major).HasColumnName("DamageThresholdMajor").HasDefaultValue(0);
+                owned.Property(x => x.Severe).HasColumnName("DamageThresholdSevere").HasDefaultValue(0);
             });
 
             entity.OwnsOne(x => x.HitPoints, owned =>
@@ -166,7 +160,7 @@ public class DaggerheartDbContext : DbContext
             entity.HasOne(x => x.GameClassAsHopeFeature)
                 .WithOne(x => x.HopeFeature)
                 .HasForeignKey<GameClass>(x => x.HopeFeatureId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(x => x.Subclass)
                 .WithMany()
@@ -277,18 +271,18 @@ public class DaggerheartDbContext : DbContext
             
             entity.HasOne(x => x.Foundation)
                 .WithMany()
-                .HasForeignKey("FoundationId")
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(x => x.FoundationId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(x => x.Specialization)
                 .WithMany()
-                .HasForeignKey("SpecializationId")
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(x  => x.SpecializationId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(x => x.Mastery)
                 .WithMany()
-                .HasForeignKey("MasteryId")
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(x =>  x.MasteryId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(x => x.GameClass)
                 .WithMany(x => x.Subclasses)
@@ -316,7 +310,7 @@ public class DaggerheartDbContext : DbContext
             entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
             entity.HasOne(x => x.Feature)
                 .WithMany(f =>  f.Weapons)
-                .HasForeignKey("FeatureId")
+                .HasForeignKey(x => x.FeatureId)
                 .OnDelete(DeleteBehavior.Restrict);
             entity.OwnsOne(x => x.Damage, damage =>
             {
@@ -333,16 +327,11 @@ public class DaggerheartDbContext : DbContext
         return new ValueComparer<List<string>>(
             (a, b) => (a ?? new List<string>()).SequenceEqual(b ?? new List<string>()),
             c => c.Aggregate(0, (h, v) => HashCode.Combine(h, v.GetHashCode())),
-            c => new List<string>(c)
+            c => c.ToList()
         );
     }
 
-    private class JsonStringListConverter : ValueConverter<List<string>, string>
-    {
-        public JsonStringListConverter() : base(
-            v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
-            v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null!) ?? new List<string>())
-        {
-        }
-    }
+    private class JsonStringListConverter() : ValueConverter<List<string>, string>(
+        v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
+        v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null!) ?? new List<string>());
 }

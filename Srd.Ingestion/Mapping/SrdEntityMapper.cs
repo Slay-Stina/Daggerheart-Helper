@@ -67,12 +67,11 @@ public static class SrdEntityMapper
 
     public static Subclass ToEntity(this SubclassCard card)
     {
-        // generate id early so features can reference subclass
         var id = Guid.NewGuid();
-        var foundation = ToEntity(card.Foundation)!;
-        var specialization = ToEntity(card.Specialization)!;
-        var mastery = ToEntity(card.Mastery)!;
-
+        
+        var foundation = ToEntity(card.Foundation) ?? throw new NullReferenceException();
+        var specialization = ToEntity(card.Specialization) ?? throw new NullReferenceException();
+        var mastery = ToEntity(card.Mastery) ?? throw new NullReferenceException();
 
         return new Subclass
         {
@@ -107,7 +106,7 @@ public static class SrdEntityMapper
             Domain2 = card.Domain2,
             SuggestedTraits = card.SuggestedTraitScores,
             SuggestedArmor = card.SuggestedArmor.ToEntity(),
-            SuggestedWeapons = new List<Weapon>(),
+            SuggestedWeapons = card.SuggestedWeapons.ToEntities(),
             Subclasses = card.Subclasses.Select(ToEntity).ToList(),
             ClassFeatures = classFeatures,
             HopeFeature = hopeFeature,
@@ -126,6 +125,7 @@ public static class SrdEntityMapper
             cf.GameClassIdAsClassFeature = id;
 
         var hopeFeature = ToEntity(card.HopeFeature)!;
+        hopeFeature.GameClassIdAsHopeFeature = id;
 
         return new GameClass
         {
@@ -137,7 +137,7 @@ public static class SrdEntityMapper
             Domain1 = card.Domain1,
             Domain2 = card.Domain2,
             SuggestedTraits = card.SuggestedTraitScores,
-            SuggestedArmor = armorByName.TryGetValue(card.SuggestedArmor.Name, out var armor) ? armor : null,
+            SuggestedArmor = armorByName.GetValueOrDefault(card.SuggestedArmor.Name),
             SuggestedWeapons = card.SuggestedWeapons
                 .Where(w => weaponsByName.ContainsKey(w.Name))
                 .Select(w => weaponsByName[w.Name])
@@ -161,4 +161,3 @@ public static class SrdEntityMapper
         };
     }
 }
-

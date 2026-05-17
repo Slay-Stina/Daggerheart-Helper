@@ -3,6 +3,6 @@ namespace Core.Enums;
 public enum DamageType
 {
     Physical,
-    Magic,
-    PhysicalAndMagical
+    Magical,
+    PhysicalOrMagical
 }
