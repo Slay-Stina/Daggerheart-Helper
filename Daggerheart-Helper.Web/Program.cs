@@ -22,6 +22,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddFluentUIComponents();
 builder.Services.AddDaggerheartPersistence(connectionString);
+builder.Services.AddCatalogServices();
 
 var app = builder.Build();
 
