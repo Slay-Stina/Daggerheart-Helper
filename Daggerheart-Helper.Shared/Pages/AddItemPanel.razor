@@ -1,0 +1,157 @@
+@implements IDialogContentComponent<AddItemResult>
+@inject IArmorCatalogQueries ArmorQueries
+@inject IWeaponCatalogQueries WeaponQueries
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="12" Width="100%">
+    @* Custom Item *@
+    <div class="panel-section">
+        <div class="panel-section-title">Custom Item</div>
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8" Width="100%">
+            <FluentTextField @bind-Value="_customItemName" Placeholder="Enter item name…" Style="flex: 1;" Immediate="true" />
+            <FluentButton Appearance="Appearance.Accent" Disabled="@string.IsNullOrWhiteSpace(_customItemName)" OnClick="@AddCustomItem">
+                Add
+            </FluentButton>
+        </FluentStack>
+    </div>
+
+    @if (_primaryWeapons.Count > 0)
+    {
+        <div class="panel-section">
+            <div class="panel-section-title">Primary Weapons</div>
+            <div class="panel-item-list">
+                @foreach (var wp in _primaryWeapons)
+                {
+                    <FluentButton Appearance="Appearance.Stealth" OnClick="@(() => SelectCatalogItem(wp.Name, wp.Id, "Primary"))" Style="width: 100%; justify-content: flex-start; text-align: left;" Class="panel-item-btn">
+                        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8" VerticalAlignment="VerticalAlignment.Center" Width="100%">
+                            <FluentIcon Value="@(new Icons.Filled.Size20.Flash())" Color="Color.Accent" />
+                            <span>@wp.Name</span>
+                            <span class="text-muted" style="margin-left: auto;">@FormatWeaponDamage(wp)</span>
+                        </FluentStack>
+                    </FluentButton>
+                }
+            </div>
+        </div>
+    }
+
+    @if (_secondaryWeapons.Count > 0)
+    {
+        <div class="panel-section">
+            <div class="panel-section-title">Secondary Weapons</div>
+            <div class="panel-item-list">
+                @foreach (var wp in _secondaryWeapons)
+                {
+                    <FluentButton Appearance="Appearance.Stealth" OnClick="@(() => SelectCatalogItem(wp.Name, wp.Id, "Secondary"))" Style="width: 100%; justify-content: flex-start; text-align: left;" Class="panel-item-btn">
+                        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8" VerticalAlignment="VerticalAlignment.Center" Width="100%">
+                            <FluentIcon Value="@(new Icons.Filled.Size20.Flash())" Color="Color.Accent" />
+                            <span>@wp.Name</span>
+                            <span class="text-muted" style="margin-left: auto;">@FormatWeaponDamage(wp)</span>
+                        </FluentStack>
+                    </FluentButton>
+                }
+            </div>
+        </div>
+    }
+
+    @if (_armors.Count > 0)
+    {
+        <div class="panel-section">
+            <div class="panel-section-title">Armor</div>
+            <div class="panel-item-list">
+                @foreach (var arm in _armors)
+                {
+                    <FluentButton Appearance="Appearance.Stealth" OnClick="@(() => SelectCatalogItem(arm.Name, arm.Id, "Armor"))" Style="width: 100%; justify-content: flex-start; text-align: left;" Class="panel-item-btn">
+                        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="8" VerticalAlignment="VerticalAlignment.Center" Width="100%">
+                            <FluentIcon Value="@(new Icons.Filled.Size20.Shield())" Color="Color.Accent" />
+                            <span>@arm.Name</span>
+                            <span class="text-muted" style="margin-left: auto;">AC @arm.ArmorScore</span>
+                        </FluentStack>
+                    </FluentButton>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="panel-section">
+        <div class="panel-section-title">Common Items</div>
+        <div class="panel-common-grid">
+            @foreach (var item in _commonItems)
+            {
+                <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => SelectCommonItem(item))" Style="padding: 6px 12px;">
+                    @item
+                </FluentButton>
+            }
+        </div>
+    </div>
+</FluentStack>
+
+@code {
+    [Parameter] public AddItemResult Content { get; set; } = default!;
+    [CascadingParameter] public FluentDialog Dialog { get; set; } = default!;
+
+    private string _customItemName = string.Empty;
+    private List<WeaponSummary> _primaryWeapons = new();
+    private List<WeaponSummary> _secondaryWeapons = new();
+    private List<ArmorSummary> _armors = new();
+    private static readonly string[] _commonItems = new[]
+    {
+        "Torch", "50 ft rope", "Basic supplies",
+        "Minor Health Potion", "Minor Stamina Potion",
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var weaponsTask = WeaponQueries.GetSummariesByTierAsync(1);
+        var armorsTask = ArmorQueries.GetSummariesByTierAsync(1);
+        await Task.WhenAll(weaponsTask, armorsTask);
+
+        var allWeapons = weaponsTask.Result;
+        _primaryWeapons = allWeapons.Where(w => w.Category == WeaponPriority.Primary).ToList();
+        _secondaryWeapons = allWeapons.Where(w => w.Category == WeaponPriority.Secondary).ToList();
+        _armors = armorsTask.Result;
+    }
+
+    private async Task AddCustomItem()
+    {
+        if (string.IsNullOrWhiteSpace(_customItemName)) return;
+        await CloseAndReturn(new AddItemResult
+        {
+            ItemName = _customItemName.Trim(),
+            CatalogId = null,
+            SlotType = null,
+        });
+    }
+
+    private async Task SelectCatalogItem(string name, Guid catalogId, string slotType)
+    {
+        await CloseAndReturn(new AddItemResult
+        {
+            ItemName = name,
+            CatalogId = catalogId,
+            SlotType = slotType,
+        });
+    }
+
+    private async Task SelectCommonItem(string name)
+    {
+        await CloseAndReturn(new AddItemResult
+        {
+            ItemName = name,
+            CatalogId = null,
+            SlotType = null,
+        });
+    }
+
+    private async Task CloseAndReturn(AddItemResult result)
+    {
+        var dialog = Dialog;
+        if (dialog != null)
+        {
+            await dialog.CloseAsync(DialogResult.Ok(result));
+        }
+    }
+
+    private string FormatWeaponDamage(WeaponSummary wp)
+    {
+        return $"({wp.Damage.NumberOfDice}d{wp.Damage.NumberOfSides}{(wp.Damage.Bonus > 0 ? "+" + wp.Damage.Bonus : "")} {wp.Damage.Type})";
+    }
+}

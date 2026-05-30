@@ -13,95 +13,58 @@
     <FluentWizard Value="@_currentStep" ValueChanged="@(i => _currentStep = i)" OnFinish="SaveCharacter" StepperPosition="StepperPosition.Top" Width="100%" Height="auto" Border="WizardBorder.None" StepperBulletSpace="140px">
         <Steps>
 
-        <FluentWizardStep Label="Class" Summary="Pick a class and subclass" OnChange="@ValidateStep">
-            <h3>Choose Class</h3>
-            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Your class defines your powers, health & evasion bases, and magical domains.</p>
-            @if (_classes.Count == 0)
-            {
-                <FluentGrid Spacing="3">
-                    @for (int i = 0; i < 6; i++)
-                    {
-                        <FluentGridItem Xs="12" Sm="6" Md="4">
-                            <FluentSkeleton Style="height:260px; width:100%" />
-                        </FluentGridItem>
-                    }
-                </FluentGrid>
-            }
-            else
-            {
-            <FluentGrid Spacing="3">
-                @foreach (var cls in _classes)
-                {
-                    <FluentGridItem Xs="12" Sm="6" Md="4">
-                        <FluentCard @onclick="() => SelectClass(cls)" Style="cursor: pointer;">
-                            @if (_selectedClass == cls)
-                            {
-                                <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
-                            }
-                            <h4>@cls.Name</h4>
-                            <p style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.45;">@cls.Description</p>
-                            <FluentStack Orientation="Orientation.Vertical" VerticalGap="5" Width="100%">
-                                <span><strong>Domains:</strong> @cls.Domain1 & @cls.Domain2</span>
-                                <span><strong>Base Evasion:</strong> @cls.BaseEvasion | <strong>Base HP:</strong> @cls.BaseHealth</span>
-                            </FluentStack>
-                            @if (cls.ClassFeatures.Any())
-                            {
-                                <FluentDivider Role="DividerRole.Presentation" />
-                                <div style="font-size: 0.8rem;">
-                                    @foreach (var feat in cls.ClassFeatures)
-                                    {
-                                        <div style="color: #94a3b8; margin-top: 4px;">
-                                            <span style="color: #d8b4fe; font-weight: 600;">@feat.Name:</span> @feat.Description.ToMarkdownHtml()
-                                        </div>
-                                    }
-                                </div>
-                            }
-                            <FluentDivider Role="DividerRole.Presentation" />
-                            <div style="font-size: 0.8rem;">
-                                <strong>Hope Ability:</strong>
-                                <div style="color: #94a3b8; margin-top: 4px;">
-                                    <span style="color: #fbbf24; font-weight: 600;">@cls.HopeFeature.Name:</span> @cls.HopeFeature.Description.ToMarkdownHtml()
-                                </div>
-                            </div>
-                        </FluentCard>
-                    </FluentGridItem>
-                }
-            </FluentGrid>
-            }
-            @if (_selectedClass != null)
-            {
+            <FluentWizardStep Label="Class" Summary="Pick a class and subclass" OnChange="@ValidateStep">
+                <h3>Character Name</h3>
+                <FluentTextField @bind-Value="_characterName" Placeholder="Vaelen, Arcela, Gealovan .." Required="true" Style="width: 100%; margin-bottom: 1.5rem;" />
                 <FluentDivider Role="DividerRole.Presentation" />
-                <FluentTextField @bind-Value="_characterName" Label="Character Name" Placeholder="E.g. Vaelen" Required="true" Style="width: 100%; margin-bottom: 1.5rem;" />
-                <FluentDivider Role="DividerRole.Presentation" />
-                <h3>Choose Subclass for @_selectedClass.Name</h3>
-                <p style="color: #9ca3af; margin-bottom: 1.5rem;">Refines your class and grants your first Foundation ability.</p>
-
-                @if (_isLoadingSubclasses)
+                
+                <h3>Choose Class</h3>
+                <p class="text-desc mb-step">Your class defines your powers, health & evasion bases, and magical domains.</p>
+                @if (_classes.Count == 0)
                 {
-                    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="12">
-                        <FluentSkeleton Style="height:180px; width:280px" />
-                        <FluentSkeleton Style="height:180px; width:280px" />
-                        <FluentSkeleton Style="height:180px; width:280px" />
-                    </FluentStack>
+                    <FluentGrid Spacing="3">
+                        @for (int i = 0; i < 6; i++)
+                        {
+                            <FluentGridItem Xs="12" Sm="6" Md="4">
+                                <FluentSkeleton Style="height:260px; width:100%"/>
+                            </FluentGridItem>
+                        }
+                    </FluentGrid>
                 }
                 else
                 {
                     <FluentGrid Spacing="3">
-                        @foreach (var sub in _selectedSubclasses)
+                        @foreach (var cls in _classes)
                         {
                             <FluentGridItem Xs="12" Sm="6" Md="4">
-                                <FluentCard @onclick="() => SelectSubclass(sub)" Style="cursor: pointer;">
-                                    @if (_selectedSubclass == sub)
+                                <FluentCard @onclick="() => SelectClass(cls)" Style="cursor: pointer;">
+                                    @if (_selectedClass == cls)
                                     {
                                         <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
                                     }
-                                    <h4>@sub.Name</h4>
-                                    <p style="color: #cbd5e1; font-size: 0.85rem;">@sub.Description</p>
-                                    <FluentDivider Role="DividerRole.Presentation" />
-                                    <div style="font-size: 0.8rem;">
-                                        <strong>Foundation Ability:</strong>
-                                        <div style="color: #94a3b8; margin-top: 4px;">
-                                            <span style="color: #d8b4fe; font-weight: 600;">@sub.Foundation.Name:</span> @sub.Foundation.Description.ToMarkdownHtml()
+                                    <h4>@cls.Name</h4>
+                                    <p class="text-desc">@cls.Description</p>
+                                    <FluentStack Orientation="Orientation.Vertical" VerticalGap="5" Width="100%">
+                                        <span><strong>Domains:</strong> @cls.Domain1 & @cls.Domain2</span>
+                                        <span><strong>Base Evasion:</strong> @cls.BaseEvasion | <strong>Base HP:</strong> @cls.BaseHealth</span>
+                                    </FluentStack>
+                                    @if (cls.ClassFeatures.Any())
+                                    {
+                                        <FluentDivider Role="DividerRole.Presentation"/>
+                                        <div style="font-size: 0.8rem;">
+                                            @foreach (var feat in cls.ClassFeatures)
+                                            {
+                                                <div class="text-caption" style="margin-top: 4px;">
+                                                    <span class="text-feat-name">@feat.Name:</span> @feat.Description.ToMarkdownHtml()
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    <FluentDivider Role="DividerRole.Presentation"/>
+                                    <div class="text-caption">
+                                        <strong>Hope Ability:</strong>
+                                        <div class="text-caption" style="margin-top: 4px;">
+                                            <span class="text-hope" style="font-weight: 600;">@cls.HopeFeature.Name:</span> @cls.HopeFeature.Description.ToMarkdownHtml()
                                         </div>
                                     </div>
                                 </FluentCard>
@@ -109,14 +72,53 @@
                         }
                     </FluentGrid>
                 }
-            }
-        </FluentWizardStep>
+                @if (_selectedClass != null)
+                {
+                    <FluentDivider Role="DividerRole.Presentation"/>
+                    <h3>Choose Subclass for @_selectedClass.Name</h3>
+                    <p class="text-desc mb-step">Refines your class and grants your first Foundation ability.</p>
+
+                    @if (_isLoadingSubclasses)
+                    {
+                        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="12">
+                            <FluentSkeleton Style="height:180px; width:280px"/>
+                            <FluentSkeleton Style="height:180px; width:280px"/>
+                            <FluentSkeleton Style="height:180px; width:280px"/>
+                        </FluentStack>
+                    }
+                    else
+                    {
+                        <FluentGrid Spacing="3">
+                            @foreach (var sub in _selectedSubclasses)
+                            {
+                                <FluentGridItem Xs="12" Sm="6" Md="4">
+                                    <FluentCard @onclick="() => SelectSubclass(sub)" Style="cursor: pointer;">
+                                        @if (_selectedSubclass == sub)
+                                        {
+                                            <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
+                                        }
+                                        <h4>@sub.Name</h4>
+                                        <p class="text-muted">@sub.Description</p>
+                                        <FluentDivider Role="DividerRole.Presentation"/>
+                                        <div style="font-size: 0.8rem;">
+                                            <strong>Foundation Ability:</strong>
+                                            <div class="text-caption" style="margin-top: 4px;">
+                                                <span class="text-feat-name">@sub.Foundation.Name:</span> @sub.Foundation.Description.ToMarkdownHtml()
+                                            </div>
+                                        </div>
+                                    </FluentCard>
+                                </FluentGridItem>
+                            }
+                        </FluentGrid>
+                    }
+                }
+            </FluentWizardStep>
 
         <FluentWizardStep Label="Heritage" Summary="Ancestry & community" OnChange="@ValidateStep">
             @if (_currentStep >= 1)
             {
             <h3>Choose Ancestry</h3>
-            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Determines your physical form and unique physiological traits.</p>
+            <p class="text-desc mb-step">Determines your physical form and unique physiological traits.</p>
             @if (_ancestries.Count == 0)
             {
                 <FluentGrid Spacing="3">
@@ -140,7 +142,7 @@
                                 <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
                             }
                             <h4>@anc.Name</h4>
-                            <p style="color: #cbd5e1; font-size: 0.85rem;">@anc.Description</p>
+                            <p class="text-muted">@anc.Description</p>
                             @if (anc.Features.Any())
                             {
                                 <FluentDivider Role="DividerRole.Presentation" />
@@ -148,8 +150,8 @@
                                     <strong>Abilities:</strong>
                                     @foreach (var feat in anc.Features)
                                     {
-                                        <div style="color: #94a3b8; margin-top: 4px;">
-                                            <span style="color: #d8b4fe; font-weight: 600;">@feat.Name:</span> @feat.Description.ToMarkdownHtml()
+                                        <div class="text-caption" style="margin-top: 4px;">
+                                            <span class="text-feat-name">@feat.Name:</span> @feat.Description.ToMarkdownHtml()
                                         </div>
                                     }
                                 </div>
@@ -161,7 +163,7 @@
             }
             <FluentDivider Role="DividerRole.Presentation" />
             <h3>Choose Community</h3>
-            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Where your character grew up and the cultural abilities they carry.</p>
+            <p class="text-desc mb-step">Where your character grew up and the cultural abilities they carry.</p>
             @if (_communities.Count == 0)
             {
                 <FluentGrid Spacing="3">
@@ -185,7 +187,7 @@
                                 <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
                             }
                             <h4>@com.Name</h4>
-                            <p style="color: #cbd5e1; font-size: 0.85rem;">@com.Description</p>
+                            <p class="text-muted">@com.Description</p>
                             @if (com.Features.Any())
                             {
                                 <FluentDivider Role="DividerRole.Presentation" />
@@ -193,8 +195,8 @@
                                     <strong>Community Ability:</strong>
                                     @foreach (var feat in com.Features)
                                     {
-                                        <div style="color: #94a3b8; margin-top: 4px;">
-                                            <span style="color: #d8b4fe; font-weight: 600;">@feat.Name:</span> @feat.Description.ToMarkdownHtml()
+                                        <div class="text-caption" style="margin-top: 4px;">
+                                            <span class="text-feat-name">@feat.Name:</span> @feat.Description.ToMarkdownHtml()
                                         </div>
                                     }
                                 </div>
@@ -216,7 +218,7 @@
                     Auto-assign for @(_selectedClass?.Name ?? "class")
                 </FluentButton>
             </FluentStack>
-            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Drag each bonus to a trait, or click <strong>Auto-assign</strong> to use the class's suggested distribution.</p>
+            <p class="text-desc mb-step">Drag each bonus to a trait, or click <strong>Auto-assign</strong> to use the class's suggested distribution.</p>
 
             <FluentDragContainer TItem="BonusChip">
                 <FluentDropZone TItem="BonusChip" Droppable="true" OnDropEnd="@HandleDropOnPool">
@@ -229,7 +231,7 @@
                             @foreach (var bonus in _pool)
                             {
                                 <FluentDropZone TItem="BonusChip" Draggable="true" Droppable="false" Item="@bonus">
-                                    <div style="display: inline-block; padding: 8px 20px; background: rgba(167, 139, 250, 0.15); border: 1px solid rgba(167, 139, 250, 0.4); border-radius: 8px; cursor: grab; user-select: none; font-weight: 600; font-size: 1.05rem;">
+                                    <div style="display: inline-block; padding: 8px 20px; background: color-mix(in srgb, var(--dh-purple) 15%, transparent); border: 1px solid color-mix(in srgb, var(--dh-purple) 40%, transparent); border-radius: 8px; cursor: grab; user-select: none; font-weight: 600; font-size: 1.05rem;">
                                         @bonus.Label
                                     </div>
                                 </FluentDropZone>
@@ -247,7 +249,7 @@
                                         Droppable="true"
                                         Item="@s.AssignedChip"
                                         OnDropEnd="@(e => HandleDropOnTrait(e, s.Key))">
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(25, 25, 45, 0.5); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 10px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: color-mix(in srgb, var(--dh-bg-end) 50%, transparent); border: 1px solid color-mix(in srgb, #fff 6%, transparent); border-radius: 10px;">
                                 <span style="font-weight: 600; color: #f0f0f5;">@s.DisplayName</span>
                                 @if (s.AssignedChip != null)
                                 {
@@ -272,13 +274,13 @@
             {
                 <FluentStack Orientation="Orientation.Vertical" VerticalAlignment="VerticalAlignment.Center" Style="padding: 3rem 0; text-align: center;" VerticalGap="16">
                     <FluentProgress />
-                    <span style="color: #9ca3af;">Loading equipment…</span>
+                    <span class="text-muted">Loading equipment…</span>
                 </FluentStack>
             }
             else
             {
                 <h3>Choose Armor</h3>
-                <p style="color: #9ca3af; margin-bottom: 1.5rem;">Your armor sets your protection (Armor Score) and damage thresholds.</p>
+                <p class="text-desc mb-step">Your armor sets your protection (Armor Score) and damage thresholds.</p>
                 <FluentGrid Spacing="3">
                     @foreach (var arm in _armors)
                     {
@@ -290,13 +292,13 @@
                                 }
                                 <h4>@arm.Name</h4>
                                 <FluentStack Orientation="Orientation.Vertical" VerticalGap="3" Width="100%">
-                                    <span style="font-size: 0.85rem; color: #cbd5e1;"><strong>Armor Score:</strong> @arm.ArmorScore</span>
-                                    <span style="font-size: 0.85rem; color: #cbd5e1;"><strong>Thresholds:</strong> @arm.DamageThresholds.Major / @arm.DamageThresholds.Severe</span>
+                                    <span class="text-muted"><strong>Armor Score:</strong> @arm.ArmorScore</span>
+                                    <span class="text-muted"><strong>Thresholds:</strong> @arm.DamageThresholds.Major / @arm.DamageThresholds.Severe</span>
                                 </FluentStack>
                                 @if (arm.Feature != null)
                                 {
                                     <FluentDivider Role="DividerRole.Presentation" />
-                                    <div style="font-size: 0.78rem; color: #a78bfa; padding-top: 8px;">
+                                    <div class="text-caption text-accent" style="padding-top: 8px;">
                                         <strong>Feature:</strong> @arm.Feature.Description.ToMarkdownHtml()
                                     </div>
                                 }
@@ -307,7 +309,7 @@
 
                 <FluentDivider Role="DividerRole.Presentation" />
                 <h3>Choose Primary Weapon (Tier 1)</h3>
-                <p style="color: #9ca3af; margin-bottom: 1.5rem;">Your main attack weapon.</p>
+                <p class="text-desc mb-step">Your main attack weapon.</p>
                 <FluentGrid Spacing="3">
                     @foreach (var wp in _primaryWeapons)
                     {
@@ -319,9 +321,9 @@
                                 }
                                 <h4>@wp.Name</h4>
                                 <FluentStack Orientation="Orientation.Vertical" VerticalGap="3" Width="100%">
-                                    <span style="font-size: 0.85rem; color: #cbd5e1;"><strong>Damage:</strong> @wp.Damage.NumberOfDice d @wp.Damage.NumberOfSides @(wp.Damage.Bonus > 0 ? " + " + wp.Damage.Bonus : "") (@wp.Damage.Type)</span>
-                                    <span style="font-size: 0.85rem; color: #cbd5e1;"><strong>Range:</strong> @wp.RangeType | <strong>Requires:</strong> @wp.Trait</span>
-                                    <span style="font-size: 0.85rem; color: #cbd5e1;"><strong>Hands:</strong> @wp.Burden</span>
+                                    <span class="text-muted"><strong>Damage:</strong> @wp.Damage.NumberOfDice d @wp.Damage.NumberOfSides @(wp.Damage.Bonus > 0 ? " + " + wp.Damage.Bonus : "") (@wp.Damage.Type)</span>
+                                    <span class="text-muted"><strong>Range:</strong> @wp.RangeType | <strong>Requires:</strong> @wp.Trait</span>
+                                    <span class="text-muted"><strong>Hands:</strong> @wp.Burden</span>
                                 </FluentStack>
                             </FluentCard>
                         </FluentGridItem>
@@ -332,7 +334,7 @@
                 {
                     <FluentDivider Role="DividerRole.Presentation" />
                     <h3>Choose Secondary Weapon (Optional, 1-handed)</h3>
-                    <p style="color: #9ca3af; margin-bottom: 1.5rem;">An extra one-handed weapon in your free hand.</p>
+                    <p class="text-desc mb-step">An extra one-handed weapon in your free hand.</p>
                     <FluentGrid Spacing="3">
                         <FluentGridItem Xs="12" Sm="6" Md="4">
                             <FluentCard @onclick="() => SelectSecondaryWeapon(null)" Style="cursor: pointer;">
@@ -341,7 +343,7 @@
                                     <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
                                 }
                                 <h4>No secondary weapon</h4>
-                                <p style="color: #cbd5e1; font-size: 0.85rem;">Fight with only one weapon.</p>
+                                <p class="text-muted">Fight with only one weapon.</p>
                             </FluentCard>
                         </FluentGridItem>
                         @foreach (var wp in _secondaryWeapons)
@@ -354,8 +356,8 @@
                                     }
                                     <h4>@wp.Name</h4>
                                     <FluentStack Orientation="Orientation.Vertical" VerticalGap="3" Width="100%">
-                                        <span style="font-size: 0.85rem; color: #cbd5e1;"><strong>Damage:</strong> @wp.Damage.NumberOfDice d @wp.Damage.NumberOfSides @(wp.Damage.Bonus > 0 ? " + " + wp.Damage.Bonus : "") (@wp.Damage.Type)</span>
-                                        <span style="font-size: 0.85rem; color: #cbd5e1;"><strong>Range:</strong> @wp.RangeType</span>
+                                        <span class="text-muted"><strong>Damage:</strong> @wp.Damage.NumberOfDice d @wp.Damage.NumberOfSides @(wp.Damage.Bonus > 0 ? " + " + wp.Damage.Bonus : "") (@wp.Damage.Type)</span>
+                                        <span class="text-muted"><strong>Range:</strong> @wp.RangeType</span>
                                     </FluentStack>
                                 </FluentCard>
                             </FluentGridItem>
@@ -365,7 +367,7 @@
 
                 <FluentDivider Role="DividerRole.Presentation" />
                 <h3>Starting Inventory</h3>
-                <p style="color: #9ca3af; margin-bottom: 1rem;">Basic supplies are automatically added to your pack.</p>
+                <p class="text-desc" style="margin-bottom: 1rem;">Basic supplies are automatically added to your pack.</p>
                 <FluentStack Orientation="Orientation.Horizontal" Wrap="true" HorizontalGap="8" VerticalGap="5" Style="margin-bottom: 1.5rem;">
                     <FluentBadge Appearance="Appearance.Neutral">✅ Torch</FluentBadge>
                     <FluentBadge Appearance="Appearance.Neutral">✅ 50 ft rope</FluentBadge>
@@ -375,7 +377,7 @@
 
                 <FluentDivider Role="DividerRole.Presentation" />
                 <h3>Potion Choice</h3>
-                <p style="color: #9ca3af; margin-bottom: 1rem;">Choose one potion to start with.</p>
+                <p class="text-desc" style="margin-bottom: 1rem;">Choose one potion to start with.</p>
                 <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="12" Style="margin-bottom: 1.5rem;">
                     <FluentCard @onclick="() => _selectedPotion = _selectedPotion == _potionHealth ? null : _potionHealth" Style="cursor: pointer; padding: 12px 20px;">
                         @if (_selectedPotion == _potionHealth)
@@ -383,7 +385,7 @@
                             <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
                         }
                         <span>Minor Health Potion</span>
-                        <p style="color: #9ca3af; font-size: 0.8rem;">Clear 1d4 HP</p>
+                        <p class="text-muted">Clear 1d4 HP</p>
                     </FluentCard>
                     <FluentCard @onclick="() => _selectedPotion = _selectedPotion == _potionStamina ? null : _potionStamina" Style="cursor: pointer; padding: 12px 20px;">
                         @if (_selectedPotion == _potionStamina)
@@ -391,7 +393,7 @@
                             <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
                         }
                         <span>Minor Stamina Potion</span>
-                        <p style="color: #9ca3af; font-size: 0.8rem;">Clear 1d4 Stress</p>
+                        <p class="text-muted">Clear 1d4 Stress</p>
                     </FluentCard>
                 </FluentStack>
 
@@ -399,7 +401,7 @@
                 {
                     <FluentDivider Role="DividerRole.Presentation" />
                     <h3>Class Item</h3>
-                    <p style="color: #9ca3af; margin-bottom: 1rem;">Choose one signature item.</p>
+                    <p class="text-desc" style="margin-bottom: 1rem;">Choose one signature item.</p>
                     <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="12" Style="margin-bottom: 1.5rem;">
                         @foreach (var item in _classSetupData.ClassItems)
                         {
@@ -418,7 +420,7 @@
                 {
                     <FluentDivider Role="DividerRole.Presentation" />
                     <h3>Spell Focus</h3>
-                    <p style="color: #9ca3af; margin-bottom: 1rem;">Decide what you carry your spells in.</p>
+                    <p class="text-desc" style="margin-bottom: 1rem;">Decide what you carry your spells in.</p>
                     <FluentTextField @bind-Value="_spellFocus" Label="Spell Focus" Placeholder="e.g. songbook, journal, large tomes, tarot cards..." Style="width: 100%;" />
                 }
             }
@@ -429,7 +431,7 @@
             @if (_currentStep >= 4)
             {
             <h3>Experiences</h3>
-            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Define your character's life experiences. Each gives <strong>+2</strong> on related dice rolls when you spend Hope.</p>
+            <p class="text-desc mb-step">Define your character's life experiences. Each gives <strong>+2</strong> on related dice rolls when you spend Hope.</p>
 
             <FluentStack Orientation="Orientation.Vertical" VerticalGap="12" Width="100%" Style="margin-bottom: 2rem;">
                 <FluentTextField @bind-Value="_experience1" Label="Experience 1 (+2)" Placeholder="E.g. Street urchin, Temple acolyte" Style="width: 100%;" />
@@ -440,7 +442,7 @@
             {
                 <FluentDivider Role="DividerRole.Presentation" />
                 <h3>Background Questions for @_selectedClass!.Name</h3>
-                <p style="color: #9ca3af; margin-bottom: 1.5rem;">Edit each question freely, then write your answer below it.</p>
+                <p class="text-desc mb-step">Edit each question freely, then write your answer below it.</p>
 
                 <FluentStack Orientation="Orientation.Vertical" VerticalGap="16" Width="100%">
                     @foreach (var entry in _backgroundEntries)
@@ -459,20 +461,20 @@
             @if (_currentStep >= 5)
             {
             <h3>Choose Domain Cards</h3>
-            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Select one domain ability for each of your class's domains. These are your core magical powers.</p>
+            <p class="text-desc mb-step">Select one domain ability for each of your class's domains. These are your core magical powers.</p>
 
             @if (_isLoadingDomains)
             {
                 <FluentStack Orientation="Orientation.Vertical" VerticalGap="16">
                     <FluentProgress />
-                    <span style="color: #9ca3af;">Loading domain abilities…</span>
+                    <span class="text-muted">Loading domain abilities…</span>
                 </FluentStack>
             }
             else
             {
-                <p style="color: #9ca3af; margin-bottom: 1rem;">Selected: <strong>@(_selectedDomainAbilities.Count) / 2</strong> domain card(s). You may take one from each domain or two from the same domain.</p>
+                <p class="text-desc" style="margin-bottom: 1rem;">Selected: <strong>@(_selectedDomainAbilities.Count) / 2</strong> domain card(s). You may take one from each domain or two from the same domain.</p>
 
-                <h4 style="color: #c084fc;">@_selectedClass?.Domain1</h4>
+                <h4 class="text-accent">@_selectedClass?.Domain1</h4>
                 <FluentGrid Spacing="3">
                     @foreach (var ab in _domainAbilities1)
                     {
@@ -484,10 +486,10 @@
                                 }
                                 <h4>@ab.Title</h4>
                                 <FluentStack Orientation="Orientation.Vertical" VerticalGap="3" Width="100%">
-                                    <span style="font-size: 0.8rem; color: #a78bfa;"><strong>@ab.Type</strong> · Recall @ab.RecallCost</span>
+                                    <span class="text-caption text-accent"><strong>@ab.Type</strong> · Recall @ab.RecallCost</span>
                                 </FluentStack>
                                 <FluentDivider Role="DividerRole.Presentation" />
-                                <div style="font-size: 0.8rem; color: #94a3b8; max-height: 120px; overflow-y: auto;">
+                                <div class="text-caption" style="max-height: 120px; overflow-y: auto;">
                                     @ab.FeatureDescription.ToMarkdownHtml()
                                 </div>
                             </FluentCard>
@@ -496,7 +498,7 @@
                 </FluentGrid>
 
                 <FluentDivider Role="DividerRole.Presentation" />
-                <h4 style="color: #c084fc;">@_selectedClass?.Domain2</h4>
+                <h4 class="text-accent">@_selectedClass?.Domain2</h4>
                 <FluentGrid Spacing="3">
                     @foreach (var ab in _domainAbilities2)
                     {
@@ -508,10 +510,10 @@
                                 }
                                 <h4>@ab.Title</h4>
                                 <FluentStack Orientation="Orientation.Vertical" VerticalGap="3" Width="100%">
-                                    <span style="font-size: 0.8rem; color: #a78bfa;"><strong>@ab.Type</strong> · Recall @ab.RecallCost</span>
+                                    <span class="text-caption text-accent"><strong>@ab.Type</strong> · Recall @ab.RecallCost</span>
                                 </FluentStack>
                                 <FluentDivider Role="DividerRole.Presentation" />
-                                <div style="font-size: 0.8rem; color: #94a3b8; max-height: 120px; overflow-y: auto;">
+                                <div class="text-caption" style="max-height: 120px; overflow-y: auto;">
                                     @ab.FeatureDescription.ToMarkdownHtml()
                                 </div>
                             </FluentCard>
@@ -526,12 +528,12 @@
             @if (_currentStep >= 6)
             {
             <h3>Pronouns</h3>
-            <p style="color: #9ca3af; margin-bottom: 1.5rem;">How should others refer to your character?</p>
+            <p class="text-desc mb-step">How should others refer to your character?</p>
             <FluentTextField @bind-Value="_pronouns" Label="Pronouns" Placeholder="e.g. they/them, she/her, he/him" Style="width: 100%; margin-bottom: 2rem;" />
 
             <FluentDivider Role="DividerRole.Presentation" />
             <h3>Character Description</h3>
-            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Optional details to bring your character to life.</p>
+            <p class="text-desc mb-step">Optional details to bring your character to life.</p>
             <FluentStack Orientation="Orientation.Vertical" VerticalGap="12" Width="100%">
                 <FluentTextField @bind-Value="_descriptionEyes" Label="Eyes like" Placeholder="e.g. carnations, earth, endless ocean, fire, ivy..." Style="width: 100%;" />
                 <FluentTextField @bind-Value="_descriptionBody" Label="Body that's" Placeholder="e.g. broad, carved, curvy, lanky, rotund..." Style="width: 100%;" />
@@ -546,12 +548,12 @@
             @if (_currentStep >= 7)
             {
             <h3>Review Your Character</h3>
-            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Check all details before heading out on your adventure.</p>
+            <p class="text-desc mb-step">Check all details before heading out on your adventure.</p>
 
             <FluentGrid Spacing="3">
                 <FluentGridItem Xs="12" Md="6">
                     <FluentCard>
-                        <h4 style="color: #a78bfa; border-bottom: 1px solid rgba(167, 139, 250, 0.15); padding-bottom: 8px;">General</h4>
+                        <h4 class="title-review">General</h4>
                         <p><strong>Name:</strong> @_characterName</p>
                         @if (!string.IsNullOrWhiteSpace(_pronouns))
                         {
@@ -593,11 +595,11 @@
 
                 <FluentGridItem Xs="12" Md="6">
                     <FluentCard>
-                        <h4 style="color: #a78bfa; border-bottom: 1px solid rgba(167, 139, 250, 0.15); padding-bottom: 8px;">Traits</h4>
+                        <h4 class="title-review">Traits</h4>
                         @foreach (var slot in _traitSlots)
                         {
                             var val = slot.AssignedChip?.Value ?? 0;
-                            var color = val > 0 ? "#10b981" : val < 0 ? "#ef4444" : "#9ca3af";
+                            var color = val > 0 ? "var(--dh-positive)" : val < 0 ? "var(--dh-negative)" : "var(--dh-neutral)";
                             <p><strong>@slot.Key:</strong> <FluentBadge Appearance="Appearance.Neutral" Color="@color">@FormatModifier(val)</FluentBadge></p>
                         }
                     </FluentCard>
@@ -605,7 +607,7 @@
 
                 <FluentGridItem Xs="12" Md="6">
                     <FluentCard>
-                        <h4 style="color: #a78bfa; border-bottom: 1px solid rgba(167, 139, 250, 0.15); padding-bottom: 8px;">Calculated Stats</h4>
+                        <h4 class="title-review">Calculated Stats</h4>
                         <p><strong>Evasion:</strong> @CalculateEvasion()</p>
                         <p><strong>Armor Score:</strong> @(_selectedArmor?.ArmorScore ?? 0)</p>
                         <p><strong>Damage Thresholds:</strong><br />
@@ -617,7 +619,7 @@
 
                 <FluentGridItem Xs="12" Md="6">
                     <FluentCard>
-                        <h4 style="color: #a78bfa; border-bottom: 1px solid rgba(167, 139, 250, 0.15); padding-bottom: 8px;">Resources</h4>
+                        <h4 class="title-review">Resources</h4>
                         <p><strong>Hit Points:</strong> @(_selectedClass?.BaseHealth ?? 5) / @(_selectedClass?.BaseHealth ?? 5)</p>
                         <p><strong>Stress:</strong> 0 / 6</p>
                         <p><strong>Hope:</strong> 2 / 6</p>
@@ -632,14 +634,14 @@
                 {
                     <FluentGridItem Xs="12">
                         <FluentCard>
-                            <h4 style="color: #a78bfa; border-bottom: 1px solid rgba(167, 139, 250, 0.15); padding-bottom: 8px;">Background</h4>
+                            <h4 class="title-review">Background</h4>
                             @foreach (var entry in _backgroundEntries)
                             {
                                 if (!string.IsNullOrWhiteSpace(entry.Question) || !string.IsNullOrWhiteSpace(entry.Answer))
                                 {
                                     <p style="margin-bottom: 8px;">
                                         <strong>@entry.Question</strong><br />
-                                        <span style="color: #9ca3af;">@entry.Answer</span>
+                                        <span class="text-desc">@entry.Answer</span>
                                     </p>
                                 }
                             }
@@ -649,7 +651,7 @@
 
                 <FluentGridItem Xs="12">
                     <FluentCard>
-                        <h4 style="color: #a78bfa; border-bottom: 1px solid rgba(167, 139, 250, 0.15); padding-bottom: 8px;">Equipment</h4>
+                        <h4 class="title-review">Equipment</h4>
                         <p><strong>Equipped Armor:</strong> @(_selectedArmor?.Name ?? "None")</p>
                         <p><strong>Primary Weapon:</strong> @(_selectedPrimaryWeapon?.Name ?? "None")</p>
                         @if (_selectedSecondaryWeapon != null)
@@ -681,7 +683,7 @@
                 {
                     <FluentGridItem Xs="12">
                         <FluentCard>
-                            <h4 style="color: #a78bfa; border-bottom: 1px solid rgba(167, 139, 250, 0.15); padding-bottom: 8px;">Character Description</h4>
+                            <h4 class="title-review">Character Description</h4>
                             @foreach (var (label, val) in descFields)
                             {
                                 if (!string.IsNullOrWhiteSpace(val))

@@ -34,6 +34,7 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
             .Include(c => c.EquippedArmor)
             .Include(c => c.PrimaryWeapon)
             .Include(c => c.SecondaryWeapon)
+            .Include(c => c.DomainAbilities)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
@@ -83,12 +84,15 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
             existing.Hope = character.Hope;
             existing.ArmorSlots = character.ArmorSlots;
 
-            // Update many-to-many DomainAbilities
-            existing.DomainAbilities.Clear();
-            foreach (var ab in character.DomainAbilities)
+            // Update many-to-many DomainAbilities (only if provided)
+            if (character.DomainAbilities.Count > 0)
             {
-                context.Entry(ab).State = EntityState.Unchanged;
-                existing.DomainAbilities.Add(ab);
+                existing.DomainAbilities.Clear();
+                foreach (var ab in character.DomainAbilities)
+                {
+                    context.Entry(ab).State = EntityState.Unchanged;
+                    existing.DomainAbilities.Add(ab);
+                }
             }
 
             // Update foreign keys

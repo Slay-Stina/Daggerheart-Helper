@@ -1,0 +1,40 @@
+.panel-section {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.panel-section:last-child {
+    border-bottom: none;
+}
+
+.panel-section-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--dh-purple);
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+}
+
+.panel-item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.panel-item-btn {
+    border-radius: 6px;
+    padding: 8px 12px !important;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.panel-item-btn:hover {
+    background: color-mix(in srgb, var(--dh-purple) 8%, transparent);
+    border-color: color-mix(in srgb, var(--dh-purple) 20%, transparent);
+}
+
+.panel-common-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}

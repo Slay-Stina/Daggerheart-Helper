@@ -1,5 +1,6 @@
 @page "/Characters"
 @inject ICharacterService CharacterService
+@inject IDialogService DialogService
 @inject NavigationManager NavigationManager
 
 <PageTitle>My Characters</PageTitle>
@@ -37,7 +38,7 @@
         <div class="character-grid animate-fade">
             @foreach (var ch in _characters)
             {
-                <div class="character-card">
+                <div class="character-card" @onclick="@(() => NavigateTo(ch.Id))" @onclick:stopPropagation>
                     <div class="card-accent"></div>
                     <div class="card-header">
                         <div class="char-title">
@@ -45,10 +46,10 @@
                             <span class="char-class">Level @ch.Level @ch.GameClass.Name (@ch.Subclass.Name)</span>
                         </div>
                         <FluentButton Appearance="Appearance.Stealth" 
-                                      IconStart="@(new Icons.Filled.Size20.Delete())" 
-                                      OnClick="@(() => ConfirmDelete(ch.Id))" 
-                                      Title="Delete character"
-                                      Style="color: #ef4444;" />
+                                       IconStart="@(new Icons.Filled.Size20.Delete())" 
+                                       OnClick="@(() => ConfirmDelete(ch.Id))" 
+                                       Title="Delete character"
+                                       Style="color: var(--dh-negative);" />
                     </div>
 
                     <div class="card-body">
@@ -188,9 +189,22 @@
 
     private async Task ConfirmDelete(Guid id)
     {
-        // Simple alert confirmation, can be replaced by Fluent Dialog
-        await CharacterService.DeleteAsync(id);
-        await LoadCharacters();
+        var dialog = await DialogService.ShowConfirmationAsync(
+            "Are you sure you want to delete this character? This action cannot be undone.",
+            primaryText: "Delete",
+            secondaryText: "Cancel",
+            title: "Delete Character");
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            await CharacterService.DeleteAsync(id);
+            await LoadCharacters();
+        }
+    }
+
+    private void NavigateTo(Guid id)
+    {
+        NavigationManager.NavigateTo($"/character/{id}");
     }
 
     private string FormatVal(int val)
