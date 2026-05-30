@@ -1,3 +1,4 @@
+using Application.Dtos;
 using Core.Entities;
 using Core.Enums;
 
@@ -10,4 +11,6 @@ public interface IWeaponCatalogQueries
     List<Weapon> GetByFeatureId(Guid featureId);
     List<Weapon> GetByTier(int tier);
     List<Weapon> GetByTraitType(TraitType trait);
+
+    Task<List<WeaponSummary>> GetSummariesByTierAsync(int tier);
 }

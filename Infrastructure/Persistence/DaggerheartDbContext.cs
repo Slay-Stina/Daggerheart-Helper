@@ -59,6 +59,15 @@ public class DaggerheartDbContext(DbContextOptions<DaggerheartDbContext> options
             entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
             entity.Property(x => x.Level).HasDefaultValue(1);
             entity.Ignore(x => x.Proficiency);
+            entity.Property(x => x.Experiences)
+                .HasConversion<JsonStringListConverter>()
+                .Metadata.SetValueComparer(GetListValueComparer());
+            entity.Property(x => x.BackgroundAnswers)
+                .HasConversion<JsonStringListConverter>()
+                .Metadata.SetValueComparer(GetListValueComparer());
+            entity.Property(x => x.Inventory)
+                .HasConversion<JsonStringListConverter>()
+                .Metadata.SetValueComparer(GetListValueComparer());
 
             entity.OwnsOne(x => x.Traits, owned =>
             {
@@ -134,6 +143,18 @@ public class DaggerheartDbContext(DbContextOptions<DaggerheartDbContext> options
                 .WithMany()
                 .HasForeignKey(x => x.SecondaryWeaponId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasMany(x => x.DomainAbilities)
+                .WithMany()
+                .UsingEntity<Dictionary<string, object>>(
+                    "CharacterDomainAbility",
+                    r => r.HasOne<Ability>().WithMany().HasForeignKey("AbilityId").OnDelete(DeleteBehavior.Cascade),
+                    l => l.HasOne<Character>().WithMany().HasForeignKey("CharacterId").OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("CharacterId", "AbilityId");
+                        j.ToTable("CharacterDomainAbilities");
+                    });
             
             entity.HasOne(x => x.Ancestry)
                 .WithMany()

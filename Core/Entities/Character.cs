@@ -7,6 +7,14 @@ public class Character
     public Guid Id { get; set; }
     public int Level { get; set; } = 1;
     public string Name { get; set; } = string.Empty;
+    public string? Pronouns { get; set; }
+
+    // Character Description
+    public string? DescriptionEyes { get; set; }
+    public string? DescriptionBody { get; set; }
+    public string? DescriptionClothes { get; set; }
+    public string? DescriptionSkin { get; set; }
+    public string? DescriptionAttitude { get; set; }
 
     public Guid GameClassId { get; set; }
     public GameClass GameClass { get; set; } = null!;
@@ -26,7 +34,13 @@ public class Character
     public DamageThresholds DamageThresholds { get; set; } = new(0,0);
     public int Evasion { get; set; }
     public int ProficiencyBonus { get; set; }
-    public int Proficiency => (Level + 2) / 3;
+    public int Proficiency => 1 + (Level >= 2 ? 1 : 0) + (Level >= 5 ? 1 : 0) + (Level >= 8 ? 1 : 0) + ProficiencyBonus;
+
+    public List<string> Experiences { get; set; } = new();
+    public List<string> BackgroundAnswers { get; set; } = new();
+    public List<string> Inventory { get; set; } = new();
+    public int GoldHandfuls { get; set; } = 1;
+    public string? SpellFocus { get; set; }
 
     public Guid? EquippedArmorId { get; set; }
     public Armor? EquippedArmor { get; set; }
@@ -35,9 +49,11 @@ public class Character
     public Guid? SecondaryWeaponId { get; set; }
     public Weapon? SecondaryWeapon { get; set; }
     
+    public List<Ability> DomainAbilities { get; set; } = new();
+
     public ResourcePool HitPoints { get; set; } = new(5, 5);
     public ResourcePool Stress { get; set; } = new(0, 5);
     public ResourcePool Hope { get; set; } = new(0, 5);
-    public ResourcePool ArmorSlots { get; set; } = new(0, 5);
+    public ResourcePool ArmorSlots { get; set; } = new(0, 0);
 
 }

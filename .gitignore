@@ -64,3 +64,7 @@ nunit-agent.*
 
 # Mac
 .DS_Store
+
+# Database
+*.db
+*.sqlite

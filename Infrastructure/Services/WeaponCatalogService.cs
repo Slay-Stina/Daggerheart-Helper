@@ -1,3 +1,4 @@
+using Application.Dtos;
 using Application.Services;
 using Core.Entities;
 using Core.Enums;
@@ -21,4 +22,19 @@ public sealed class WeaponCatalogQueries(DaggerheartDbContext context) : IWeapon
     public Weapon GetById(Guid id) =>
         _weapons.AsNoTracking().FirstOrDefault(x => x.Id == id)
         ?? throw new KeyNotFoundException($"Weapon '{id}' was not found.");
+
+    public Task<List<WeaponSummary>> GetSummariesByTierAsync(int tier) =>
+        _weapons
+            .AsNoTracking()
+            .Where(w => w.Tier == tier)
+            .Select(w => new WeaponSummary(
+                w.Id,
+                w.Name,
+                w.Tier,
+                w.Damage,
+                w.Burden,
+                w.RangeType,
+                w.Trait,
+                w.Category))
+            .ToListAsync();
 }

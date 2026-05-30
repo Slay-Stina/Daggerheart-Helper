@@ -1,6 +1,1224 @@
 @page "/CharacterCreator"
-<h3>Character Creator</h3>
+@inject IHeritageCatalogQueries HeritageQueries
+@inject IClassCatalogQueries ClassQueries
+@inject IArmorCatalogQueries ArmorQueries
+@inject IWeaponCatalogQueries WeaponQueries
+@inject IAbilityCatalogQueries AbilityQueries
+@inject ICharacterService CharacterService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create Character</PageTitle>
+
+<FluentCard Style="max-width: 960px; margin: 2rem auto; padding: 2rem;">
+    <FluentWizard Value="@_currentStep" ValueChanged="@(i => _currentStep = i)" OnFinish="SaveCharacter" StepperPosition="StepperPosition.Top" Width="100%" Height="auto" Border="WizardBorder.None" StepperBulletSpace="140px">
+        <Steps>
+
+        <FluentWizardStep Label="Class" Summary="Pick a class and subclass" OnChange="@ValidateStep">
+            <h3>Choose Class</h3>
+            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Your class defines your powers, health & evasion bases, and magical domains.</p>
+            @if (_classes.Count == 0)
+            {
+                <FluentGrid Spacing="3">
+                    @for (int i = 0; i < 6; i++)
+                    {
+                        <FluentGridItem Xs="12" Sm="6" Md="4">
+                            <FluentSkeleton Style="height:260px; width:100%" />
+                        </FluentGridItem>
+                    }
+                </FluentGrid>
+            }
+            else
+            {
+            <FluentGrid Spacing="3">
+                @foreach (var cls in _classes)
+                {
+                    <FluentGridItem Xs="12" Sm="6" Md="4">
+                        <FluentCard @onclick="() => SelectClass(cls)" Style="cursor: pointer;">
+                            @if (_selectedClass == cls)
+                            {
+                                <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
+                            }
+                            <h4>@cls.Name</h4>
+                            <p style="color: #cbd5e1; font-size: 0.85rem; line-height: 1.45;">@cls.Description</p>
+                            <FluentStack Orientation="Orientation.Vertical" VerticalGap="5" Width="100%">
+                                <span><strong>Domains:</strong> @cls.Domain1 & @cls.Domain2</span>
+                                <span><strong>Base Evasion:</strong> @cls.BaseEvasion | <strong>Base HP:</strong> @cls.BaseHealth</span>
+                            </FluentStack>
+                            @if (cls.ClassFeatures.Any())
+                            {
+                                <FluentDivider Role="DividerRole.Presentation" />
+                                <div style="font-size: 0.8rem;">
+                                    @foreach (var feat in cls.ClassFeatures)
+                                    {
+                                        <div style="color: #94a3b8; margin-top: 4px;">
+                                            <span style="color: #d8b4fe; font-weight: 600;">@feat.Name:</span> @feat.Description.ToMarkdownHtml()
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            <FluentDivider Role="DividerRole.Presentation" />
+                            <div style="font-size: 0.8rem;">
+                                <strong>Hope Ability:</strong>
+                                <div style="color: #94a3b8; margin-top: 4px;">
+                                    <span style="color: #fbbf24; font-weight: 600;">@cls.HopeFeature.Name:</span> @cls.HopeFeature.Description.ToMarkdownHtml()
+                                </div>
+                            </div>
+                        </FluentCard>
+                    </FluentGridItem>
+                }
+            </FluentGrid>
+            }
+            @if (_selectedClass != null)
+            {
+                <FluentDivider Role="DividerRole.Presentation" />
+                <FluentTextField @bind-Value="_characterName" Label="Character Name" Placeholder="E.g. Vaelen" Required="true" Style="width: 100%; margin-bottom: 1.5rem;" />
+                <FluentDivider Role="DividerRole.Presentation" />
+                <h3>Choose Subclass for @_selectedClass.Name</h3>
+                <p style="color: #9ca3af; margin-bottom: 1.5rem;">Refines your class and grants your first Foundation ability.</p>
+
+                @if (_isLoadingSubclasses)
+                {
+                    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="12">
+                        <FluentSkeleton Style="height:180px; width:280px" />
+                        <FluentSkeleton Style="height:180px; width:280px" />
+                        <FluentSkeleton Style="height:180px; width:280px" />
+                    </FluentStack>
+                }
+                else
+                {
+                    <FluentGrid Spacing="3">
+                        @foreach (var sub in _selectedSubclasses)
+                        {
+                            <FluentGridItem Xs="12" Sm="6" Md="4">
+                                <FluentCard @onclick="() => SelectSubclass(sub)" Style="cursor: pointer;">
+                                    @if (_selectedSubclass == sub)
+                                    {
+                                        <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
+                                    }
+                                    <h4>@sub.Name</h4>
+                                    <p style="color: #cbd5e1; font-size: 0.85rem;">@sub.Description</p>
+                                    <FluentDivider Role="DividerRole.Presentation" />
+                                    <div style="font-size: 0.8rem;">
+                                        <strong>Foundation Ability:</strong>
+                                        <div style="color: #94a3b8; margin-top: 4px;">
+                                            <span style="color: #d8b4fe; font-weight: 600;">@sub.Foundation.Name:</span> @sub.Foundation.Description.ToMarkdownHtml()
+                                        </div>
+                                    </div>
+                                </FluentCard>
+                            </FluentGridItem>
+                        }
+                    </FluentGrid>
+                }
+            }
+        </FluentWizardStep>
+
+        <FluentWizardStep Label="Heritage" Summary="Ancestry & community" OnChange="@ValidateStep">
+            @if (_currentStep >= 1)
+            {
+            <h3>Choose Ancestry</h3>
+            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Determines your physical form and unique physiological traits.</p>
+            @if (_ancestries.Count == 0)
+            {
+                <FluentGrid Spacing="3">
+                    @for (int i = 0; i < 6; i++)
+                    {
+                        <FluentGridItem Xs="12" Sm="6" Md="4">
+                            <FluentSkeleton Style="height:160px; width:100%" />
+                        </FluentGridItem>
+                    }
+                </FluentGrid>
+            }
+            else
+            {
+            <FluentGrid Spacing="3">
+                @foreach (var anc in _ancestries)
+                {
+                    <FluentGridItem Xs="12" Sm="6" Md="4">
+                        <FluentCard @onclick="() => SelectAncestry(anc)" Style="cursor: pointer;">
+                            @if (_selectedAncestry == anc)
+                            {
+                                <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
+                            }
+                            <h4>@anc.Name</h4>
+                            <p style="color: #cbd5e1; font-size: 0.85rem;">@anc.Description</p>
+                            @if (anc.Features.Any())
+                            {
+                                <FluentDivider Role="DividerRole.Presentation" />
+                                <div style="font-size: 0.8rem;">
+                                    <strong>Abilities:</strong>
+                                    @foreach (var feat in anc.Features)
+                                    {
+                                        <div style="color: #94a3b8; margin-top: 4px;">
+                                            <span style="color: #d8b4fe; font-weight: 600;">@feat.Name:</span> @feat.Description.ToMarkdownHtml()
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </FluentCard>
+                    </FluentGridItem>
+                }
+            </FluentGrid>
+            }
+            <FluentDivider Role="DividerRole.Presentation" />
+            <h3>Choose Community</h3>
+            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Where your character grew up and the cultural abilities they carry.</p>
+            @if (_communities.Count == 0)
+            {
+                <FluentGrid Spacing="3">
+                    @for (int i = 0; i < 6; i++)
+                    {
+                        <FluentGridItem Xs="12" Sm="6" Md="4">
+                            <FluentSkeleton Style="height:160px; width:100%" />
+                        </FluentGridItem>
+                    }
+                </FluentGrid>
+            }
+            else
+            {
+            <FluentGrid Spacing="3">
+                @foreach (var com in _communities)
+                {
+                    <FluentGridItem Xs="12" Sm="6" Md="4">
+                        <FluentCard @onclick="() => SelectCommunity(com)" Style="cursor: pointer;">
+                            @if (_selectedCommunity == com)
+                            {
+                                <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
+                            }
+                            <h4>@com.Name</h4>
+                            <p style="color: #cbd5e1; font-size: 0.85rem;">@com.Description</p>
+                            @if (com.Features.Any())
+                            {
+                                <FluentDivider Role="DividerRole.Presentation" />
+                                <div style="font-size: 0.8rem;">
+                                    <strong>Community Ability:</strong>
+                                    @foreach (var feat in com.Features)
+                                    {
+                                        <div style="color: #94a3b8; margin-top: 4px;">
+                                            <span style="color: #d8b4fe; font-weight: 600;">@feat.Name:</span> @feat.Description.ToMarkdownHtml()
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </FluentCard>
+                    </FluentGridItem>
+                }
+            </FluentGrid>
+            }
+            }
+        </FluentWizardStep>
+
+        <FluentWizardStep Label="Traits" Summary="Assign trait bonuses" OnChange="@ValidateStep">
+            @if (_currentStep >= 2)
+            {
+            <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.SpaceBetween" VerticalAlignment="VerticalAlignment.Center" Style="margin-bottom: 0.5rem;">
+                <h3 style="margin: 0;">Assign Trait Bonuses</h3>
+                <FluentButton Appearance="Appearance.Accent" OnClick="@AutoAssignTraits" Disabled="@(_pool.Count < 6)">
+                    Auto-assign for @(_selectedClass?.Name ?? "class")
+                </FluentButton>
+            </FluentStack>
+            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Drag each bonus to a trait, or click <strong>Auto-assign</strong> to use the class's suggested distribution.</p>
+
+            <FluentDragContainer TItem="BonusChip">
+                <FluentDropZone TItem="BonusChip" Droppable="true" OnDropEnd="@HandleDropOnPool">
+                    <FluentCard Style="margin-bottom: 1.5rem; padding: 1rem;">
+                        <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.Center" HorizontalGap="12" VerticalGap="8" Wrap="true">
+                            @if (_pool.Count == 0)
+                            {
+                                <FluentBadge Appearance="Appearance.Accent">✓ All bonuses assigned</FluentBadge>
+                            }
+                            @foreach (var bonus in _pool)
+                            {
+                                <FluentDropZone TItem="BonusChip" Draggable="true" Droppable="false" Item="@bonus">
+                                    <div style="display: inline-block; padding: 8px 20px; background: rgba(167, 139, 250, 0.15); border: 1px solid rgba(167, 139, 250, 0.4); border-radius: 8px; cursor: grab; user-select: none; font-weight: 600; font-size: 1.05rem;">
+                                        @bonus.Label
+                                    </div>
+                                </FluentDropZone>
+                            }
+                        </FluentStack>
+                    </FluentCard>
+                </FluentDropZone>
+
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="8" Width="100%">
+                    @foreach (var slot in _traitSlots)
+                    {
+                        var s = slot;
+                        <FluentDropZone TItem="BonusChip"
+                                        Draggable="@(s.AssignedChip != null)"
+                                        Droppable="true"
+                                        Item="@s.AssignedChip"
+                                        OnDropEnd="@(e => HandleDropOnTrait(e, s.Key))">
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(25, 25, 45, 0.5); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 10px;">
+                                <span style="font-weight: 600; color: #f0f0f5;">@s.DisplayName</span>
+                                @if (s.AssignedChip != null)
+                                {
+                                    <FluentBadge Appearance="Appearance.Accent" Style="font-size: 1rem; padding: 4px 14px;">@s.AssignedChip.Label</FluentBadge>
+                                }
+                                else
+                                {
+                                    <span style="opacity: 0.3; font-size: 0.9rem;">Drop a bonus here</span>
+                                }
+                            </div>
+                        </FluentDropZone>
+                    }
+                </FluentStack>
+            </FluentDragContainer>
+            }
+        </FluentWizardStep>
+
+        <FluentWizardStep Label="Equipment" Summary="Armor & weapons" OnChange="@ValidateStep">
+            @if (_currentStep >= 3)
+            {
+            @if (_equipmentTask is { IsCompleted: false })
+            {
+                <FluentStack Orientation="Orientation.Vertical" VerticalAlignment="VerticalAlignment.Center" Style="padding: 3rem 0; text-align: center;" VerticalGap="16">
+                    <FluentProgress />
+                    <span style="color: #9ca3af;">Loading equipment…</span>
+                </FluentStack>
+            }
+            else
+            {
+                <h3>Choose Armor</h3>
+                <p style="color: #9ca3af; margin-bottom: 1.5rem;">Your armor sets your protection (Armor Score) and damage thresholds.</p>
+                <FluentGrid Spacing="3">
+                    @foreach (var arm in _armors)
+                    {
+                        <FluentGridItem Xs="12" Sm="6" Md="4">
+                            <FluentCard @onclick="() => SelectArmor(arm)" Style="cursor: pointer;">
+                                @if (_selectedArmor == arm)
+                                {
+                                    <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
+                                }
+                                <h4>@arm.Name</h4>
+                                <FluentStack Orientation="Orientation.Vertical" VerticalGap="3" Width="100%">
+                                    <span style="font-size: 0.85rem; color: #cbd5e1;"><strong>Armor Score:</strong> @arm.ArmorScore</span>
+                                    <span style="font-size: 0.85rem; color: #cbd5e1;"><strong>Thresholds:</strong> @arm.DamageThresholds.Major / @arm.DamageThresholds.Severe</span>
+                                </FluentStack>
+                                @if (arm.Feature != null)
+                                {
+                                    <FluentDivider Role="DividerRole.Presentation" />
+                                    <div style="font-size: 0.78rem; color: #a78bfa; padding-top: 8px;">
+                                        <strong>Feature:</strong> @arm.Feature.Description.ToMarkdownHtml()
+                                    </div>
+                                }
+                            </FluentCard>
+                        </FluentGridItem>
+                    }
+                </FluentGrid>
+
+                <FluentDivider Role="DividerRole.Presentation" />
+                <h3>Choose Primary Weapon (Tier 1)</h3>
+                <p style="color: #9ca3af; margin-bottom: 1.5rem;">Your main attack weapon.</p>
+                <FluentGrid Spacing="3">
+                    @foreach (var wp in _primaryWeapons)
+                    {
+                        <FluentGridItem Xs="12" Sm="6" Md="4">
+                            <FluentCard @onclick="() => SelectPrimaryWeapon(wp)" Style="cursor: pointer;">
+                                @if (_selectedPrimaryWeapon == wp)
+                                {
+                                    <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
+                                }
+                                <h4>@wp.Name</h4>
+                                <FluentStack Orientation="Orientation.Vertical" VerticalGap="3" Width="100%">
+                                    <span style="font-size: 0.85rem; color: #cbd5e1;"><strong>Damage:</strong> @wp.Damage.NumberOfDice d @wp.Damage.NumberOfSides @(wp.Damage.Bonus > 0 ? " + " + wp.Damage.Bonus : "") (@wp.Damage.Type)</span>
+                                    <span style="font-size: 0.85rem; color: #cbd5e1;"><strong>Range:</strong> @wp.RangeType | <strong>Requires:</strong> @wp.Trait</span>
+                                    <span style="font-size: 0.85rem; color: #cbd5e1;"><strong>Hands:</strong> @wp.Burden</span>
+                                </FluentStack>
+                            </FluentCard>
+                        </FluentGridItem>
+                    }
+                </FluentGrid>
+
+                @if (_selectedPrimaryWeapon is { Burden: Burden.OneHanded })
+                {
+                    <FluentDivider Role="DividerRole.Presentation" />
+                    <h3>Choose Secondary Weapon (Optional, 1-handed)</h3>
+                    <p style="color: #9ca3af; margin-bottom: 1.5rem;">An extra one-handed weapon in your free hand.</p>
+                    <FluentGrid Spacing="3">
+                        <FluentGridItem Xs="12" Sm="6" Md="4">
+                            <FluentCard @onclick="() => SelectSecondaryWeapon(null)" Style="cursor: pointer;">
+                                @if (_selectedSecondaryWeapon == null)
+                                {
+                                    <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
+                                }
+                                <h4>No secondary weapon</h4>
+                                <p style="color: #cbd5e1; font-size: 0.85rem;">Fight with only one weapon.</p>
+                            </FluentCard>
+                        </FluentGridItem>
+                        @foreach (var wp in _secondaryWeapons)
+                        {
+                            <FluentGridItem Xs="12" Sm="6" Md="4">
+                                <FluentCard @onclick="() => SelectSecondaryWeapon(wp)" Style="cursor: pointer;">
+                                    @if (_selectedSecondaryWeapon == wp)
+                                    {
+                                        <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
+                                    }
+                                    <h4>@wp.Name</h4>
+                                    <FluentStack Orientation="Orientation.Vertical" VerticalGap="3" Width="100%">
+                                        <span style="font-size: 0.85rem; color: #cbd5e1;"><strong>Damage:</strong> @wp.Damage.NumberOfDice d @wp.Damage.NumberOfSides @(wp.Damage.Bonus > 0 ? " + " + wp.Damage.Bonus : "") (@wp.Damage.Type)</span>
+                                        <span style="font-size: 0.85rem; color: #cbd5e1;"><strong>Range:</strong> @wp.RangeType</span>
+                                    </FluentStack>
+                                </FluentCard>
+                            </FluentGridItem>
+                        }
+                    </FluentGrid>
+                }
+
+                <FluentDivider Role="DividerRole.Presentation" />
+                <h3>Starting Inventory</h3>
+                <p style="color: #9ca3af; margin-bottom: 1rem;">Basic supplies are automatically added to your pack.</p>
+                <FluentStack Orientation="Orientation.Horizontal" Wrap="true" HorizontalGap="8" VerticalGap="5" Style="margin-bottom: 1.5rem;">
+                    <FluentBadge Appearance="Appearance.Neutral">✅ Torch</FluentBadge>
+                    <FluentBadge Appearance="Appearance.Neutral">✅ 50 ft rope</FluentBadge>
+                    <FluentBadge Appearance="Appearance.Neutral">✅ Basic supplies</FluentBadge>
+                    <FluentBadge Appearance="Appearance.Neutral">✅ Gold (1 handful)</FluentBadge>
+                </FluentStack>
+
+                <FluentDivider Role="DividerRole.Presentation" />
+                <h3>Potion Choice</h3>
+                <p style="color: #9ca3af; margin-bottom: 1rem;">Choose one potion to start with.</p>
+                <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="12" Style="margin-bottom: 1.5rem;">
+                    <FluentCard @onclick="() => _selectedPotion = _selectedPotion == _potionHealth ? null : _potionHealth" Style="cursor: pointer; padding: 12px 20px;">
+                        @if (_selectedPotion == _potionHealth)
+                        {
+                            <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
+                        }
+                        <span>Minor Health Potion</span>
+                        <p style="color: #9ca3af; font-size: 0.8rem;">Clear 1d4 HP</p>
+                    </FluentCard>
+                    <FluentCard @onclick="() => _selectedPotion = _selectedPotion == _potionStamina ? null : _potionStamina" Style="cursor: pointer; padding: 12px 20px;">
+                        @if (_selectedPotion == _potionStamina)
+                        {
+                            <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
+                        }
+                        <span>Minor Stamina Potion</span>
+                        <p style="color: #9ca3af; font-size: 0.8rem;">Clear 1d4 Stress</p>
+                    </FluentCard>
+                </FluentStack>
+
+                @if (_classSetupData?.ClassItems.Count > 0)
+                {
+                    <FluentDivider Role="DividerRole.Presentation" />
+                    <h3>Class Item</h3>
+                    <p style="color: #9ca3af; margin-bottom: 1rem;">Choose one signature item.</p>
+                    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="12" Style="margin-bottom: 1.5rem;">
+                        @foreach (var item in _classSetupData.ClassItems)
+                        {
+                            <FluentCard @onclick="() => _selectedClassItem = _selectedClassItem == item ? null : item" Style="cursor: pointer; padding: 12px 20px;">
+                                @if (_selectedClassItem == item)
+                                {
+                                    <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
+                                }
+                                <span>@item</span>
+                            </FluentCard>
+                        }
+                    </FluentStack>
+                }
+
+                @if (_selectedClass is { Name: "Bard" } or { Name: "Wizard" })
+                {
+                    <FluentDivider Role="DividerRole.Presentation" />
+                    <h3>Spell Focus</h3>
+                    <p style="color: #9ca3af; margin-bottom: 1rem;">Decide what you carry your spells in.</p>
+                    <FluentTextField @bind-Value="_spellFocus" Label="Spell Focus" Placeholder="e.g. songbook, journal, large tomes, tarot cards..." Style="width: 100%;" />
+                }
+            }
+            }
+        </FluentWizardStep>
+
+        <FluentWizardStep Label="Background" Summary="Experiences & questions" OnChange="@ValidateStep">
+            @if (_currentStep >= 4)
+            {
+            <h3>Experiences</h3>
+            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Define your character's life experiences. Each gives <strong>+2</strong> on related dice rolls when you spend Hope.</p>
+
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="12" Width="100%" Style="margin-bottom: 2rem;">
+                <FluentTextField @bind-Value="_experience1" Label="Experience 1 (+2)" Placeholder="E.g. Street urchin, Temple acolyte" Style="width: 100%;" />
+                <FluentTextField @bind-Value="_experience2" Label="Experience 2 (+2)" Placeholder="E.g. Bounty hunter, Arcane scholar" Style="width: 100%;" />
+            </FluentStack>
+
+            @if (_classSetupData?.BackgroundQuestions.Any() == true)
+            {
+                <FluentDivider Role="DividerRole.Presentation" />
+                <h3>Background Questions for @_selectedClass!.Name</h3>
+                <p style="color: #9ca3af; margin-bottom: 1.5rem;">Edit each question freely, then write your answer below it.</p>
+
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="16" Width="100%">
+                    @foreach (var entry in _backgroundEntries)
+                    {
+                        <FluentStack Orientation="Orientation.Vertical" VerticalGap="6" Width="100%">
+                            <FluentTextField @bind-Value="entry.Question" Label="Question" Style="width: 100%;" />
+                            <FluentTextArea @bind-Value="entry.Answer" Label="Answer" Style="width: 100%;" Rows="3" Resize="TextAreaResize.Vertical" />
+                        </FluentStack>
+                    }
+                </FluentStack>
+            }
+            }
+        </FluentWizardStep>
+
+        <FluentWizardStep Label="Domains" Summary="Choose domain cards" OnChange="@ValidateStep">
+            @if (_currentStep >= 5)
+            {
+            <h3>Choose Domain Cards</h3>
+            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Select one domain ability for each of your class's domains. These are your core magical powers.</p>
+
+            @if (_isLoadingDomains)
+            {
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="16">
+                    <FluentProgress />
+                    <span style="color: #9ca3af;">Loading domain abilities…</span>
+                </FluentStack>
+            }
+            else
+            {
+                <p style="color: #9ca3af; margin-bottom: 1rem;">Selected: <strong>@(_selectedDomainAbilities.Count) / 2</strong> domain card(s). You may take one from each domain or two from the same domain.</p>
+
+                <h4 style="color: #c084fc;">@_selectedClass?.Domain1</h4>
+                <FluentGrid Spacing="3">
+                    @foreach (var ab in _domainAbilities1)
+                    {
+                        <FluentGridItem Xs="12" Sm="6" Md="4">
+                            <FluentCard @onclick="() => ToggleDomainAbility(ab)" Style="cursor: pointer;">
+                                @if (_selectedDomainAbilities.Contains(ab))
+                                {
+                                    <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
+                                }
+                                <h4>@ab.Title</h4>
+                                <FluentStack Orientation="Orientation.Vertical" VerticalGap="3" Width="100%">
+                                    <span style="font-size: 0.8rem; color: #a78bfa;"><strong>@ab.Type</strong> · Recall @ab.RecallCost</span>
+                                </FluentStack>
+                                <FluentDivider Role="DividerRole.Presentation" />
+                                <div style="font-size: 0.8rem; color: #94a3b8; max-height: 120px; overflow-y: auto;">
+                                    @ab.FeatureDescription.ToMarkdownHtml()
+                                </div>
+                            </FluentCard>
+                        </FluentGridItem>
+                    }
+                </FluentGrid>
+
+                <FluentDivider Role="DividerRole.Presentation" />
+                <h4 style="color: #c084fc;">@_selectedClass?.Domain2</h4>
+                <FluentGrid Spacing="3">
+                    @foreach (var ab in _domainAbilities2)
+                    {
+                        <FluentGridItem Xs="12" Sm="6" Md="4">
+                            <FluentCard @onclick="() => ToggleDomainAbility(ab)" Style="cursor: pointer;">
+                                @if (_selectedDomainAbilities.Contains(ab))
+                                {
+                                    <FluentBadge Appearance="Appearance.Accent">✓ Selected</FluentBadge>
+                                }
+                                <h4>@ab.Title</h4>
+                                <FluentStack Orientation="Orientation.Vertical" VerticalGap="3" Width="100%">
+                                    <span style="font-size: 0.8rem; color: #a78bfa;"><strong>@ab.Type</strong> · Recall @ab.RecallCost</span>
+                                </FluentStack>
+                                <FluentDivider Role="DividerRole.Presentation" />
+                                <div style="font-size: 0.8rem; color: #94a3b8; max-height: 120px; overflow-y: auto;">
+                                    @ab.FeatureDescription.ToMarkdownHtml()
+                                </div>
+                            </FluentCard>
+                        </FluentGridItem>
+                    }
+                </FluentGrid>
+            }
+            }
+        </FluentWizardStep>
+
+        <FluentWizardStep Label="Details" Summary="Pronouns & description" OnChange="@ValidateStep">
+            @if (_currentStep >= 6)
+            {
+            <h3>Pronouns</h3>
+            <p style="color: #9ca3af; margin-bottom: 1.5rem;">How should others refer to your character?</p>
+            <FluentTextField @bind-Value="_pronouns" Label="Pronouns" Placeholder="e.g. they/them, she/her, he/him" Style="width: 100%; margin-bottom: 2rem;" />
+
+            <FluentDivider Role="DividerRole.Presentation" />
+            <h3>Character Description</h3>
+            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Optional details to bring your character to life.</p>
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="12" Width="100%">
+                <FluentTextField @bind-Value="_descriptionEyes" Label="Eyes like" Placeholder="e.g. carnations, earth, endless ocean, fire, ivy..." Style="width: 100%;" />
+                <FluentTextField @bind-Value="_descriptionBody" Label="Body that's" Placeholder="e.g. broad, carved, curvy, lanky, rotund..." Style="width: 100%;" />
+                <FluentTextField @bind-Value="_descriptionClothes" Label="Clothes that are" Placeholder="e.g. extravagant, fancy, loud, sleek..." Style="width: 100%;" />
+                <FluentTextField @bind-Value="_descriptionSkin" Label="Skin the color of" Placeholder="e.g. ashes, clover, falling snow, fine sand..." Style="width: 100%;" />
+                <FluentTextField @bind-Value="_descriptionAttitude" Label="Attitude like" Placeholder="e.g. a hero, a rogue, a scholar..." Style="width: 100%;" />
+            </FluentStack>
+            }
+        </FluentWizardStep>
+
+        <FluentWizardStep Label="Review" Summary="Review & save character" OnChange="@ValidateStep">
+            @if (_currentStep >= 7)
+            {
+            <h3>Review Your Character</h3>
+            <p style="color: #9ca3af; margin-bottom: 1.5rem;">Check all details before heading out on your adventure.</p>
+
+            <FluentGrid Spacing="3">
+                <FluentGridItem Xs="12" Md="6">
+                    <FluentCard>
+                        <h4 style="color: #a78bfa; border-bottom: 1px solid rgba(167, 139, 250, 0.15); padding-bottom: 8px;">General</h4>
+                        <p><strong>Name:</strong> @_characterName</p>
+                        @if (!string.IsNullOrWhiteSpace(_pronouns))
+                        {
+                            <p><strong>Pronouns:</strong> @_pronouns</p>
+                        }
+                        <p><strong>Ancestry:</strong> @_selectedAncestry?.Name</p>
+                        <p><strong>Community:</strong> @_selectedCommunity?.Name</p>
+                        <p><strong>Class:</strong> @_selectedClass?.Name (@_selectedSubclass?.Name)</p>
+                        @if (_selectedSubclass?.SpellCastingTraitType != null)
+                        {
+                            <p><strong>Spellcast Trait:</strong> @_selectedSubclass.SpellCastingTraitType</p>
+                        }
+                        @if (_selectedDomainAbilities.Count > 0)
+                        {
+                            <p><strong>Domain Abilities:</strong></p>
+                            <FluentStack Orientation="Orientation.Horizontal" Wrap="true" HorizontalGap="8" VerticalGap="5">
+                                @foreach (var ab in _selectedDomainAbilities)
+                                {
+                                    var domain = _domainAbilities1.Contains(ab) ? _selectedClass?.Domain1 : _selectedClass?.Domain2;
+                                    <FluentBadge Appearance="Appearance.Accent">@ab.Title (@domain)</FluentBadge>
+                                }
+                            </FluentStack>
+                        }
+                        @{
+                            var filledExps = new[] { _experience1, _experience2 }.Where(e => !string.IsNullOrWhiteSpace(e)).ToList();
+                        }
+                        @if (filledExps.Count > 0)
+                        {
+                            <p><strong>Experiences:</strong></p>
+                            <FluentStack Orientation="Orientation.Horizontal" Wrap="true" HorizontalGap="8" VerticalGap="5">
+                                @foreach (var exp in filledExps)
+                                {
+                                    <FluentBadge Appearance="Appearance.Accent">@exp (+2)</FluentBadge>
+                                }
+                            </FluentStack>
+                        }
+                    </FluentCard>
+                </FluentGridItem>
+
+                <FluentGridItem Xs="12" Md="6">
+                    <FluentCard>
+                        <h4 style="color: #a78bfa; border-bottom: 1px solid rgba(167, 139, 250, 0.15); padding-bottom: 8px;">Traits</h4>
+                        @foreach (var slot in _traitSlots)
+                        {
+                            var val = slot.AssignedChip?.Value ?? 0;
+                            var color = val > 0 ? "#10b981" : val < 0 ? "#ef4444" : "#9ca3af";
+                            <p><strong>@slot.Key:</strong> <FluentBadge Appearance="Appearance.Neutral" Color="@color">@FormatModifier(val)</FluentBadge></p>
+                        }
+                    </FluentCard>
+                </FluentGridItem>
+
+                <FluentGridItem Xs="12" Md="6">
+                    <FluentCard>
+                        <h4 style="color: #a78bfa; border-bottom: 1px solid rgba(167, 139, 250, 0.15); padding-bottom: 8px;">Calculated Stats</h4>
+                        <p><strong>Evasion:</strong> @CalculateEvasion()</p>
+                        <p><strong>Armor Score:</strong> @(_selectedArmor?.ArmorScore ?? 0)</p>
+                        <p><strong>Damage Thresholds:</strong><br />
+                            Minor: 0 - @(CalculateMajorThreshold() - 1)<br />
+                            Major: @CalculateMajorThreshold() - @(CalculateSevereThreshold() - 1)<br />
+                            Severe: @CalculateSevereThreshold() +</p>
+                    </FluentCard>
+                </FluentGridItem>
+
+                <FluentGridItem Xs="12" Md="6">
+                    <FluentCard>
+                        <h4 style="color: #a78bfa; border-bottom: 1px solid rgba(167, 139, 250, 0.15); padding-bottom: 8px;">Resources</h4>
+                        <p><strong>Hit Points:</strong> @(_selectedClass?.BaseHealth ?? 5) / @(_selectedClass?.BaseHealth ?? 5)</p>
+                        <p><strong>Stress:</strong> 0 / 6</p>
+                        <p><strong>Hope:</strong> 2 / 6</p>
+                        <p><strong>Armor Slots:</strong> @(_selectedArmor != null ? $"0 / {_selectedArmor.ArmorScore}" : "-- (No armor)")</p>
+                    </FluentCard>
+                </FluentGridItem>
+
+                @{
+                    var hasBackground = _backgroundEntries.Any(e => !string.IsNullOrWhiteSpace(e.Question) || !string.IsNullOrWhiteSpace(e.Answer));
+                }
+                @if (hasBackground)
+                {
+                    <FluentGridItem Xs="12">
+                        <FluentCard>
+                            <h4 style="color: #a78bfa; border-bottom: 1px solid rgba(167, 139, 250, 0.15); padding-bottom: 8px;">Background</h4>
+                            @foreach (var entry in _backgroundEntries)
+                            {
+                                if (!string.IsNullOrWhiteSpace(entry.Question) || !string.IsNullOrWhiteSpace(entry.Answer))
+                                {
+                                    <p style="margin-bottom: 8px;">
+                                        <strong>@entry.Question</strong><br />
+                                        <span style="color: #9ca3af;">@entry.Answer</span>
+                                    </p>
+                                }
+                            }
+                        </FluentCard>
+                    </FluentGridItem>
+                }
+
+                <FluentGridItem Xs="12">
+                    <FluentCard>
+                        <h4 style="color: #a78bfa; border-bottom: 1px solid rgba(167, 139, 250, 0.15); padding-bottom: 8px;">Equipment</h4>
+                        <p><strong>Equipped Armor:</strong> @(_selectedArmor?.Name ?? "None")</p>
+                        <p><strong>Primary Weapon:</strong> @(_selectedPrimaryWeapon?.Name ?? "None")</p>
+                        @if (_selectedSecondaryWeapon != null)
+                        {
+                            <p><strong>Secondary Weapon:</strong> @_selectedSecondaryWeapon.Name</p>
+                        }
+                        @{
+                            var invItems = new List<string?> { "Torch", "50 ft rope", "Basic supplies", _selectedPotion, _selectedClassItem, _spellFocus }.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+                        }
+                        @if (invItems.Count > 0)
+                        {
+                            <p><strong>Inventory:</strong></p>
+                            <FluentStack Orientation="Orientation.Horizontal" Wrap="true" HorizontalGap="8" VerticalGap="5">
+                                @foreach (var item in invItems)
+                                {
+                                    <FluentBadge Appearance="Appearance.Neutral">@item</FluentBadge>
+                                }
+                            </FluentStack>
+                        }
+                    </FluentCard>
+
+                </FluentGridItem>
+
+                @{
+                    var descFields = new[] { ("Eyes", _descriptionEyes), ("Body", _descriptionBody), ("Clothes", _descriptionClothes), ("Skin", _descriptionSkin), ("Attitude", _descriptionAttitude) };
+                    var hasDescription = descFields.Any(f => !string.IsNullOrWhiteSpace(f.Item2));
+                }
+                @if (hasDescription)
+                {
+                    <FluentGridItem Xs="12">
+                        <FluentCard>
+                            <h4 style="color: #a78bfa; border-bottom: 1px solid rgba(167, 139, 250, 0.15); padding-bottom: 8px;">Character Description</h4>
+                            @foreach (var (label, val) in descFields)
+                            {
+                                if (!string.IsNullOrWhiteSpace(val))
+                                {
+                                    <p><strong>@label:</strong> @val</p>
+                                }
+                            }
+                        </FluentCard>
+                    </FluentGridItem>
+                }
+            </FluentGrid>
+            }
+        </FluentWizardStep>
+
+        </Steps>
+    </FluentWizard>
+
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        <FluentMessageBar Intent="MessageIntent.Error">
+            <span>@_errorMessage</span>
+        </FluentMessageBar>
+    }
+</FluentCard>
 
 @code {
-    
+    private int _currentStep;
+    private string _characterName = string.Empty;
+    private string _errorMessage = string.Empty;
+
+    // Selections (DTOs — lightweight)
+    private HeritageSummary? _selectedAncestry;
+    private HeritageSummary? _selectedCommunity;
+    private ClassCardSummary? _selectedClass;
+    private SubclassSummary? _selectedSubclass;
+    private ArmorSummary? _selectedArmor;
+    private WeaponSummary? _selectedPrimaryWeapon;
+    private WeaponSummary? _selectedSecondaryWeapon;
+
+    // Lazy-loaded after class selection
+    private List<SubclassSummary> _selectedSubclasses = new();
+    private bool _isLoadingSubclasses;
+
+    // Domain abilities
+    private List<DomainAbilitySummary> _domainAbilities1 = new();
+    private List<DomainAbilitySummary> _domainAbilities2 = new();
+    private List<DomainAbilitySummary> _selectedDomainAbilities = new();
+    private bool _isLoadingDomains;
+
+    // Loaded on step 0→1 transition
+    private ClassSetupData? _classSetupData;
+
+    // Experiences
+    private string _experience1 = string.Empty;
+    private string _experience2 = string.Empty;
+
+    // Inventory
+    private const string _potionHealth = "Minor Health Potion";
+    private const string _potionStamina = "Minor Stamina Potion";
+    private string? _selectedPotion;
+    private string? _selectedClassItem;
+    private string _spellFocus = string.Empty;
+
+    // Details
+    private string _pronouns = string.Empty;
+    private string _descriptionEyes = string.Empty;
+    private string _descriptionBody = string.Empty;
+    private string _descriptionClothes = string.Empty;
+    private string _descriptionSkin = string.Empty;
+    private string _descriptionAttitude = string.Empty;
+
+    // Background entries (editable question + answer)
+    private class BackgroundEntry
+    {
+        public string Question { get; set; } = string.Empty;
+        public string Answer { get; set; } = string.Empty;
+    }
+
+    private List<BackgroundEntry> _backgroundEntries = new();
+
+    // Trait drag-drop state
+    private record BonusChip(int Value, Guid Id)
+    {
+        public string Label => Value >= 0 ? $"+{Value}" : $"{Value}";
+    }
+
+    private record TraitSlot(TraitKey Key, BonusChip? AssignedChip)
+    {
+        public string DisplayName => Key switch
+        {
+            TraitKey.Agility => "Agility",
+            TraitKey.Strength => "Strength",
+            TraitKey.Finesse => "Finesse",
+            TraitKey.Instinct => "Instinct",
+            TraitKey.Presence => "Presence",
+            TraitKey.Knowledge => "Knowledge",
+            _ => Key.ToString()
+        };
+    }
+
+    private List<BonusChip> _pool = new();
+    private List<TraitSlot> _traitSlots = new();
+
+    // Catalog Data (DTOs)
+    private List<HeritageSummary> _ancestries = new();
+    private List<HeritageSummary> _communities = new();
+    private List<ClassCardSummary> _classes = new();
+    private List<ArmorSummary> _armors = new();
+    private List<WeaponSummary> _primaryWeapons = new();
+    private List<WeaponSummary> _secondaryWeapons = new();
+
+    // Equipment prefetch (fire-and-forget, started after cards + heritages load)
+    private Task? _equipmentTask;
+
+    private void InitTraits()
+    {
+        _pool = new List<BonusChip>
+        {
+            new(2, Guid.NewGuid()),
+            new(1, Guid.NewGuid()),
+            new(1, Guid.NewGuid()),
+            new(0, Guid.NewGuid()),
+            new(0, Guid.NewGuid()),
+            new(-1, Guid.NewGuid()),
+        };
+
+        _traitSlots = new List<TraitSlot>
+        {
+            new(TraitKey.Agility, null),
+            new(TraitKey.Strength, null),
+            new(TraitKey.Finesse, null),
+            new(TraitKey.Instinct, null),
+            new(TraitKey.Presence, null),
+            new(TraitKey.Knowledge, null),
+        };
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var classesTask = ClassQueries.GetCardSummariesAsync();
+        var ancestriesTask = HeritageQueries.GetSummariesAsync(HeritageType.Ancestry);
+        var communitiesTask = HeritageQueries.GetSummariesAsync(HeritageType.Community);
+
+        _equipmentTask = LoadEquipmentAsync();
+        InitTraits();
+
+        // Await only classes — fastest path to first meaningful paint
+        _classes = await classesTask;
+
+        // Load heritage in background (StateHasChanged when done)
+        _ = LoadHeritageAsync(ancestriesTask, communitiesTask);
+    }
+
+    private async Task LoadHeritageAsync(
+        Task<List<HeritageSummary>> ancestriesTask,
+        Task<List<HeritageSummary>> communitiesTask)
+    {
+        await Task.WhenAll(ancestriesTask, communitiesTask);
+        _ancestries = ancestriesTask.Result;
+        _communities = communitiesTask.Result;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadEquipmentAsync()
+    {
+        Task<List<ArmorSummary>> armorsTask = ArmorQueries.GetSummariesByTierAsync(1);
+        Task<List<WeaponSummary>> weaponsTask = WeaponQueries.GetSummariesByTierAsync(1);
+
+        await Task.WhenAll(armorsTask, weaponsTask);
+
+        _armors = armorsTask.Result;
+        _primaryWeapons = weaponsTask.Result;
+        _secondaryWeapons = weaponsTask.Result.Where(w => w.Burden == Burden.OneHanded).ToList();
+    }
+
+    private async Task ValidateStep(FluentWizardStepChangeEventArgs args)
+    {
+        if (_currentStep == 0)
+        {
+            if (string.IsNullOrWhiteSpace(_characterName))
+            {
+                _errorMessage = "You must enter a name for your character.";
+                args.IsCancelled = true;
+                return;
+            }
+            if (_selectedClass == null)
+            {
+                _errorMessage = "Choose a Class.";
+                args.IsCancelled = true;
+                return;
+            }
+            if (_selectedSubclass == null)
+            {
+                _errorMessage = "Choose a Subclass.";
+                args.IsCancelled = true;
+                return;
+            }
+
+            // Load extra class data for upcoming steps
+            _classSetupData = await ClassQueries.GetClassSetupDataAsync(_selectedClass.Id);
+            _backgroundEntries = _classSetupData.BackgroundQuestions
+                .Select(q => new BackgroundEntry { Question = q, Answer = string.Empty })
+                .ToList();
+        }
+        else if (_currentStep == 1)
+        {
+            if (_selectedAncestry == null)
+            {
+                _errorMessage = "Choose an Ancestry.";
+                args.IsCancelled = true;
+                return;
+            }
+            if (_selectedCommunity == null)
+            {
+                _errorMessage = "Choose a Community.";
+                args.IsCancelled = true;
+                return;
+            }
+        }
+        else if (_currentStep == 2)
+        {
+            if (_pool.Count > 0)
+            {
+                _errorMessage = "Assign all 6 trait bonuses to continue.";
+                args.IsCancelled = true;
+                return;
+            }
+        }
+        else if (_currentStep == 3)
+        {
+            if (_selectedArmor == null)
+            {
+                _errorMessage = "Choose armor.";
+                args.IsCancelled = true;
+                return;
+            }
+            if (_selectedPrimaryWeapon == null)
+            {
+                _errorMessage = "Choose a primary weapon.";
+                args.IsCancelled = true;
+                return;
+            }
+            if (_selectedPotion == null)
+            {
+                _errorMessage = "Choose a potion.";
+                args.IsCancelled = true;
+                return;
+            }
+            if (_classSetupData?.ClassItems.Count > 0 && _selectedClassItem == null)
+            {
+                _errorMessage = "Choose a class item.";
+                args.IsCancelled = true;
+                return;
+            }
+        }
+        else if (_currentStep == 4)
+        {
+            if (string.IsNullOrWhiteSpace(_experience1) || string.IsNullOrWhiteSpace(_experience2))
+            {
+                _errorMessage = "Fill in both Experience fields.";
+                args.IsCancelled = true;
+                return;
+            }
+        }
+        else if (_currentStep == 5)
+        {
+            if (_selectedDomainAbilities.Count < 2)
+            {
+                _errorMessage = "Select exactly 2 domain cards. You may take one from each domain or two from the same domain.";
+                args.IsCancelled = true;
+                return;
+            }
+        }
+
+        _errorMessage = string.Empty;
+    }
+
+    private void SelectAncestry(HeritageSummary anc)
+    {
+        _selectedAncestry = anc;
+        _errorMessage = string.Empty;
+    }
+
+    private void SelectCommunity(HeritageSummary com)
+    {
+        _selectedCommunity = com;
+        _errorMessage = string.Empty;
+    }
+
+    private void ToggleDomainAbility(DomainAbilitySummary ab)
+    {
+        if (_selectedDomainAbilities.Contains(ab))
+        {
+            _selectedDomainAbilities.Remove(ab);
+        }
+        else if (_selectedDomainAbilities.Count < 2)
+        {
+            _selectedDomainAbilities.Add(ab);
+        }
+        _errorMessage = string.Empty;
+    }
+
+    private async Task SelectClass(ClassCardSummary cls)
+    {
+        _selectedClass = cls;
+        _selectedSubclass = null;
+        _selectedSubclasses = new List<SubclassSummary>();
+        _selectedDomainAbilities.Clear();
+        _selectedPotion = null;
+        _selectedClassItem = null;
+        _spellFocus = string.Empty;
+        _pronouns = string.Empty;
+        _descriptionEyes = string.Empty;
+        _descriptionBody = string.Empty;
+        _descriptionClothes = string.Empty;
+        _descriptionSkin = string.Empty;
+        _descriptionAttitude = string.Empty;
+        _errorMessage = string.Empty;
+
+        InitTraits();
+
+        _isLoadingSubclasses = true;
+        var subTask = ClassQueries.GetSubclassesAsync(cls.Id);
+
+        _isLoadingDomains = true;
+        var dom1Task = AbilityQueries.GetByDomainAsync(cls.Domain1, 1);
+        var dom2Task = AbilityQueries.GetByDomainAsync(cls.Domain2, 1);
+
+        await Task.WhenAll(subTask, dom1Task, dom2Task);
+
+        _selectedSubclasses = subTask.Result;
+        _isLoadingSubclasses = false;
+
+        _domainAbilities1 = dom1Task.Result;
+        _domainAbilities2 = dom2Task.Result;
+        _isLoadingDomains = false;
+
+        _selectedSubclass = _selectedSubclasses.FirstOrDefault();
+    }
+
+    private void AutoAssignTraits()
+    {
+        if (_selectedClass == null || _classSetupData == null) return;
+        InitTraits();
+        ApplySuggestedTraits(_classSetupData);
+    }
+
+    private void ApplySuggestedTraits(ClassSetupData setup)
+    {
+        var suggested = new Dictionary<TraitKey, int>
+        {
+            { TraitKey.Agility, setup.SuggestedTraits.Agility },
+            { TraitKey.Strength, setup.SuggestedTraits.Strength },
+            { TraitKey.Finesse, setup.SuggestedTraits.Finesse },
+            { TraitKey.Instinct, setup.SuggestedTraits.Instinct },
+            { TraitKey.Presence, setup.SuggestedTraits.Presence },
+            { TraitKey.Knowledge, setup.SuggestedTraits.Knowledge },
+        };
+
+        for (int i = 0; i < _traitSlots.Count; i++)
+        {
+            var slot = _traitSlots[i];
+            var value = suggested[slot.Key];
+            var chip = _pool.FirstOrDefault(b => b.Value == value && !_traitSlots.Any(s => s.AssignedChip?.Id == b.Id));
+            if (chip != null)
+            {
+                _traitSlots[i] = slot with { AssignedChip = chip };
+                _pool.Remove(chip);
+            }
+        }
+    }
+
+    private void SelectSubclass(SubclassSummary sub)
+    {
+        _selectedSubclass = sub;
+        _errorMessage = string.Empty;
+    }
+
+    private void SelectArmor(ArmorSummary arm)
+    {
+        _selectedArmor = arm;
+        _errorMessage = string.Empty;
+    }
+
+    private void SelectPrimaryWeapon(WeaponSummary wp)
+    {
+        _selectedPrimaryWeapon = wp;
+        if (wp.Burden == Burden.TwoHanded)
+        {
+            _selectedSecondaryWeapon = null;
+        }
+        _errorMessage = string.Empty;
+    }
+
+    private void SelectSecondaryWeapon(WeaponSummary? wp)
+    {
+        _selectedSecondaryWeapon = wp;
+        _errorMessage = string.Empty;
+    }
+
+    // Drag-drop handlers
+    private void HandleDropOnTrait(FluentDragEventArgs<BonusChip> e, TraitKey targetTrait)
+    {
+        var dragged = e.Source.Item;
+        if (dragged == null) return;
+
+        var fromPool = _pool.Any(b => b.Id == dragged.Id);
+        TraitKey? fromTrait = fromPool ? null
+            : _traitSlots.FirstOrDefault(s => s.AssignedChip?.Id == dragged.Id)?.Key;
+
+        var currentOnTarget = _traitSlots.First(s => s.Key == targetTrait).AssignedChip;
+
+        if (fromTrait is TraitKey ft)
+        {
+            if (currentOnTarget != null)
+            {
+                var swapIdx = _traitSlots.FindIndex(s => s.Key == ft);
+                _traitSlots[swapIdx] = _traitSlots[swapIdx] with { AssignedChip = currentOnTarget };
+            }
+            else
+            {
+                var clearIdx = _traitSlots.FindIndex(s => s.Key == ft);
+                _traitSlots[clearIdx] = _traitSlots[clearIdx] with { AssignedChip = null };
+            }
+        }
+        else
+        {
+            if (currentOnTarget != null)
+            {
+                _pool.Add(currentOnTarget);
+            }
+            _pool.RemoveAll(b => b.Id == dragged.Id);
+        }
+
+        var targetIdx = _traitSlots.FindIndex(s => s.Key == targetTrait);
+        _traitSlots[targetIdx] = _traitSlots[targetIdx] with { AssignedChip = dragged };
+    }
+
+    private void HandleDropOnPool(FluentDragEventArgs<BonusChip> e)
+    {
+        var dragged = e.Source.Item;
+        if (dragged == null) return;
+
+        var fromTrait = _traitSlots.FirstOrDefault(s => s.AssignedChip?.Id == dragged.Id)?.Key;
+        if (fromTrait is TraitKey ft)
+        {
+            var idx = _traitSlots.FindIndex(s => s.Key == ft);
+            _traitSlots[idx] = _traitSlots[idx] with { AssignedChip = null };
+            _pool.Add(dragged);
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private string FormatModifier(int val)
+    {
+        return val >= 0 ? $"+{val}" : val.ToString();
+    }
+
+    private int CalculateEvasion()
+    {
+        if (_selectedClass == null) return 0;
+        var agilityBonus = _traitSlots.First(s => s.Key == TraitKey.Agility).AssignedChip?.Value ?? 0;
+        return _selectedClass.BaseEvasion + agilityBonus;
+    }
+
+    private int CalculateMajorThreshold()
+    {
+        if (_selectedArmor == null) return 0;
+        return _selectedArmor.DamageThresholds.Major + 1;
+    }
+
+    private int CalculateSevereThreshold()
+    {
+        if (_selectedArmor == null) return 0;
+        return _selectedArmor.DamageThresholds.Severe + 1;
+    }
+
+    private async Task SaveCharacter()
+    {
+        try
+        {
+            // Await pending equipment load if user skipped straight to save
+            if (_equipmentTask is { IsCompleted: false })
+                await _equipmentTask;
+
+            var charEntity = new Character
+            {
+                Name = _characterName,
+                Pronouns = string.IsNullOrWhiteSpace(_pronouns) ? null : _pronouns,
+                DescriptionEyes = string.IsNullOrWhiteSpace(_descriptionEyes) ? null : _descriptionEyes,
+                DescriptionBody = string.IsNullOrWhiteSpace(_descriptionBody) ? null : _descriptionBody,
+                DescriptionClothes = string.IsNullOrWhiteSpace(_descriptionClothes) ? null : _descriptionClothes,
+                DescriptionSkin = string.IsNullOrWhiteSpace(_descriptionSkin) ? null : _descriptionSkin,
+                DescriptionAttitude = string.IsNullOrWhiteSpace(_descriptionAttitude) ? null : _descriptionAttitude,
+                Level = 1,
+                GameClassId = _selectedClass!.Id,
+                SubclassId = _selectedSubclass!.Id,
+                AncestryId = _selectedAncestry!.Id,
+                CommunityId = _selectedCommunity!.Id,
+                Experiences = new[] { _experience1, _experience2 }.Where(e => !string.IsNullOrWhiteSpace(e)).ToList(),
+                BackgroundAnswers = _backgroundEntries.SelectMany(e => new[] { e.Question, e.Answer }).ToList(),
+                Inventory = new List<string> { "Torch", "50 ft rope", "Basic supplies", _selectedPotion!, _selectedClassItem! }
+                    .Where(x => x is not null).ToList(),
+                GoldHandfuls = 1,
+                SpellFocus = string.IsNullOrWhiteSpace(_spellFocus) ? null : _spellFocus,
+                Traits = new TraitScores(
+                    _traitSlots.First(s => s.Key == TraitKey.Agility).AssignedChip?.Value ?? 0,
+                    _traitSlots.First(s => s.Key == TraitKey.Strength).AssignedChip?.Value ?? 0,
+                    _traitSlots.First(s => s.Key == TraitKey.Finesse).AssignedChip?.Value ?? 0,
+                    _traitSlots.First(s => s.Key == TraitKey.Instinct).AssignedChip?.Value ?? 0,
+                    _traitSlots.First(s => s.Key == TraitKey.Presence).AssignedChip?.Value ?? 0,
+                    _traitSlots.First(s => s.Key == TraitKey.Knowledge).AssignedChip?.Value ?? 0
+                ),
+                Evasion = CalculateEvasion(),
+                DamageThresholds = new DamageThresholds(CalculateMajorThreshold(), CalculateSevereThreshold()),
+                EquippedArmorId = _selectedArmor?.Id,
+                PrimaryWeaponId = _selectedPrimaryWeapon?.Id,
+                SecondaryWeaponId = _selectedSecondaryWeapon?.Id,
+                DomainAbilities = _selectedDomainAbilities.Select(ab => new Ability { Id = ab.Id }).ToList(),
+                HitPoints = new ResourcePool(_selectedClass.BaseHealth, _selectedClass.BaseHealth),
+                Stress = new ResourcePool(0, 6),
+                Hope = new ResourcePool(2, 6),
+                ArmorSlots = new ResourcePool(_selectedArmor?.ArmorScore ?? 0, _selectedArmor?.ArmorScore ?? 0)
+            };
+
+            await CharacterService.SaveAsync(charEntity);
+            NavigationManager.NavigateTo("/Characters");
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Failed to save character: {ex.Message}";
+        }
+    }
+
+    private enum TraitKey { Agility, Strength, Finesse, Instinct, Presence, Knowledge }
 }
