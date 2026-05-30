@@ -1,4 +1,4 @@
-using Infrastructure.Persistence;
+    using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Application.Services;
@@ -28,6 +28,7 @@ public static class DependencyInjection
         services.AddScoped<IClassCatalogQueries, ClassCatalogQueries>();
         services.AddScoped<IHeritageCatalogQueries, HeritageCatalogQueries>();
         services.AddScoped<IWeaponCatalogQueries, WeaponCatalogQueries>();
+        services.AddScoped<ICharacterService, CharacterService>();
         return services;
     }
 }
