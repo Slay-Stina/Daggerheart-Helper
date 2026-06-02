@@ -38,7 +38,7 @@ public class Character
 
     public List<string> Experiences { get; set; } = new();
     public List<string> BackgroundAnswers { get; set; } = new();
-    public List<string> Inventory { get; set; } = new();
+    public List<Item> Inventory { get; set; } = new();
     public int GoldHandfuls { get; set; } = 1;
     public string? SpellFocus { get; set; }
 
@@ -48,12 +48,10 @@ public class Character
     public Weapon? PrimaryWeapon { get; set; }
     public Guid? SecondaryWeaponId { get; set; }
     public Weapon? SecondaryWeapon { get; set; }
-    
-    public List<Ability> DomainAbilities { get; set; } = new();
-
+    public List<CharacterAbility> CharacterAbilities { get; set; } = new();
     public ResourcePool HitPoints { get; set; } = new(5, 5);
     public ResourcePool Stress { get; set; } = new(0, 5);
     public ResourcePool Hope { get; set; } = new(0, 5);
     public ResourcePool ArmorSlots { get; set; } = new(0, 0);
-
+    public byte[] RowVersion { get; set; } = [];
 }

@@ -9,5 +9,5 @@ public interface IAbilityCatalogQueries
     List<Ability> GetAll();
     Ability GetById(Guid id);
 
-    Task<List<DomainAbilitySummary>> GetByDomainAsync(DomainType domain, int level);
+    Task<List<AbilitySummary>> GetByDomainAsync(DomainType domain, int level);
 }

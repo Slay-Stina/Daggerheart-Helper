@@ -1,7 +1,9 @@
 @page "/character/{id:guid}"
+@using Microsoft.FluentUI.AspNetCore.Components.Icons.Filled
 @inject ICharacterService CharacterService
 @inject IArmorCatalogQueries ArmorQueries
 @inject IWeaponCatalogQueries WeaponQueries
+@inject IAbilityCatalogQueries AbilityQueries
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
 
@@ -18,7 +20,7 @@
     else if (_character == null)
     {
         <div class="empty-state">
-            <FluentIcon Value="@(new Icons.Filled.Size48.PeopleCommunity())" Color="Color.Neutral" />
+            <FluentIcon Value="@(new Size48.PeopleCommunity())" Color="Color.Neutral" />
             <h3>Character not found</h3>
             <FluentButton Appearance="Appearance.Accent" OnClick="@(() => NavigationManager.NavigateTo("/Characters") )">
                 Back to Characters
@@ -30,13 +32,15 @@
         <div class="sheet-header">
             <div class="header-left">
                 <FluentButton Appearance="Appearance.Stealth"
-                              IconStart="@(new Icons.Filled.Size20.ArrowLeft())"
+                              IconStart="@(new Size20.ArrowLeft())"
                               OnClick="@(() => NavigationManager.NavigateTo("/Characters") )"
                               Title="Back to Characters" />
                 <div class="header-text">
                     <h2>@_character.Name</h2>
                     <span class="header-subtitle">
-                        @_character.Ancestry.Name @_character.Subclass.Name @_character.GameClass.Name
+                        @_character.Ancestry.Name
+                        @_character.Subclass.Name
+                        @_character.GameClass.Name
                         — Level @_character.Level
                     </span>
                 </div>
@@ -44,6 +48,9 @@
             <div class="header-actions">
                 @if (_isEditing)
                 {
+                    <FluentButton Appearance="Appearance.Accent" OnClick="@LevelUp" Disabled="@(_character.Level >= 10)">
+                        Level Up! (@_character.Level -> @(_character.Level + 1))
+                    </FluentButton>
                     <FluentButton Appearance="Appearance.Accent" OnClick="@SaveEdit">
                         Save Changes
                     </FluentButton>
@@ -252,21 +259,20 @@
                                         @for (int i = 0; i < _editInventory.Count; i++)
                                         {
                                             var idx = i;
-                                            var itemName = _editInventory[idx];
-                                            var match = GetCatalogMatch(itemName);
+                                            var entry = _editInventory[idx];
                                             <div class="inventory-item-row">
-                                                <span class="inv-item-name @(match != null ? "inv-match" : "")">@itemName</span>
-                                                @if (match != null)
+                                                <span class="inv-item-name @(entry.CatalogId != null ? "inv-match" : "")">@entry.Name</span>
+                                                @if (entry.CatalogId != null)
                                                 {
-                                                    var equipped = IsSlotEquipped(match.Value.CatalogId, match.Value.SlotType);
+                                                    var equipped = IsSlotEquipped(entry.CatalogId.Value, entry.SlotType!);
                                                     <FluentButton Appearance="@(equipped ? Appearance.Accent : Appearance.Stealth)"
-                                                                  OnClick="@(() => ToggleEquip(idx))"
-                                                                  Style="min-width: 80px;">
+                                                                   OnClick="@(() => ToggleEquip(idx))"
+                                                                   Style="min-width: 80px;">
                                                         @(equipped ? "Unequip" : "Equip")
                                                     </FluentButton>
                                                 }
                                                 <FluentButton Appearance="Appearance.Stealth"
-                                           IconStart="@(new Icons.Filled.Size20.Delete())"
+                                           IconStart="@(new Size20.Delete())"
                                                            OnClick="@(() => RemoveInventoryItem(idx))"
                                                            Style="color: var(--dh-negative);" />
                                             </div>
@@ -289,7 +295,7 @@
                                         <div class="inventory-badges">
                                             @foreach (var item in _character.Inventory)
                                             {
-                                                <FluentBadge Appearance="Appearance.Neutral">@item</FluentBadge>
+                                                <FluentBadge Appearance="Appearance.Neutral">@item.Name</FluentBadge>
                                             }
                                         </div>
                                     }
@@ -307,26 +313,116 @@
             @* Abilities *@
             <FluentCard class="section-card">
                 <div class="section-title">Domain Abilities</div>
-                @if (_character.DomainAbilities.Count > 0)
+                @if (_isEditing)
                 {
-                    <div class="abilities-list">
-                        @foreach (var ab in _character.DomainAbilities)
+                    @* Available abilities *@
+                    <div class="ability-section">
+                        <div class="ability-section-header">
+                            <span class="text-sm">Available (@(_domainAbilities.Count))</span>
+                        </div>
+                        @if (_domainAbilities.Count > 0)
                         {
-                            <div class="ability-card">
-                                <div class="ability-header">
-                                    <span class="ability-name">@ab.Title</span>
-                                    <FluentBadge Appearance="Appearance.Neutral">@ab.Type · Recall @ab.RecallCost</FluentBadge>
-                                </div>
-                                <div class="ability-desc">
-                                    @((MarkupString)ab.FeatureDescription.ToMarkdownHtml())
-                                </div>
+                            <div class="ability-pick-list">
+                                @foreach (var ab in _domainAbilities)
+                                {
+                                    <div class="ability-entry">
+                                        <div class="ability-info">
+                                            <span class="ability-name">@ab.Title</span>
+                                            <FluentBadge Appearance="Appearance.Neutral">@ab.DomainType · Lv @ab.Level · @ab.Type · Recall @ab.RecallCost</FluentBadge>
+                                        </div>
+                                        <FluentButton Appearance="Appearance.Accent" OnClick="@(() => AddAbility(ab))" Title="Add to active">
+                                            <FluentIcon Value="@(new Size20.ArrowRight())" />
+                                        </FluentButton>
+                                    </div>
+                                }
                             </div>
+                        }
+                        else
+                        {
+                            <div class="text-muted" style="padding: 8px;">All abilities acquired for your level and domains.</div>
+                        }
+                    </div>
+
+                    @* Active abilities *@
+                    <div class="ability-section">
+                        <div class="ability-section-header">
+                            <span class="text-sm">Active (@(_editActiveAbilities.Count) / 5)</span>
+                        </div>
+                        @if (_editActiveAbilities.Count > 0)
+                        {
+                            <div class="ability-pick-list">
+                                @foreach (var ca in _editActiveAbilities)
+                                {
+                                    <div class="ability-entry">
+                                        <div class="ability-info">
+                                            <span class="ability-name">@ca.Ability.Title</span>
+                                            <FluentBadge Appearance="Appearance.Neutral">@ca.Ability.DomainType · Recall @ca.Ability.RecallCost</FluentBadge>
+                                        </div>
+                                        <FluentButton Appearance="Appearance.Stealth" OnClick="@(() => VaultAbility(ca.AbilityId))" Title="Move to vault">
+                                            <FluentIcon Value="@(new Size20.ArrowDownload())" />
+                                        </FluentButton>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-muted" style="padding: 8px;">No active abilities.</div>
+                        }
+                    </div>
+
+                    @* Vault *@
+                    <div class="ability-section">
+                        <div class="ability-section-header">
+                            <span class="text-sm">Vault (@(_editVaultAbilities.Count))</span>
+                        </div>
+                        @if (_editVaultAbilities.Count > 0)
+                        {
+                            <div class="ability-pick-list">
+                                @foreach (var ca in _editVaultAbilities)
+                                {
+                                    <div class="ability-entry">
+                                        <div class="ability-info">
+                                            <span class="ability-name">@ca.Ability.Title</span>
+                                            <FluentBadge Appearance="Appearance.Neutral">@ca.Ability.DomainType · Recall @ca.Ability.RecallCost</FluentBadge>
+                                        </div>
+                                        <FluentButton Appearance="Appearance.Stealth" OnClick="@(() => ActivateAbility(ca.AbilityId))" Title="Move to active">
+                                            <FluentIcon Value="@(new Size20.ArrowUpload())" />
+                                        </FluentButton>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-muted" style="padding: 8px;">Vault is empty.</div>
                         }
                     </div>
                 }
                 else
                 {
-                    <div class="text-muted" style="padding: 20px; text-align: center;">No domain abilities</div>
+                    var activeAbilities = _character.CharacterAbilities?.Where(ca => !ca.IsVaulted).ToList() ?? new();
+                    @if (activeAbilities.Count > 0)
+                    {
+                        <div class="abilities-list">
+                            @foreach (var ca in activeAbilities)
+                            {
+                                <div class="ability-card">
+                                    <div class="ability-header">
+                                        <span class="ability-name">@ca.Ability.Title</span>
+                                        <FluentBadge Appearance="Appearance.Neutral">@ca.Ability.Type · Recall @ca.Ability.RecallCost</FluentBadge>
+                                    </div>
+                                    <div class="ability-desc">
+                                        @ca.Ability.FeatureDescription.ToMarkdownHtml()
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted" style="padding: 20px; text-align: center;">No domain abilities</div>
+                    }
                 }
             </FluentCard>
         </div>
@@ -343,7 +439,7 @@
                         <div class="exp-edit-row">
                             <FluentTextField @bind-Value="_editExperiences[idx]" Style="width: 100%;" />
                             <FluentButton Appearance="Appearance.Stealth"
-                                           IconStart="@(new Icons.Filled.Size20.Delete())"
+                                           IconStart="@(new Size20.Delete())"
                                            OnClick="@(() => RemoveExperience(idx))"
                                            Style="color: var(--dh-negative);" />
                         </div>
@@ -361,7 +457,7 @@
                         @foreach (var exp in _character.Experiences)
                         {
                             <div class="exp-chip-large">
-                                <FluentIcon Value="@(new Icons.Filled.Size20.Star())" Color="Color.Accent" />
+                                <FluentIcon Value="@(new Size20.Star())" Color="Color.Accent" />
                                 <span>@exp (+2)</span>
                             </div>
                         }
@@ -400,12 +496,12 @@
         }
 
         @* Description *@
-        @if (_descriptionFields.Any(f => !string.IsNullOrWhiteSpace(f.Value)))
+        @if (DescriptionFields.Any(f => !string.IsNullOrWhiteSpace(f.Value)))
         {
             <FluentCard class="section-card full-width">
                 <div class="section-title">Description</div>
                 <div class="desc-grid">
-                    @foreach (var (label, val) in _descriptionFields)
+                    @foreach (var (label, val) in DescriptionFields)
                     {
                         if (!string.IsNullOrWhiteSpace(val))
                         {
@@ -439,11 +535,14 @@
     private int _editArmorCurrent;
     private int _editArmorMax;
     private int _editGold;
-    private List<string> _editInventory = new();
+    private List<InventoryEntry> _editInventory = new();
     private List<string> _editExperiences = new();
     private Guid? _editEquippedArmorId;
     private Guid? _editPrimaryWeaponId;
     private Guid? _editSecondaryWeaponId;
+    private List<CharacterAbility> _editActiveAbilities = new();
+    private List<CharacterAbility> _editVaultAbilities = new();
+    private List<AbilitySummary> _domainAbilities = new();
 
     private List<ArmorSummary> _armors = new();
     private List<WeaponSummary> _weapons = new();
@@ -471,7 +570,7 @@
         }
     }
 
-    private async void EnterEditMode()
+    private async Task EnterEditMode()
     {
         _editHpCurrent = _character!.HitPoints.Current;
         _editHpMax = _character.HitPoints.Max;
@@ -482,13 +581,28 @@
         _editArmorCurrent = _character.ArmorSlots.Current;
         _editArmorMax = _character.ArmorSlots.Max;
         _editGold = _character.GoldHandfuls;
-        _editInventory = _character.Inventory.ToList();
+        _editInventory = _character.Inventory
+            .Select(item => new InventoryEntry
+            {
+                Name = item.Name,
+                CatalogId = item.Id,
+                SlotType = null,
+            })
+            .ToList();
         _editExperiences = _character.Experiences.ToList();
         _editEquippedArmorId = _character.EquippedArmorId;
         _editPrimaryWeaponId = _character.PrimaryWeaponId;
         _editSecondaryWeaponId = _character.SecondaryWeaponId;
+        _editActiveAbilities = _character.CharacterAbilities
+            .Where(ca => !ca.IsVaulted)
+            .Select(ca => new CharacterAbility { AbilityId = ca.AbilityId, IsVaulted = false, Ability = ca.Ability })
+            .ToList();
+        _editVaultAbilities = _character.CharacterAbilities
+            .Where(ca => ca.IsVaulted)
+            .Select(ca => new CharacterAbility { AbilityId = ca.AbilityId, IsVaulted = true, Ability = ca.Ability })
+            .ToList();
 
-        await LoadEquipmentCatalogAsync();
+        await Task.WhenAll(LoadEquipmentCatalogAsync(), LoadDomainAbilitiesAsync());
         _isEditing = true;
     }
 
@@ -510,14 +624,19 @@
             _character.Hope = new ResourcePool(_editHopeCurrent, _editHopeMax);
             _character.ArmorSlots = new ResourcePool(_editArmorCurrent, _editArmorMax);
             _character.GoldHandfuls = _editGold;
-            _character.Inventory = _editInventory;
+            _character.Inventory = _editInventory
+                .Where(e => e.SlotType is null)
+                .Select(e => e.CatalogId is not null
+                    ? new Item { Id = e.CatalogId.Value, Name = e.Name, Description = "" }
+                    : new Item { Id = Guid.NewGuid(), Name = e.Name, Description = "" })
+                .ToList();
             _character.Experiences = _editExperiences;
             _character.EquippedArmorId = _editEquippedArmorId;
             _character.PrimaryWeaponId = _editPrimaryWeaponId;
             _character.SecondaryWeaponId = _editSecondaryWeaponId;
-
-            // Don't touch DomainAbilities in gameplay edit — clear so SaveAsync preserves existing
-            _character.DomainAbilities.Clear();
+            _character.CharacterAbilities = _editActiveAbilities
+                .Concat(_editVaultAbilities)
+                .ToList();
 
             await CharacterService.SaveAsync(_character);
             await LoadCharacter();
@@ -530,6 +649,47 @@
         }
     }
 
+    private async Task LoadDomainAbilitiesAsync()
+    {
+        _domainAbilities = await CharacterService.GetAvailableAbilitiesAsync(_character!.Id);
+    }
+
+    private async Task AddAbility(AbilitySummary ab)
+    {
+        _editActiveAbilities.Add(new CharacterAbility
+        {
+            AbilityId = ab.Id,
+            IsVaulted = false,
+            Ability = new Ability { Id = ab.Id, Title = ab.Title, DomainType = ab.DomainType, Level = ab.Level, RecallCost = ab.RecallCost, Type = ab.Type, FeatureDescription = ab.FeatureDescription },
+        });
+        _domainAbilities.RemoveAll(a => a.Id == ab.Id);
+    }
+
+    private void VaultAbility(Guid abilityId)
+    {
+        var ca = _editActiveAbilities.FirstOrDefault(a => a.AbilityId == abilityId);
+        if (ca == null) return;
+        ca.IsVaulted = true;
+        _editActiveAbilities.Remove(ca);
+        _editVaultAbilities.Add(ca);
+    }
+
+    private void ActivateAbility(Guid abilityId)
+    {
+        var ca = _editVaultAbilities.FirstOrDefault(a => a.AbilityId == abilityId);
+        if (ca == null) return;
+        ca.IsVaulted = false;
+        _editVaultAbilities.Remove(ca);
+        _editActiveAbilities.Add(ca);
+    }
+
+    private async Task LevelUp()
+    {
+        if (_character!.Level >= 10) return;
+        _character.Level++;
+        _domainAbilities = await CharacterService.GetAvailableAbilitiesAsync(_character.Id);
+    }
+
     private void CancelEdit()
     {
         _isEditing = false;
@@ -538,20 +698,15 @@
 
     private void RemoveInventoryItem(int index)
     {
-        var removed = _editInventory[index];
+        var entry = _editInventory[index];
         _editInventory.RemoveAt(index);
-        var match = GetCatalogMatch(removed);
-        if (match != null)
+        if (entry.CatalogId != null && IsSlotEquipped(entry.CatalogId.Value, entry.SlotType!))
         {
-            var (catalogId, slotType) = match.Value;
-            if (IsSlotEquipped(catalogId, slotType))
+            switch (entry.SlotType)
             {
-                switch (slotType)
-                {
-                    case "Primary": _editPrimaryWeaponId = null; break;
-                    case "Secondary": _editSecondaryWeaponId = null; break;
-                    case "Armor": _editEquippedArmorId = null; break;
-                }
+                case "Primary": _editPrimaryWeaponId = null; break;
+                case "Secondary": _editSecondaryWeaponId = null; break;
+                case "Armor": _editEquippedArmorId = null; break;
             }
         }
     }
@@ -582,26 +737,6 @@
         return $"({wp.Damage.NumberOfDice}d{wp.Damage.NumberOfSides}{(wp.Damage.Bonus > 0 ? "+" + wp.Damage.Bonus : "")} {wp.Damage.Type})";
     }
 
-    private string FormatWeaponDamage(WeaponSummary? wp)
-    {
-        if (wp == null) return "(0)";
-        return $"({wp.Damage.NumberOfDice}d{wp.Damage.NumberOfSides}{(wp.Damage.Bonus > 0 ? "+" + wp.Damage.Bonus : "")} {wp.Damage.Type})";
-    }
-
-    private (Guid CatalogId, string SlotType)? GetCatalogMatch(string name)
-    {
-        var wp = _weapons.FirstOrDefault(w => w.Name == name);
-        if (wp != null)
-        {
-            var slot = wp.Category == WeaponPriority.Primary ? "Primary" : "Secondary";
-            return (wp.Id, slot);
-        }
-        var arm = _armors.FirstOrDefault(a => a.Name == name);
-        if (arm != null)
-            return (arm.Id, "Armor");
-        return null;
-    }
-
     private bool IsSlotEquipped(Guid catalogId, string slotType)
     {
         return slotType switch
@@ -615,10 +750,10 @@
 
     private void ToggleEquip(int index)
     {
-        var itemName = _editInventory[index];
-        var match = GetCatalogMatch(itemName);
-        if (match == null) return;
-        var (catalogId, slotType) = match.Value;
+        var entry = _editInventory[index];
+        if (entry.CatalogId == null || entry.SlotType == null) return;
+        var catalogId = entry.CatalogId.Value;
+        var slotType = entry.SlotType;
         if (IsSlotEquipped(catalogId, slotType))
         {
             switch (slotType)
@@ -650,10 +785,15 @@
                 Width = "400px",
             });
         var result = await dialog.Result;
-        if (!result.Cancelled && result.Data is AddItemResult addResult)
+        if (result is { Cancelled: false, Data: AddItemResult addResult })
         {
-            _editInventory.Add(addResult.ItemName);
-            if (addResult.CatalogId.HasValue && addResult.SlotType != null)
+            _editInventory.Add(new InventoryEntry
+            {
+                Name = addResult.ItemName,
+                CatalogId = addResult.CatalogId,
+                SlotType = addResult.SlotType,
+            });
+            if (addResult is { CatalogId: not null, SlotType: not null })
             {
                 switch (addResult.SlotType)
                 {
@@ -665,12 +805,12 @@
         }
     }
 
-    private (string Label, string? Value)[] _descriptionFields => new[]
-    {
+    private (string Label, string? Value)[] DescriptionFields =>
+    [
         ("Eyes", _character?.DescriptionEyes),
         ("Body", _character?.DescriptionBody),
         ("Clothes", _character?.DescriptionClothes),
         ("Skin", _character?.DescriptionSkin),
-        ("Attitude", _character?.DescriptionAttitude),
-    };
+        ("Attitude", _character?.DescriptionAttitude)
+    ];
 }

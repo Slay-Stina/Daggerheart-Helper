@@ -18,6 +18,8 @@ public class DaggerheartDbContext(DbContextOptions<DaggerheartDbContext> options
     public DbSet<Subclass> Subclasses => Set<Subclass>();
     public DbSet<Weapon> Weapons => Set<Weapon>();
     public DbSet<Heritage> Heritages => Set<Heritage>();
+    public DbSet<CharacterAbility> CharacterAbilities => Set<CharacterAbility>();
+    public DbSet<Item> Items => Set<Item>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -65,9 +67,21 @@ public class DaggerheartDbContext(DbContextOptions<DaggerheartDbContext> options
             entity.Property(x => x.BackgroundAnswers)
                 .HasConversion<JsonStringListConverter>()
                 .Metadata.SetValueComparer(GetListValueComparer());
-            entity.Property(x => x.Inventory)
-                .HasConversion<JsonStringListConverter>()
-                .Metadata.SetValueComparer(GetListValueComparer());
+            entity.HasMany(x => x.Inventory)
+                .WithMany()
+                .UsingEntity<Dictionary<string, object>>(
+                    "CharacterItems",
+                    r => r.HasOne<Item>().WithMany().HasForeignKey("ItemId").OnDelete(DeleteBehavior.Cascade),
+                    l => l.HasOne<Character>().WithMany().HasForeignKey("CharacterId").OnDelete(DeleteBehavior.Cascade),
+                    j =>
+                    {
+                        j.HasKey("CharacterId", "ItemId");
+                        j.ToTable("CharacterItems");
+                    });
+
+            entity.Property(x => x.RowVersion)
+                .HasDefaultValue(Array.Empty<byte>())
+                .IsRowVersion();
 
             entity.OwnsOne(x => x.Traits, owned =>
             {
@@ -144,17 +158,10 @@ public class DaggerheartDbContext(DbContextOptions<DaggerheartDbContext> options
                 .HasForeignKey(x => x.SecondaryWeaponId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            entity.HasMany(x => x.DomainAbilities)
-                .WithMany()
-                .UsingEntity<Dictionary<string, object>>(
-                    "CharacterDomainAbility",
-                    r => r.HasOne<Ability>().WithMany().HasForeignKey("AbilityId").OnDelete(DeleteBehavior.Cascade),
-                    l => l.HasOne<Character>().WithMany().HasForeignKey("CharacterId").OnDelete(DeleteBehavior.Cascade),
-                    j =>
-                    {
-                        j.HasKey("CharacterId", "AbilityId");
-                        j.ToTable("CharacterDomainAbilities");
-                    });
+            entity.HasMany(x => x.CharacterAbilities)
+                .WithOne(x => x.Character)
+                .HasForeignKey(x => x.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
             
             entity.HasOne(x => x.Ancestry)
                 .WithMany()
@@ -340,6 +347,30 @@ public class DaggerheartDbContext(DbContextOptions<DaggerheartDbContext> options
                 damage.Property(x => x.Bonus).HasColumnName("DamageBonus").HasDefaultValue(0);
                 damage.Property(x => x.Type).HasColumnName("DamageType").IsRequired();
             });
+        });
+
+        modelBuilder.Entity<Item>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
+            entity.Property(x => x.Description).HasMaxLength(2000);
+        });
+
+        modelBuilder.Entity<CharacterAbility>(entity =>
+        {
+            entity.HasKey(x => new { x.CharacterId, x.AbilityId });
+            entity.ToTable("CharacterAbilities");
+            entity.Property(x => x.IsVaulted).HasDefaultValue(false);
+
+            entity.HasOne(x => x.Character)
+                .WithMany(x => x.CharacterAbilities)
+                .HasForeignKey(x => x.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.Ability)
+                .WithMany(x => x.CharacterAbilities)
+                .HasForeignKey(x => x.AbilityId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 

@@ -17,11 +17,11 @@ public sealed class AbilityCatalogQueries(DaggerheartDbContext context) : IAbili
         _abilities.AsNoTracking().FirstOrDefault(x => x.Id == id)
         ?? throw new KeyNotFoundException($"Ability '{id}' was not found.");
 
-    public Task<List<DomainAbilitySummary>> GetByDomainAsync(DomainType domain, int level) =>
+    public Task<List<AbilitySummary>> GetByDomainAsync(DomainType domain, int level) =>
         _abilities
             .AsNoTracking()
             .Where(a => a.DomainType == domain && a.Level == level)
-            .Select(a => new DomainAbilitySummary(
+            .Select(a => new AbilitySummary(
                 a.Id, a.Title, a.DomainType, a.Level, a.RecallCost, a.Type, a.FeatureDescription))
             .ToListAsync();
 }

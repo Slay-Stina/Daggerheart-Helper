@@ -16,7 +16,10 @@ public class Seed
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Seed>>();
     
     // Create database schema from model
-    await context.Database.EnsureCreatedAsync();
+    var created = await context.Database.EnsureCreatedAsync();
+    
+    if (created)
+        await EnsureConcurrencyTriggersAsync(context);
     
     // Check if already seeded
     if (await context.GameClasses.AnyAsync())
@@ -93,6 +96,26 @@ public class Seed
         await SaveChangesForBatchAsync("abilities");
         logger.LogInformation("{AbilityCount} abilities seeded", catalog.Abilities.Count);
 
+        logger.LogInformation("Seeding {ItemCount} items...", catalog.Items.Count);
+        var itemEntities = catalog.Items.ToEntities();
+        context.Items.AddRange(itemEntities);
+        await SaveChangesForBatchAsync("items");
+        logger.LogInformation("{ItemCount} SRD items seeded", catalog.Items.Count);
+
+        // Seed base items not in SRD (torch, rope, etc.)
+        logger.LogInformation("Seeding base items...");
+        if (!await context.Items.AnyAsync(i => i.Name == "Torch"))
+        {
+            context.Items.AddRange(
+                new Item { Name = "Torch", Description = "A simple torch that provides light." },
+                new Item { Name = "50 ft rope", Description = "A coil of sturdy rope." },
+                new Item { Name = "Basic supplies", Description = "General adventuring supplies." },
+                new Item { Name = "Minor Health Potion", Description = "Restores some health." },
+                new Item { Name = "Minor Stamina Potion", Description = "Restores some stamina." });
+            await SaveChangesForBatchAsync("base items");
+        }
+        logger.LogInformation("Base items seeded");
+        
         logger.LogInformation("Seeding {AncestryCount} ancestries...", catalog.Ancestries.Count);
         var heritageEntities = catalog.Ancestries.ToEntities();
         context.Heritages.AddRange(heritageEntities);
@@ -137,6 +160,16 @@ public class Seed
         logger.LogError(ex, "Failed to seed SRD data.");
         throw new InvalidOperationException("Failed to seed SRD data. See inner exception for details.", ex);
     }
+}
+
+public static async Task EnsureConcurrencyTriggersAsync(DaggerheartDbContext context)
+{
+    await context.Database.ExecuteSqlRawAsync(
+        "CREATE TRIGGER IF NOT EXISTS UpdateCharacterRowVersion " +
+        "AFTER UPDATE ON Characters " +
+        "BEGIN " +
+        "    UPDATE Characters SET RowVersion = randomblob(8) WHERE rowid = NEW.rowid; " +
+        "END;");
 }
 
 }

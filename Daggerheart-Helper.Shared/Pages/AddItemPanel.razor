@@ -1,6 +1,7 @@
 @implements IDialogContentComponent<AddItemResult>
 @inject IArmorCatalogQueries ArmorQueries
 @inject IWeaponCatalogQueries WeaponQueries
+@inject IItemCatalogQueries ItemQueries
 
 <FluentStack Orientation="Orientation.Vertical" VerticalGap="12" Width="100%">
     @* Custom Item *@
@@ -77,7 +78,7 @@
             @foreach (var item in _commonItems)
             {
                 <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => SelectCommonItem(item))" Style="padding: 6px 12px;">
-                    @item
+                    @item.Name
                 </FluentButton>
             }
         </div>
@@ -92,22 +93,20 @@
     private List<WeaponSummary> _primaryWeapons = new();
     private List<WeaponSummary> _secondaryWeapons = new();
     private List<ArmorSummary> _armors = new();
-    private static readonly string[] _commonItems = new[]
-    {
-        "Torch", "50 ft rope", "Basic supplies",
-        "Minor Health Potion", "Minor Stamina Potion",
-    };
+    private List<Item> _commonItems = new();
 
     protected override async Task OnInitializedAsync()
     {
         var weaponsTask = WeaponQueries.GetSummariesByTierAsync(1);
         var armorsTask = ArmorQueries.GetSummariesByTierAsync(1);
-        await Task.WhenAll(weaponsTask, armorsTask);
+        var commonTask = ItemQueries.GetAllAsync();
+        await Task.WhenAll(weaponsTask, armorsTask, commonTask);
 
         var allWeapons = weaponsTask.Result;
         _primaryWeapons = allWeapons.Where(w => w.Category == WeaponPriority.Primary).ToList();
         _secondaryWeapons = allWeapons.Where(w => w.Category == WeaponPriority.Secondary).ToList();
         _armors = armorsTask.Result;
+        _commonItems = commonTask.Result;
     }
 
     private async Task AddCustomItem()
@@ -131,12 +130,12 @@
         });
     }
 
-    private async Task SelectCommonItem(string name)
+    private async Task SelectCommonItem(Item item)
     {
         await CloseAndReturn(new AddItemResult
         {
-            ItemName = name,
-            CatalogId = null,
+            ItemName = item.Name,
+            CatalogId = item.Id,
             SlotType = null,
         });
     }
