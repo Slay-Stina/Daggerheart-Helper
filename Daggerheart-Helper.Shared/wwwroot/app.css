@@ -1,12 +1,31 @@
 @import '_content/Microsoft.FluentUI.AspNetCore.Components/css/reboot.css';
 
+:root {
+    --dh-font-heading: 'Outfit', 'Inter', system-ui, sans-serif;
+    --dh-font-body: 'Inter', 'Outfit', system-ui, -apple-system, sans-serif;
+    --dh-purple: #a78bfa;
+    --dh-pink: #ec4899;
+    --dh-hp: #f87171;
+    --dh-stress: #fb923c;
+    --dh-hope: #38bdf8;
+    --dh-positive: #10b981;
+    --dh-negative: #ef4444;
+    --dh-neutral: #9ca3af;
+    --dh-bg-start: #1e1e2f;
+    --dh-bg-end: #0c0c14;
+}
+
 body {
-    --body-font: "Segoe UI Variable", "Segoe UI", sans-serif;
+    --body-font: var(--dh-font-body);
     font-family: var(--body-font);
     font-size: var(--type-ramp-base-font-size);
     line-height: var(--type-ramp-base-line-height);
     margin: 0;
     min-height: 100dvh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--dh-font-heading);
 }
 
 .navmenu-icon {
@@ -128,6 +147,138 @@ footer {
 
 code {
     color: #c02d76;
+}
+
+/* ===== Daggerheart Design System ===== */
+
+/* Page */
+.page-bg {
+    background: radial-gradient(circle at top, var(--dh-bg-start) 0%, var(--dh-bg-end) 100%);
+}
+
+/* Typography */
+.title-page {
+    font-size: 2.2rem;
+    margin: 0 0 5px 0;
+    background: linear-gradient(135deg, var(--dh-purple) 0%, var(--dh-pink) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.title-section {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--dh-purple);
+}
+.title-step {
+    font-size: 1.4rem;
+    margin: 0;
+    color: #f3f4f6;
+}
+.title-card {
+    font-size: 1.15rem;
+    margin: 0 0 10px 0;
+    color: #f9fafb;
+}
+.title-review {
+    color: var(--dh-purple);
+    border-bottom: 1px solid rgba(167, 139, 250, 0.15);
+    padding-bottom: 8px;
+    margin: 0 0 15px 0;
+}
+.text-subtitle {
+    color: var(--dh-neutral);
+    font-size: 0.95rem;
+}
+.text-desc {
+    color: var(--dh-neutral);
+    font-size: 0.9rem;
+}
+.text-caption {
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+.text-sm {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--dh-neutral);
+    letter-spacing: 0.5px;
+}
+.text-muted {
+    color: var(--dh-neutral);
+    font-size: 0.85rem;
+}
+.text-feat-name {
+    color: #d8b4fe;
+    font-weight: 600;
+}
+
+/* Semantic colors */
+.text-hp        { color: var(--dh-hp); }
+.text-stress    { color: var(--dh-stress); }
+.text-hope      { color: var(--dh-hope); }
+.text-positive  { color: var(--dh-positive); }
+.text-negative  { color: var(--dh-negative); }
+.text-accent    { color: var(--dh-purple); }
+.text-neutral   { color: var(--dh-neutral); }
+
+.text-val {
+    color: #e5e7eb;
+}
+
+/* Cards */
+.card-section {
+    background: rgba(25, 25, 40, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 16px 20px;
+}
+.card-subtle {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+}
+
+/* Pools */
+.chip-pool {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 8px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.grid-traits {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+}
+
+/* Semantic backgrounds & borders */
+.bg-hp-subtle     { background: color-mix(in srgb, var(--dh-hp) 5%, transparent); }
+.bg-stress-subtle { background: color-mix(in srgb, var(--dh-stress) 5%, transparent); }
+.bg-hope-subtle   { background: color-mix(in srgb, var(--dh-hope) 5%, transparent); }
+
+.border-hp     { border-color: color-mix(in srgb, var(--dh-hp) 20%, transparent); }
+.border-stress { border-color: color-mix(in srgb, var(--dh-stress) 20%, transparent); }
+.border-hope   { border-color: color-mix(in srgb, var(--dh-hope) 20%, transparent); }
+
+/* Spacing */
+.mb-step {
+    margin-bottom: 1.5rem;
+}
+.divider-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 12px;
+}
+
+/* Animation */
+.animate-fade {
+    animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 600px) {

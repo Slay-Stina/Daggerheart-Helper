@@ -1,0 +1,816 @@
+@page "/character/{id:guid}"
+@using Microsoft.FluentUI.AspNetCore.Components.Icons.Filled
+@inject ICharacterService CharacterService
+@inject IArmorCatalogQueries ArmorQueries
+@inject IWeaponCatalogQueries WeaponQueries
+@inject IAbilityCatalogQueries AbilityQueries
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+
+<PageTitle>@(_character?.Name ?? "Character")</PageTitle>
+
+<div class="sheet-container animate-fade">
+    @if (_loading)
+    {
+        <div class="loading-container">
+            <FluentProgressRing />
+            <p>Loading character…</p>
+        </div>
+    }
+    else if (_character == null)
+    {
+        <div class="empty-state">
+            <FluentIcon Value="@(new Size48.PeopleCommunity())" Color="Color.Neutral" />
+            <h3>Character not found</h3>
+            <FluentButton Appearance="Appearance.Accent" OnClick="@(() => NavigationManager.NavigateTo("/Characters") )">
+                Back to Characters
+            </FluentButton>
+        </div>
+    }
+    else
+    {
+        <div class="sheet-header">
+            <div class="header-left">
+                <FluentButton Appearance="Appearance.Stealth"
+                              IconStart="@(new Size20.ArrowLeft())"
+                              OnClick="@(() => NavigationManager.NavigateTo("/Characters") )"
+                              Title="Back to Characters" />
+                <div class="header-text">
+                    <h2>@_character.Name</h2>
+                    <span class="header-subtitle">
+                        @_character.Ancestry.Name
+                        @_character.Subclass.Name
+                        @_character.GameClass.Name
+                        — Level @_character.Level
+                    </span>
+                </div>
+            </div>
+            <div class="header-actions">
+                @if (_isEditing)
+                {
+                    <FluentButton Appearance="Appearance.Accent" OnClick="@LevelUp" Disabled="@(_character.Level >= 10)">
+                        Level Up! (@_character.Level -> @(_character.Level + 1))
+                    </FluentButton>
+                    <FluentButton Appearance="Appearance.Accent" OnClick="@SaveEdit">
+                        Save Changes
+                    </FluentButton>
+                    <FluentButton Appearance="Appearance.Neutral" OnClick="@CancelEdit">
+                        Cancel
+                    </FluentButton>
+                }
+                else
+                {
+                    <FluentButton Appearance="Appearance.Accent" OnClick="@EnterEditMode">
+                        Edit
+                    </FluentButton>
+                }
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <FluentMessageBar Intent="MessageIntent.Error">
+                <span>@_errorMessage</span>
+            </FluentMessageBar>
+        }
+
+        <FluentGrid Spacing="2">
+            <FluentGridItem Xs="12" Sm="6">
+                @* Resource Pools *@
+                <div class="card-section">
+                    <FluentGrid Spacing="2">
+                        <FluentGridItem Xs="6" Sm="3">
+                            @if (_isEditing)
+                            {
+                                <div class="pool-edit hp">
+                                    <span class="pool-label">HP</span>
+                                    <div class="pool-inputs">
+                                        <FluentNumberField @bind-Value="_editHpCurrent" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
+                                        <span class="pool-sep">/</span>
+                                        <FluentNumberField @bind-Value="_editHpMax" Min="1" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="chip-pool bg-hp-subtle border-hp">
+                                    <span class="text-hp text-sm">HITPOINTS</span>
+                                    <strong class="text-hp">@_character.HitPoints.Current / @_character.HitPoints.Max</strong>
+                                </div>
+                            }
+                        </FluentGridItem>
+                        <FluentGridItem Xs="6" Sm="3">
+                            @if (_isEditing)
+                            {
+                                <div class="pool-edit stress">
+                                    <span class="pool-label">STRESS</span>
+                                    <div class="pool-inputs">
+                                        <FluentNumberField @bind-Value="_editStressCurrent" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
+                                        <span class="pool-sep">/</span>
+                                        <FluentNumberField @bind-Value="_editStressMax" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="chip-pool bg-stress-subtle border-stress">
+                                    <span class="text-stress text-sm">STRESS</span>
+                                    <strong class="text-stress">@_character.Stress.Current / @_character.Stress.Max</strong>
+                                </div>
+                            }
+                        </FluentGridItem>
+                        <FluentGridItem Xs="6" Sm="3">
+                            @if (_isEditing)
+                            {
+                                <div class="pool-edit hope">
+                                    <span class="pool-label">HOPE</span>
+                                    <div class="pool-inputs">
+                                        <FluentNumberField @bind-Value="_editHopeCurrent" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
+                                        <span class="pool-sep">/</span>
+                                        <FluentNumberField @bind-Value="_editHopeMax" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="chip-pool bg-hope-subtle border-hope">
+                                    <span class="text-hope text-sm">HOPE</span>
+                                    <strong class="text-hope">@_character.Hope.Current / @_character.Hope.Max</strong>
+                                </div>
+                            }
+                        </FluentGridItem>
+                        <FluentGridItem Xs="6" Sm="3">
+                            @if (_isEditing)
+                            {
+                                <div class="pool-edit armor">
+                                    <span class="pool-label">ARMOR</span>
+                                    <div class="pool-inputs">
+                                        <FluentNumberField @bind-Value="_editArmorCurrent" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
+                                        <span class="pool-sep">/</span>
+                                        <FluentNumberField @bind-Value="_editArmorMax" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="chip-pool card-subtle">
+                                    <span class="text-neutral text-sm">ARMOR</span>
+                                    <strong class="text-neutral">@_character.ArmorSlots.Current / @_character.ArmorSlots.Max</strong>
+                                </div>
+                            }
+                        </FluentGridItem>
+                    </FluentGrid>
+                </div>
+
+            </FluentGridItem>
+            <FluentGridItem Xs="12" Sm="6">
+                @* Traits *@
+                <div class="card-section">
+                    <FluentGrid Spacing="1">
+                        <FluentGridItem Xs="4" Sm="2">
+                            <div class="card-subtle" style="padding:6px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                                <span class="text-sm">AGILITY</span>
+                                <strong class="@TraitColorClass(_character.Traits.Agility)">@FormatModifier(_character.Traits.Agility)</strong>
+                            </div>
+                        </FluentGridItem>
+                        <FluentGridItem Xs="4" Sm="2">
+                            <div class="card-subtle" style="padding:6px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                                <span class="text-sm">STRENGTH</span>
+                                <strong class="@TraitColorClass(_character.Traits.Strength)">@FormatModifier(_character.Traits.Strength)</strong>
+                            </div>
+                        </FluentGridItem>
+                        <FluentGridItem Xs="4" Sm="2">
+                            <div class="card-subtle" style="padding:6px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                                <span class="text-sm">FINESSE</span>
+                                <strong class="@TraitColorClass(_character.Traits.Finesse)">@FormatModifier(_character.Traits.Finesse)</strong>
+                            </div>
+                        </FluentGridItem>
+                        <FluentGridItem Xs="4" Sm="2">
+                            <div class="card-subtle" style="padding:6px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                                <span class="text-sm">INSTINCT</span>
+                                <strong class="@TraitColorClass(_character.Traits.Instinct)">@FormatModifier(_character.Traits.Instinct)</strong>
+                            </div>
+                        </FluentGridItem>
+                        <FluentGridItem Xs="4" Sm="2">
+                            <div class="card-subtle" style="padding:6px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                                <span class="text-sm">PRESENCE</span>
+                                <strong class="@TraitColorClass(_character.Traits.Presence)">@FormatModifier(_character.Traits.Presence)</strong>
+                            </div>
+                        </FluentGridItem>
+                        <FluentGridItem Xs="4" Sm="2">
+                            <div class="card-subtle" style="padding:6px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                                <span class="text-sm">KNOWLEDGE</span>
+                                <strong class="@TraitColorClass(_character.Traits.Knowledge)">@FormatModifier(_character.Traits.Knowledge)</strong>
+                            </div>
+                        </FluentGridItem>
+                    </FluentGrid>
+                </div>
+            </FluentGridItem>
+        </FluentGrid>
+
+        @* Two-column grid: Equipment + Abilities *@
+        <div class="content-grid">
+            @* Equipment *@
+            <FluentCard class="section-card">
+                <FluentTabs ActiveTabId="@_equipmentTab" ActiveTabIdChanged="@(v => _equipmentTab = v)">
+                    <FluentTab Id="equipped" Label="Equipped">
+                        <div class="tab-content">
+                            <div class="equipped-view">
+                                <div class="equip-row">
+                                    <span class="equip-label">Proficiency Bonus:</span>
+                                    <span class="equip-value">+@_character.Proficiency</span>
+                                </div>
+                                <div class="equip-row">
+                                    <span class="equip-label">Primary Weapon:</span>
+                                    <span class="equip-value">@(_character.PrimaryWeapon?.Name ?? "None") @FormatWeaponDamage(_character.PrimaryWeapon)</span>
+                                </div>
+                                @if (_character.SecondaryWeapon != null)
+                                {
+                                    <div class="equip-row">
+                                        <span class="equip-label">Secondary Weapon:</span>
+                                        <span class="equip-value">@_character.SecondaryWeapon.Name @FormatWeaponDamage(_character.SecondaryWeapon)</span>
+                                    </div>
+                                }
+                                <div class="equip-row">
+                                    <span class="equip-label">Armor:</span>
+                                    <span class="equip-value">@(_character.EquippedArmor?.Name ?? "None")</span>
+                                </div>
+                            </div>
+                            @if (_isEditing)
+                            {
+                                <div class="text-muted divider-section" style="margin-top: 12px;">
+                                    Equip items from the Inventory tab below.
+                                </div>
+                            }
+                        </div>
+                    </FluentTab>
+                    <FluentTab Id="inventory" Label="Inventory">
+                        <div class="tab-content">
+                            @if (_isEditing)
+                            {
+                                <div class="inventory-edit">
+                                    <div class="inventory-row">
+                                        <span class="equip-label">Gold:</span>
+                                        <FluentNumberField @bind-Value="_editGold" Min="0" HideStep="true" Style="width: 80px;" />
+                                        <span class="equip-value">handful(s)</span>
+                                    </div>
+                                    <div style="margin-top: 12px;">
+                                        <span class="equip-label">Items:</span>
+                                        @for (int i = 0; i < _editInventory.Count; i++)
+                                        {
+                                            var idx = i;
+                                            var entry = _editInventory[idx];
+                                            <div class="inventory-item-row">
+                                                <span class="inv-item-name @(entry.CatalogId != null ? "inv-match" : "")">@entry.Name</span>
+                                                @if (entry.CatalogId != null)
+                                                {
+                                                    var equipped = IsSlotEquipped(entry.CatalogId.Value, entry.SlotType!);
+                                                    <FluentButton Appearance="@(equipped ? Appearance.Accent : Appearance.Stealth)"
+                                                                   OnClick="@(() => ToggleEquip(idx))"
+                                                                   Style="min-width: 80px;">
+                                                        @(equipped ? "Unequip" : "Equip")
+                                                    </FluentButton>
+                                                }
+                                                <FluentButton Appearance="Appearance.Stealth"
+                                           IconStart="@(new Size20.Delete())"
+                                                           OnClick="@(() => RemoveInventoryItem(idx))"
+                                                           Style="color: var(--dh-negative);" />
+                                            </div>
+                                        }
+                                        <FluentButton Appearance="Appearance.Accent" OnClick="@ShowAddItemPanel" Style="margin-top: 8px;">
+                                            Add Item
+                                        </FluentButton>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="inventory-view">
+                                    <div class="equip-row">
+                                        <span class="equip-label">Gold:</span>
+                                        <span class="equip-value">@_character.GoldHandfuls handful(s)</span>
+                                    </div>
+                                    @if (_character.Inventory.Count > 0)
+                                    {
+                                        <div class="inventory-badges">
+                                            @foreach (var item in _character.Inventory)
+                                            {
+                                                <FluentBadge Appearance="Appearance.Neutral">@item.Name</FluentBadge>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-muted" style="margin-top: 8px;">No items</div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </FluentTab>
+                </FluentTabs>
+            </FluentCard>
+
+            @* Abilities *@
+            <FluentCard class="section-card">
+                <div class="section-title">Domain Abilities</div>
+                @if (_isEditing)
+                {
+                    @* Available abilities *@
+                    <div class="ability-section">
+                        <div class="ability-section-header">
+                            <span class="text-sm">Available (@(_domainAbilities.Count))</span>
+                        </div>
+                        @if (_domainAbilities.Count > 0)
+                        {
+                            <div class="ability-pick-list">
+                                @foreach (var ab in _domainAbilities)
+                                {
+                                    <div class="ability-entry">
+                                        <div class="ability-info">
+                                            <span class="ability-name">@ab.Title</span>
+                                            <FluentBadge Appearance="Appearance.Neutral">@ab.DomainType · Lv @ab.Level · @ab.Type · Recall @ab.RecallCost</FluentBadge>
+                                        </div>
+                                        <FluentButton Appearance="Appearance.Accent" OnClick="@(() => AddAbility(ab))" Title="Add to active">
+                                            <FluentIcon Value="@(new Size20.ArrowRight())" />
+                                        </FluentButton>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-muted" style="padding: 8px;">All abilities acquired for your level and domains.</div>
+                        }
+                    </div>
+
+                    @* Active abilities *@
+                    <div class="ability-section">
+                        <div class="ability-section-header">
+                            <span class="text-sm">Active (@(_editActiveAbilities.Count) / 5)</span>
+                        </div>
+                        @if (_editActiveAbilities.Count > 0)
+                        {
+                            <div class="ability-pick-list">
+                                @foreach (var ca in _editActiveAbilities)
+                                {
+                                    <div class="ability-entry">
+                                        <div class="ability-info">
+                                            <span class="ability-name">@ca.Ability.Title</span>
+                                            <FluentBadge Appearance="Appearance.Neutral">@ca.Ability.DomainType · Recall @ca.Ability.RecallCost</FluentBadge>
+                                        </div>
+                                        <FluentButton Appearance="Appearance.Stealth" OnClick="@(() => VaultAbility(ca.AbilityId))" Title="Move to vault">
+                                            <FluentIcon Value="@(new Size20.ArrowDownload())" />
+                                        </FluentButton>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-muted" style="padding: 8px;">No active abilities.</div>
+                        }
+                    </div>
+
+                    @* Vault *@
+                    <div class="ability-section">
+                        <div class="ability-section-header">
+                            <span class="text-sm">Vault (@(_editVaultAbilities.Count))</span>
+                        </div>
+                        @if (_editVaultAbilities.Count > 0)
+                        {
+                            <div class="ability-pick-list">
+                                @foreach (var ca in _editVaultAbilities)
+                                {
+                                    <div class="ability-entry">
+                                        <div class="ability-info">
+                                            <span class="ability-name">@ca.Ability.Title</span>
+                                            <FluentBadge Appearance="Appearance.Neutral">@ca.Ability.DomainType · Recall @ca.Ability.RecallCost</FluentBadge>
+                                        </div>
+                                        <FluentButton Appearance="Appearance.Stealth" OnClick="@(() => ActivateAbility(ca.AbilityId))" Title="Move to active">
+                                            <FluentIcon Value="@(new Size20.ArrowUpload())" />
+                                        </FluentButton>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-muted" style="padding: 8px;">Vault is empty.</div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    var activeAbilities = _character.CharacterAbilities?.Where(ca => !ca.IsVaulted).ToList() ?? new();
+                    @if (activeAbilities.Count > 0)
+                    {
+                        <div class="abilities-list">
+                            @foreach (var ca in activeAbilities)
+                            {
+                                <div class="ability-card">
+                                    <div class="ability-header">
+                                        <span class="ability-name">@ca.Ability.Title</span>
+                                        <FluentBadge Appearance="Appearance.Neutral">@ca.Ability.Type · Recall @ca.Ability.RecallCost</FluentBadge>
+                                    </div>
+                                    <div class="ability-desc">
+                                        @ca.Ability.FeatureDescription.ToMarkdownHtml()
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted" style="padding: 20px; text-align: center;">No domain abilities</div>
+                    }
+                }
+            </FluentCard>
+        </div>
+
+        @* Experiences (prominent, full width) *@
+        <FluentCard class="experiences-card">
+            <div class="section-title">Experiences</div>
+            @if (_isEditing)
+            {
+                <div class="exp-edit">
+                    @for (int i = 0; i < _editExperiences.Count; i++)
+                    {
+                        var idx = i;
+                        <div class="exp-edit-row">
+                            <FluentTextField @bind-Value="_editExperiences[idx]" Style="width: 100%;" />
+                            <FluentButton Appearance="Appearance.Stealth"
+                                           IconStart="@(new Size20.Delete())"
+                                           OnClick="@(() => RemoveExperience(idx))"
+                                           Style="color: var(--dh-negative);" />
+                        </div>
+                    }
+                    <FluentButton Appearance="Appearance.Accent" OnClick="@AddExperience" Style="margin-top: 8px;">
+                        Add Experience
+                    </FluentButton>
+                </div>
+            }
+            else
+            {
+                @if (_character.Experiences.Count > 0)
+                {
+                    <div class="exp-list">
+                        @foreach (var exp in _character.Experiences)
+                        {
+                            <div class="exp-chip-large">
+                                <FluentIcon Value="@(new Size20.Star())" Color="Color.Accent" />
+                                <span>@exp (+2)</span>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted">No experiences</div>
+                }
+            }
+        </FluentCard>
+
+        @* Background Questions *@
+        @if (_character.BackgroundAnswers.Any(a => !string.IsNullOrWhiteSpace(a)))
+        {
+            <FluentCard class="section-card full-width">
+                <div class="section-title">Background</div>
+                <div class="bg-list">
+                    @for (int i = 0; i < _character.BackgroundAnswers.Count; i += 2)
+                    {
+                        var question = _character.BackgroundAnswers[i];
+                        var answer = i + 1 < _character.BackgroundAnswers.Count ? _character.BackgroundAnswers[i + 1] : null;
+                        if (!string.IsNullOrWhiteSpace(question))
+                        {
+                            <div class="bg-item">
+                                <div class="bg-question">@question</div>
+                                @if (!string.IsNullOrWhiteSpace(answer))
+                                {
+                                    <div class="bg-answer">@answer</div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </FluentCard>
+        }
+
+        @* Description *@
+        @if (DescriptionFields.Any(f => !string.IsNullOrWhiteSpace(f.Value)))
+        {
+            <FluentCard class="section-card full-width">
+                <div class="section-title">Description</div>
+                <div class="desc-grid">
+                    @foreach (var (label, val) in DescriptionFields)
+                    {
+                        if (!string.IsNullOrWhiteSpace(val))
+                        {
+                            <div class="desc-item">
+                                <span class="desc-label">@label:</span>
+                                <span class="desc-value">@val</span>
+                            </div>
+                        }
+                    }
+                </div>
+            </FluentCard>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private Character? _character;
+    private bool _loading = true;
+    private bool _isEditing;
+    private string _errorMessage = string.Empty;
+    private string _equipmentTab = "equipped";
+
+    private int _editHpCurrent;
+    private int _editHpMax;
+    private int _editStressCurrent;
+    private int _editStressMax;
+    private int _editHopeCurrent;
+    private int _editHopeMax;
+    private int _editArmorCurrent;
+    private int _editArmorMax;
+    private int _editGold;
+    private List<InventoryEntry> _editInventory = new();
+    private List<string> _editExperiences = new();
+    private Guid? _editEquippedArmorId;
+    private Guid? _editPrimaryWeaponId;
+    private Guid? _editSecondaryWeaponId;
+    private List<CharacterAbility> _editActiveAbilities = new();
+    private List<CharacterAbility> _editVaultAbilities = new();
+    private List<AbilitySummary> _domainAbilities = new();
+
+    private List<ArmorSummary> _armors = new();
+    private List<WeaponSummary> _weapons = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCharacter();
+    }
+
+    private async Task LoadCharacter()
+    {
+        _loading = true;
+        try
+        {
+            _character = await CharacterService.GetByIdAsync(Id);
+            if (_character == null)
+            {
+                NavigationManager.NavigateTo("/Characters");
+            }
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task EnterEditMode()
+    {
+        _editHpCurrent = _character!.HitPoints.Current;
+        _editHpMax = _character.HitPoints.Max;
+        _editStressCurrent = _character.Stress.Current;
+        _editStressMax = _character.Stress.Max;
+        _editHopeCurrent = _character.Hope.Current;
+        _editHopeMax = _character.Hope.Max;
+        _editArmorCurrent = _character.ArmorSlots.Current;
+        _editArmorMax = _character.ArmorSlots.Max;
+        _editGold = _character.GoldHandfuls;
+        _editInventory = _character.Inventory
+            .Select(item => new InventoryEntry
+            {
+                Name = item.Name,
+                CatalogId = item.Id,
+                SlotType = null,
+            })
+            .ToList();
+        _editExperiences = _character.Experiences.ToList();
+        _editEquippedArmorId = _character.EquippedArmorId;
+        _editPrimaryWeaponId = _character.PrimaryWeaponId;
+        _editSecondaryWeaponId = _character.SecondaryWeaponId;
+        _editActiveAbilities = _character.CharacterAbilities
+            .Where(ca => !ca.IsVaulted)
+            .Select(ca => new CharacterAbility { AbilityId = ca.AbilityId, IsVaulted = false, Ability = ca.Ability })
+            .ToList();
+        _editVaultAbilities = _character.CharacterAbilities
+            .Where(ca => ca.IsVaulted)
+            .Select(ca => new CharacterAbility { AbilityId = ca.AbilityId, IsVaulted = true, Ability = ca.Ability })
+            .ToList();
+
+        await Task.WhenAll(LoadEquipmentCatalogAsync(), LoadDomainAbilitiesAsync());
+        _isEditing = true;
+    }
+
+    private async Task LoadEquipmentCatalogAsync()
+    {
+        var armorsTask = ArmorQueries.GetSummariesByTierAsync(1);
+        var weaponsTask = WeaponQueries.GetSummariesByTierAsync(1);
+        await Task.WhenAll(armorsTask, weaponsTask);
+        _armors = armorsTask.Result;
+        _weapons = weaponsTask.Result;
+    }
+
+    private async Task SaveEdit()
+    {
+        try
+        {
+            _character!.HitPoints = new ResourcePool(_editHpCurrent, _editHpMax);
+            _character.Stress = new ResourcePool(_editStressCurrent, _editStressMax);
+            _character.Hope = new ResourcePool(_editHopeCurrent, _editHopeMax);
+            _character.ArmorSlots = new ResourcePool(_editArmorCurrent, _editArmorMax);
+            _character.GoldHandfuls = _editGold;
+            _character.Inventory = _editInventory
+                .Where(e => e.SlotType is null)
+                .Select(e => e.CatalogId is not null
+                    ? new Item { Id = e.CatalogId.Value, Name = e.Name, Description = "" }
+                    : new Item { Id = Guid.NewGuid(), Name = e.Name, Description = "" })
+                .ToList();
+            _character.Experiences = _editExperiences;
+            _character.EquippedArmorId = _editEquippedArmorId;
+            _character.PrimaryWeaponId = _editPrimaryWeaponId;
+            _character.SecondaryWeaponId = _editSecondaryWeaponId;
+            _character.CharacterAbilities = _editActiveAbilities
+                .Concat(_editVaultAbilities)
+                .ToList();
+
+            await CharacterService.SaveAsync(_character);
+            await LoadCharacter();
+            _isEditing = false;
+            _errorMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Failed to save: {ex.Message}";
+        }
+    }
+
+    private async Task LoadDomainAbilitiesAsync()
+    {
+        _domainAbilities = await CharacterService.GetAvailableAbilitiesAsync(_character!.Id);
+    }
+
+    private async Task AddAbility(AbilitySummary ab)
+    {
+        _editActiveAbilities.Add(new CharacterAbility
+        {
+            AbilityId = ab.Id,
+            IsVaulted = false,
+            Ability = new Ability { Id = ab.Id, Title = ab.Title, DomainType = ab.DomainType, Level = ab.Level, RecallCost = ab.RecallCost, Type = ab.Type, FeatureDescription = ab.FeatureDescription },
+        });
+        _domainAbilities.RemoveAll(a => a.Id == ab.Id);
+    }
+
+    private void VaultAbility(Guid abilityId)
+    {
+        var ca = _editActiveAbilities.FirstOrDefault(a => a.AbilityId == abilityId);
+        if (ca == null) return;
+        ca.IsVaulted = true;
+        _editActiveAbilities.Remove(ca);
+        _editVaultAbilities.Add(ca);
+    }
+
+    private void ActivateAbility(Guid abilityId)
+    {
+        var ca = _editVaultAbilities.FirstOrDefault(a => a.AbilityId == abilityId);
+        if (ca == null) return;
+        ca.IsVaulted = false;
+        _editVaultAbilities.Remove(ca);
+        _editActiveAbilities.Add(ca);
+    }
+
+    private async Task LevelUp()
+    {
+        if (_character!.Level >= 10) return;
+        _character.Level++;
+        _domainAbilities = await CharacterService.GetAvailableAbilitiesAsync(_character.Id);
+    }
+
+    private void CancelEdit()
+    {
+        _isEditing = false;
+        _errorMessage = string.Empty;
+    }
+
+    private void RemoveInventoryItem(int index)
+    {
+        var entry = _editInventory[index];
+        _editInventory.RemoveAt(index);
+        if (entry.CatalogId != null && IsSlotEquipped(entry.CatalogId.Value, entry.SlotType!))
+        {
+            switch (entry.SlotType)
+            {
+                case "Primary": _editPrimaryWeaponId = null; break;
+                case "Secondary": _editSecondaryWeaponId = null; break;
+                case "Armor": _editEquippedArmorId = null; break;
+            }
+        }
+    }
+
+    private void AddExperience()
+    {
+        _editExperiences.Add(string.Empty);
+    }
+
+    private void RemoveExperience(int index)
+    {
+        _editExperiences.RemoveAt(index);
+    }
+
+    private string FormatModifier(int val)
+    {
+        return val >= 0 ? $"+{val}" : val.ToString();
+    }
+
+    private string TraitColorClass(int val)
+    {
+        return val > 0 ? "text-positive" : val < 0 ? "text-negative" : "text-neutral";
+    }
+
+    private string FormatWeaponDamage(Weapon? wp)
+    {
+        if (wp == null) return "(0)";
+        return $"({wp.Damage.NumberOfDice}d{wp.Damage.NumberOfSides}{(wp.Damage.Bonus > 0 ? "+" + wp.Damage.Bonus : "")} {wp.Damage.Type})";
+    }
+
+    private bool IsSlotEquipped(Guid catalogId, string slotType)
+    {
+        return slotType switch
+        {
+            "Primary" => _editPrimaryWeaponId == catalogId,
+            "Secondary" => _editSecondaryWeaponId == catalogId,
+            "Armor" => _editEquippedArmorId == catalogId,
+            _ => false
+        };
+    }
+
+    private void ToggleEquip(int index)
+    {
+        var entry = _editInventory[index];
+        if (entry.CatalogId == null || entry.SlotType == null) return;
+        var catalogId = entry.CatalogId.Value;
+        var slotType = entry.SlotType;
+        if (IsSlotEquipped(catalogId, slotType))
+        {
+            switch (slotType)
+            {
+                case "Primary": _editPrimaryWeaponId = null; break;
+                case "Secondary": _editSecondaryWeaponId = null; break;
+                case "Armor": _editEquippedArmorId = null; break;
+            }
+        }
+        else
+        {
+            switch (slotType)
+            {
+                case "Primary": _editPrimaryWeaponId = catalogId; break;
+                case "Secondary": _editSecondaryWeaponId = catalogId; break;
+                case "Armor": _editEquippedArmorId = catalogId; break;
+            }
+        }
+    }
+
+    private async Task ShowAddItemPanel()
+    {
+        var dialog = await DialogService.ShowDialogAsync<AddItemPanel>(
+            new AddItemResult(),
+            new DialogParameters
+            {
+                Title = "Add Item",
+                PrimaryAction = null,
+                Width = "400px",
+            });
+        var result = await dialog.Result;
+        if (result is { Cancelled: false, Data: AddItemResult addResult })
+        {
+            _editInventory.Add(new InventoryEntry
+            {
+                Name = addResult.ItemName,
+                CatalogId = addResult.CatalogId,
+                SlotType = addResult.SlotType,
+            });
+            if (addResult is { CatalogId: not null, SlotType: not null })
+            {
+                switch (addResult.SlotType)
+                {
+                    case "Primary": _editPrimaryWeaponId = addResult.CatalogId; break;
+                    case "Secondary": _editSecondaryWeaponId = addResult.CatalogId; break;
+                    case "Armor": _editEquippedArmorId = addResult.CatalogId; break;
+                }
+            }
+        }
+    }
+
+    private (string Label, string? Value)[] DescriptionFields =>
+    [
+        ("Eyes", _character?.DescriptionEyes),
+        ("Body", _character?.DescriptionBody),
+        ("Clothes", _character?.DescriptionClothes),
+        ("Skin", _character?.DescriptionSkin),
+        ("Attitude", _character?.DescriptionAttitude)
+    ];
+}

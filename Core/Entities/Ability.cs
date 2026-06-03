@@ -11,4 +11,5 @@ public class Ability
     public int RecallCost { get; init; }
     public AbilityType Type { get; init; }
     public string FeatureDescription { get; init; } = string.Empty;
+    public List<CharacterAbility> CharacterAbilities { get; set; } = new();
 }   

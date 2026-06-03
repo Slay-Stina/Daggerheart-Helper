@@ -2,7 +2,7 @@ using Core.Enums;
 
 namespace Application.Dtos;
 
-public sealed record DomainAbilitySummary(
+public sealed record AbilitySummary(
     Guid Id,
     string Title,
     DomainType DomainType,

@@ -1,5 +1,6 @@
 @page "/Characters"
 @inject ICharacterService CharacterService
+@inject IDialogService DialogService
 @inject NavigationManager NavigationManager
 
 <PageTitle>My Characters</PageTitle>
@@ -37,18 +38,30 @@
         <div class="character-grid animate-fade">
             @foreach (var ch in _characters)
             {
-                <div class="character-card">
+                <div class="character-card" @onclick="@(() => NavigateTo(ch.Id))" @onclick:stopPropagation>
                     <div class="card-accent"></div>
                     <div class="card-header">
                         <div class="char-title">
                             <h3>@ch.Name</h3>
                             <span class="char-class">Level @ch.Level @ch.GameClass.Name (@ch.Subclass.Name)</span>
                         </div>
-                        <FluentButton Appearance="Appearance.Stealth" 
-                                      IconStart="@(new Icons.Filled.Size20.Delete())" 
-                                      OnClick="@(() => ConfirmDelete(ch.Id))" 
-                                      Title="Delete character"
-                                      Style="color: #ef4444;" />
+                        <span @onclick:stopPropagation>
+                            <FluentButton
+                                Appearance="Appearance.Stealth" 
+                                IconStart="@(new Icons.Filled.Size20.Eye())" 
+                                OnClick="@(() => NavigationManager.NavigateTo($"/QuickView/{ch.Id}"))" 
+                                Title="Quick View"
+                                Style="color: var(--dh-neutral); margin-right: 4px;" />
+                        </span>
+                        <span @onclick:stopPropagation>
+                            <FluentButton
+                                Appearance="Appearance.Stealth" 
+                                IconStart="@(new Icons.Filled.Size20.Delete())" 
+                                OnClick="@(() => ConfirmDelete(ch.Id))" 
+                                Disabled="@_isDeleting"
+                                Title="Delete character"
+                                Style="color: var(--dh-negative);" />
+                        </span>
                     </div>
 
                     <div class="card-body">
@@ -162,6 +175,7 @@
 @code {
     private List<Character> _characters = new();
     private bool _loading = true;
+    private bool _isDeleting;
 
     protected override async Task OnInitializedAsync()
     {
@@ -188,9 +202,40 @@
 
     private async Task ConfirmDelete(Guid id)
     {
-        // Simple alert confirmation, can be replaced by Fluent Dialog
-        await CharacterService.DeleteAsync(id);
-        await LoadCharacters();
+        if (_isDeleting) return;
+
+        var dialog = await DialogService.ShowConfirmationAsync(
+            "Are you sure you want to delete this character? This action cannot be undone.",
+            primaryText: "Delete",
+            secondaryText: "Cancel",
+            title: "Delete Character");
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            _isDeleting = true;
+            try
+            {
+                await CharacterService.DeleteAsync(id);
+                await LoadCharacters();
+            }
+            catch
+            {
+                await LoadCharacters();
+            }
+            finally
+            {
+                _isDeleting = false;
+            }
+        }
+        else
+        {
+            await dialog.CloseAsync();
+        }
+    }
+
+    private void NavigateTo(Guid id)
+    {
+        NavigationManager.NavigateTo($"/character/{id}");
     }
 
     private string FormatVal(int val)

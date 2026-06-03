@@ -7,5 +7,6 @@ public sealed record SrdCatalog(
     IReadOnlyList<AncestryCard> Ancestries,
     IReadOnlyList<CommunityCard> Communities,
     IReadOnlyList<SubclassCard> Subclasses,
-    IReadOnlyList<ClassCard> Classes);
+    IReadOnlyList<ClassCard> Classes,
+    IReadOnlyList<ItemCard> Items);
 

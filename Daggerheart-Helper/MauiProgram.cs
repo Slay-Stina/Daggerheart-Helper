@@ -51,6 +51,9 @@ public static class MauiProgram
         context.Database.EnsureCreated();
         Android.Util.Log.Debug("DHELPER", "EnsureCreated done");
 
+        Seed.EnsureConcurrencyTriggersAsync(context).GetAwaiter().GetResult();
+        Android.Util.Log.Debug("DHELPER", "Concurrency triggers created");
+
         if (context.GameClasses.Any())
         {
             logger.LogInformation("Database already seeded.");

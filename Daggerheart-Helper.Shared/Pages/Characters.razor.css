@@ -1,9 +1,8 @@
 .dashboard-container {
     padding: 30px;
-    background: radial-gradient(circle at top, #1e1e2f 0%, #0c0c14 100%);
+    background: radial-gradient(circle at top, var(--dh-bg-start) 0%, var(--dh-bg-end) 100%);
     min-height: 90vh;
     color: #f0f0f5;
-    font-family: 'Outfit', 'Inter', sans-serif;
 }
 
 .dashboard-header {
@@ -18,14 +17,14 @@
 .header-text h2 {
     font-size: 2.2rem;
     margin: 0 0 5px 0;
-    background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+    background: linear-gradient(135deg, var(--dh-purple) 0%, var(--dh-pink) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .header-text p {
     margin: 0;
-    color: #9ca3af;
+    color: var(--dh-neutral);
     font-size: 0.95rem;
 }
 
@@ -35,7 +34,7 @@
     align-items: center;
     justify-content: center;
     padding: 80px 0;
-    color: #a78bfa;
+    color: var(--dh-purple);
 }
 
 .empty-state {
@@ -60,7 +59,7 @@
 
 .empty-state p {
     margin: 0 0 15px 0;
-    color: #9ca3af;
+    color: var(--dh-neutral);
     font-size: 0.95rem;
     max-width: 400px;
 }
@@ -81,17 +80,18 @@
     transition: all 0.25s ease;
     display: flex;
     flex-direction: column;
+    cursor: pointer;
 }
 
 .character-card:hover {
     transform: translateY(-3px);
-    border-color: rgba(167, 139, 250, 0.25);
-    box-shadow: 0 12px 30px rgba(167, 139, 250, 0.1);
+    border-color: color-mix(in srgb, var(--dh-purple) 25%, transparent);
+    box-shadow: 0 12px 30px color-mix(in srgb, var(--dh-purple) 10%, transparent);
 }
 
 .card-accent {
     height: 4px;
-    background: linear-gradient(90deg, #a78bfa, #ec4899);
+    background: linear-gradient(90deg, var(--dh-purple), var(--dh-pink));
 }
 
 .card-header {
@@ -110,7 +110,7 @@
 
 .char-class {
     font-size: 0.82rem;
-    color: #a78bfa;
+    color: var(--dh-purple);
     font-weight: 500;
 }
 
@@ -126,7 +126,7 @@
 }
 
 .meta-label {
-    color: #9ca3af;
+    color: var(--dh-neutral);
     margin-right: 5px;
 }
 
@@ -164,10 +164,10 @@
     font-weight: bold;
 }
 
-.pool-badge.hp { color: #f87171; border-color: rgba(248, 113, 113, 0.2); background: rgba(248, 113, 113, 0.05); }
-.pool-badge.stress { color: #fb923c; border-color: rgba(251, 146, 60, 0.2); background: rgba(251, 146, 60, 0.05); }
-.pool-badge.hope { color: #38bdf8; border-color: rgba(56, 189, 248, 0.2); background: rgba(56, 189, 248, 0.05); }
-.pool-badge.armor-slots { color: #9ca3af; border-color: rgba(156, 163, 175, 0.2); background: rgba(156, 163, 175, 0.05); }
+.pool-badge.hp { color: var(--dh-hp); border-color: color-mix(in srgb, var(--dh-hp) 20%, transparent); background: color-mix(in srgb, var(--dh-hp) 5%, transparent); }
+.pool-badge.stress { color: var(--dh-stress); border-color: color-mix(in srgb, var(--dh-stress) 20%, transparent); background: color-mix(in srgb, var(--dh-stress) 5%, transparent); }
+.pool-badge.hope { color: var(--dh-hope); border-color: color-mix(in srgb, var(--dh-hope) 20%, transparent); background: color-mix(in srgb, var(--dh-hope) 5%, transparent); }
+.pool-badge.armor-slots { color: var(--dh-neutral); border-color: color-mix(in srgb, var(--dh-neutral) 20%, transparent); background: color-mix(in srgb, var(--dh-neutral) 5%, transparent); }
 
 .combat-stats {
     display: flex;
@@ -197,7 +197,7 @@
 
 .combat-stat span {
     font-size: 0.7rem;
-    color: #9ca3af;
+    color: var(--dh-neutral);
     margin-top: 2px;
 }
 
@@ -220,7 +220,7 @@
     border-radius: 4px;
     padding: 4px 2px;
     text-align: center;
-    color: #9ca3af;
+    color: var(--dh-neutral);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -240,7 +240,7 @@
 }
 
 .gear-section strong {
-    color: #9ca3af;
+    color: var(--dh-neutral);
     display: block;
     margin-bottom: 6px;
 }
@@ -266,7 +266,7 @@
 }
 
 .exp-section strong {
-    color: #9ca3af;
+    color: var(--dh-neutral);
     display: block;
     margin-bottom: 6px;
 }
@@ -293,7 +293,7 @@
 }
 
 .bg-section strong {
-    color: #9ca3af;
+    color: var(--dh-neutral);
     display: block;
     margin-bottom: 6px;
 }

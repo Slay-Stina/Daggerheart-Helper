@@ -24,6 +24,7 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
         var rawCommunities = await LoadFileAsync<RawCommunityDto>(jsonDirectoryPath, "communities.json", cancellationToken);
         var rawSubclasses = await LoadFileAsync<RawSubclassDto>(jsonDirectoryPath, "subclasses.json", cancellationToken);
         var rawClasses = await LoadFileAsync<RawClassDto>(jsonDirectoryPath, "classes.json", cancellationToken);
+        var rawItems = await LoadFileAsync<RawItemDto>(jsonDirectoryPath, "items.json", cancellationToken);
         var subclasses = rawSubclasses.Select(ToSubclassCard).ToList();
         var armors = rawArmors.Select(ToArmorCard).ToList();
         var weapons = rawWeapons.Select(ToWeaponCard).ToList();
@@ -35,7 +36,8 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             rawAncestries.Select(ToAncestryCard).ToList(),
             rawCommunities.Select(ToCommunityCard).ToList(),
             subclasses,
-            rawClasses.Select(raw => ToClassCard(raw, subclasses, weapons, armors)).ToList()
+            rawClasses.Select(raw => ToClassCard(raw, subclasses, weapons, armors)).ToList(),
+            rawItems.Select(ToItemCard).ToList()
             );
     }
 
@@ -144,6 +146,11 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             );
     }
     
+    private static ItemCard ToItemCard(RawItemDto raw)
+    {
+        return new ItemCard(raw.Name, raw.Description);
+    }
+
     private static SubclassCard ToSubclassCard(RawSubclassDto raw)
     {
         return new SubclassCard(

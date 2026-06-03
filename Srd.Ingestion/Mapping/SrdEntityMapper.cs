@@ -12,7 +12,18 @@ public static class SrdEntityMapper
     public static List<Ability> ToEntities(this IEnumerable<AbilityCard> cards) => cards.Select(ToEntity).ToList();
 
     public static List<Heritage> ToEntities(this IEnumerable<HeritageCard> cards) => cards.Select(ToEntity).ToList();
-    
+
+    public static List<Item> ToEntities(this IEnumerable<ItemCard> cards) => cards.Select(ToEntity).ToList();
+
+    public static Item ToEntity(this ItemCard card)
+    {
+        return new Item
+        {
+            Name = card.Name,
+            Description = card.Description,
+        };
+    }
+
     public static Armor ToEntity(this ArmorCard card)
     {
         return new Armor
