@@ -22,14 +22,11 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Restore workloads
-        run: dotnet workload restore
-
-      - name: Restore dependencies
-        run: dotnet restore
+      - name: Restore
+        run: dotnet restore Daggerheart-Helper.Web/Daggerheart-Helper.Web.csproj
 
       - name: Publish Web project
-        run: dotnet publish Daggerheart-Helper.Web/Daggerheart-Helper.Web.csproj -c Release -o publish
+        run: dotnet publish Daggerheart-Helper.Web/Daggerheart-Helper.Web.csproj -c Release -o publish --no-restore
 
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v3
