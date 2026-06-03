@@ -48,14 +48,11 @@ public static class MauiProgram
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Seed>>();
 
         Android.Util.Log.Debug("DHELPER", "EnsureCreated...");
-        var created = context.Database.EnsureCreated();
+        context.Database.EnsureCreated();
         Android.Util.Log.Debug("DHELPER", "EnsureCreated done");
 
-        if (created)
-        {
-            Seed.EnsureConcurrencyTriggersAsync(context).GetAwaiter().GetResult();
-            Android.Util.Log.Debug("DHELPER", "Concurrency triggers created");
-        }
+        Seed.EnsureConcurrencyTriggersAsync(context).GetAwaiter().GetResult();
+        Android.Util.Log.Debug("DHELPER", "Concurrency triggers created");
 
         if (context.GameClasses.Any())
         {

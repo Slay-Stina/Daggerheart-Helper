@@ -59,6 +59,13 @@ public class CharacterCreationTests : IAsyncLifetime
         _itemId1 = Guid.NewGuid();
         _itemId2 = Guid.NewGuid();
 
+        var hopeFeature = new Feature
+        {
+            Id = Guid.NewGuid(),
+            Name = "Hope Feature",
+            Description = "Hope feature",
+        };
+
         var gameClass = new GameClass
         {
             Id = _gameClassId,
@@ -72,6 +79,8 @@ public class CharacterCreationTests : IAsyncLifetime
             BackgroundQuestions = [],
             ConnectionQuestions = [],
             Items = [],
+            HopeFeatureId = hopeFeature.Id,
+            HopeFeature = hopeFeature,
         };
 
         var foundationFeature = new Feature
@@ -422,5 +431,72 @@ public class CharacterCreationTests : IAsyncLifetime
         Assert.Equal(2, loaded.Inventory.Count);
         Assert.Contains(loaded.Inventory, i => i.Name == "Torch");
         Assert.Contains(loaded.Inventory, i => i.Name == "Rope");
+    }
+
+    [Fact]
+    public async Task SaveAsync_WithCustomInventoryItem_AssignsAndPersistsItem()
+    {
+        var customItemId = Guid.NewGuid();
+        var character = new Character
+        {
+            Name = "Custom Item Hero",
+            GameClassId = _gameClassId,
+            SubclassId = _subclassId,
+            AncestryId = _ancestryId,
+            CommunityId = _communityId,
+            Traits = new TraitScores(0, 0, 0, 0, 0, 0),
+            DamageThresholds = new DamageThresholds(0, 0),
+            Evasion = 10,
+            HitPoints = new ResourcePool(5, 5),
+            Stress = new ResourcePool(0, 5),
+            Hope = new ResourcePool(2, 5),
+            ArmorSlots = new ResourcePool(0, 0),
+            Inventory =
+            [
+                new Item { Id = customItemId, Name = "Homebrew Bomb", Description = "Custom explosive" },
+            ],
+        };
+
+        await _service.SaveAsync(character);
+
+        await using var context = await _factory.CreateDbContextAsync();
+        Assert.NotNull(await context.Items.FindAsync(customItemId));
+        var loaded = await _service.GetByIdAsync(character.Id);
+        Assert.NotNull(loaded);
+        Assert.Contains(loaded.Inventory, i => i.Id == customItemId);
+    }
+
+    [Fact]
+    public async Task UpdateCharacterAbilitiesAsync_WithAbilityIdOnly_UpdatesWithoutThrowing()
+    {
+        var character = new Character
+        {
+            Name = "Ability Hero",
+            GameClassId = _gameClassId,
+            SubclassId = _subclassId,
+            AncestryId = _ancestryId,
+            CommunityId = _communityId,
+            Traits = new TraitScores(0, 0, 0, 0, 0, 0),
+            DamageThresholds = new DamageThresholds(0, 0),
+            Evasion = 10,
+            HitPoints = new ResourcePool(5, 5),
+            Stress = new ResourcePool(0, 5),
+            Hope = new ResourcePool(2, 5),
+            ArmorSlots = new ResourcePool(0, 0),
+        };
+
+        await _service.SaveAsync(character);
+
+        await _service.UpdateCharacterAbilitiesAsync(character.Id,
+        [
+            new CharacterAbility { AbilityId = _abilityId1, IsVaulted = false },
+            new CharacterAbility { AbilityId = _abilityId2, IsVaulted = true },
+        ]);
+
+        var loaded = await _service.GetByIdAsync(character.Id);
+        Assert.NotNull(loaded);
+        Assert.Equal(2, loaded.CharacterAbilities.Count);
+        Assert.Contains(loaded.CharacterAbilities, ca => ca.AbilityId == _abilityId1 && !ca.IsVaulted);
+        Assert.Contains(loaded.CharacterAbilities, ca => ca.AbilityId == _abilityId2 && ca.IsVaulted);
     }
 }

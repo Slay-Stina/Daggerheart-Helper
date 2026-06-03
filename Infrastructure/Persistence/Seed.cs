@@ -16,10 +16,8 @@ public class Seed
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Seed>>();
     
     // Create database schema from model
-    var created = await context.Database.EnsureCreatedAsync();
-    
-    if (created)
-        await EnsureConcurrencyTriggersAsync(context);
+    await context.Database.EnsureCreatedAsync();
+    await EnsureConcurrencyTriggersAsync(context);
     
     // Check if already seeded
     if (await context.GameClasses.AnyAsync())

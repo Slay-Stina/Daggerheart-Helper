@@ -19,7 +19,7 @@ public class GameClass
     public List<Feature> ClassFeatures { get; init; } = new();
     
     public Guid HopeFeatureId { get; init; }
-    public Feature HopeFeature { get; init; } = new();
+    public Feature HopeFeature { get; init; } = null!;
     
     public List<string> BackgroundQuestions { get; init; } = new();
     public List<string> ConnectionQuestions { get; init; } = new();

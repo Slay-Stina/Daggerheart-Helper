@@ -46,6 +46,7 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
     public async Task SaveAsync(Character character, CancellationToken cancellationToken = default)
     {
         await using var context = await factory.CreateDbContextAsync(cancellationToken);
+        var existingItemIds = await LoadExistingInventoryItemIdsAsync(character.Inventory, context, cancellationToken);
 
         var isNew = character.Id == Guid.Empty;
         if (isNew)
@@ -53,7 +54,9 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
             character.Id = Guid.NewGuid();
             context.Characters.Add(character);
             foreach (var item in character.Inventory)
-                if (context.Entry(item).State == EntityState.Added)
+                if (item.Id != Guid.Empty
+                    && existingItemIds.Contains(item.Id)
+                    && context.Entry(item).State == EntityState.Added)
                     context.Entry(item).State = EntityState.Unchanged;
         }
         else
@@ -82,7 +85,7 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
             existing.SecondaryWeaponId = character.SecondaryWeaponId;
 
             SyncCharacterAbilities(existing, character, context);
-            SyncInventory(existing, character, context);
+            SyncInventory(existing, character, context, existingItemIds);
         }
 
         await context.SaveChangesAsync(cancellationToken);
@@ -111,7 +114,8 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
         foreach (var ca in abilities)
         {
             ca.CharacterId = characterId;
-            context.Entry(ca.Ability).State = EntityState.Unchanged;
+            if (ca.Ability != null)
+                context.Entry(ca.Ability).State = EntityState.Unchanged;
             context.CharacterAbilities.Add(ca);
         }
 
@@ -167,7 +171,8 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
         }
     }
 
-    private static void SyncInventory(Character existing, Character incoming, DaggerheartDbContext context)
+    private static void SyncInventory(Character existing, Character incoming, DaggerheartDbContext context,
+        HashSet<Guid> existingItemIds)
     {
         var incomingIds = incoming.Inventory.Select(i => i.Id).ToHashSet();
 
@@ -200,11 +205,31 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
             }
             else
             {
-                // Brand-new attachment from catalog (not previously tracked on this character)
-                context.Entry(item).State = EntityState.Unchanged;
+                // New attachment not previously tracked on this character
+                if (item.Id != Guid.Empty && existingItemIds.Contains(item.Id))
+                    context.Entry(item).State = EntityState.Unchanged;
                 existing.Inventory.Add(item);
             }
         }
+    }
+
+    private static async Task<HashSet<Guid>> LoadExistingInventoryItemIdsAsync(List<Item> inventory,
+        DaggerheartDbContext context, CancellationToken cancellationToken)
+    {
+        var incomingIds = inventory
+            .Where(i => i.Id != Guid.Empty)
+            .Select(i => i.Id)
+            .Distinct()
+            .ToList();
+
+        if (incomingIds.Count == 0)
+            return [];
+
+        return await context.Items
+            .AsNoTracking()
+            .Where(i => incomingIds.Contains(i.Id))
+            .Select(i => i.Id)
+            .ToHashSetAsync(cancellationToken);
     }
 
     private static async Task<Character> EnsureCharacterExistsAsync(Guid characterId, CancellationToken cancellationToken,
