@@ -27,7 +27,10 @@ builder.Services.AddCatalogServices();
 var app = builder.Build();
 
 // Seed SRD data on startup
-await Seed.SrdData(app.Services, srdJsonPath);
+var srdPath = Path.IsPathRooted(srdJsonPath)
+    ? srdJsonPath
+    : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, srdJsonPath));
+await Seed.SrdData(app.Services, srdPath);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

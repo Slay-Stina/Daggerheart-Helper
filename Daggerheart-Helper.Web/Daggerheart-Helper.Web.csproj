@@ -17,4 +17,12 @@
         <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.14.0"/>
     </ItemGroup>
 
+    <Target Name="CopySrdData" AfterTargets="Build;Publish">
+        <ItemGroup>
+            <SrdJsonFiles Include="..\External\daggerheart-srd\.build\03_json\**\*" />
+        </ItemGroup>
+        <Copy SourceFiles="@(SrdJsonFiles)" DestinationFolder="$(TargetDir)srd-data\%(RecursiveDir)" />
+        <Copy SourceFiles="@(SrdJsonFiles)" DestinationFolder="$(PublishDir)srd-data\%(RecursiveDir)" Condition="'$(PublishDir)' != ''" />
+    </Target>
+
 </Project>
