@@ -30,7 +30,7 @@ public sealed class AdversaryCatalogQueries(DaggerheartDbContext context) : IAdv
         var query = _adversaries.AsNoTracking().Include(a => a.Features).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(name))
-            query = query.Where(a => a.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(a => EF.Functions.Like(a.Name, $"%{name}%"));
 
         if (type.HasValue)
             query = query.Where(a => a.Type == type.Value);

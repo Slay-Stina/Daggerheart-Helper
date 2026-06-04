@@ -58,12 +58,12 @@
                     <div class="card-body">
                         <p class="adv-desc">@adv.Description</p>
                         <div class="adv-stats">
-                            <div class="stat"><span class="stat-label">HP</span><span class="stat-val">@adv.Hp</span></div>
-                            <div class="stat"><span class="stat-label">Stress</span><span class="stat-val">@adv.Stress</span></div>
-                            <div class="stat"><span class="stat-label">Threshold</span><span class="stat-val">@adv.Thresholds</span></div>
-                            <div class="stat"><span class="stat-label">ATK</span><span class="stat-val">@adv.Attack</span></div>
-                            <div class="stat"><span class="stat-label">Dmg</span><span class="stat-val">@adv.Damage</span></div>
-                            <div class="stat"><span class="stat-label">Range</span><span class="stat-val">@adv.Range</span></div>
+                            <div class="stat stat-hp"><span class="stat-label">HP</span><span class="stat-val">@adv.Hp</span></div>
+                            <div class="stat stat-stress"><span class="stat-label">Stress</span><span class="stat-val">@adv.Stress</span></div>
+                            <div class="stat stat-threshold"><span class="stat-label">Threshold</span><span class="stat-val">@adv.Thresholds</span></div>
+                            <div class="stat stat-atk"><span class="stat-label">ATK</span><span class="stat-val">@adv.Attack</span></div>
+                            <div class="stat stat-dmg"><span class="stat-label">Dmg</span><span class="stat-val">@adv.Damage</span></div>
+                            <div class="stat stat-range"><span class="stat-label">Range</span><span class="stat-val">@adv.Range</span></div>
                         </div>
                     </div>
                 </div>
@@ -106,7 +106,7 @@
                     {
                         <div class="feature-card">
                             <strong>@f.Name</strong>
-                            <p>@f.Description</p>
+                            <p>@f.Description.ToMarkdownHtml()</p>
                         </div>
                     }
                 </div>
