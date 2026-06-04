@@ -102,15 +102,16 @@
 
             <div class="stat-block">
                 <div class="stat-row-core">
-                    <span class="stat-badge stat-dv">DV @_selected.Difficulty</span>
-                    <span class="stat-badge stat-thr">@(!string.IsNullOrEmpty(_selected.Thresholds) ? _selected.Thresholds : "—")</span>
-                    <span class="stat-badge stat-hp">HP @_selected.Hp</span>
-                    <span class="stat-badge stat-sta">STA @_selected.Stress</span>
+                    <span class="stat-badge stat-difficulty">Difficulty @_selected.Difficulty</span>
+                    <span class="stat-badge stat-thresholds">Thresholds @(!string.IsNullOrEmpty(_selected.Thresholds) ? _selected.Thresholds : "—")</span>
+                    <span class="stat-badge stat-hp">Hp @_selected.Hp</span>
+                    <span class="stat-badge stat-stress">Stress @_selected.Stress</span>
                 </div>
                 <div class="stat-row-attack">
-                    <span class="stat-badge stat-atk">ATK @_selected.Atk</span>
-                    <span class="stat-badge stat-rng">@_selected.Range</span>
-                    <span class="stat-badge stat-dmg">@_selected.Damage</span>
+                    <span class="stat-badge stat-atk">Atk @_selected.Atk</span>
+                    <span class="stat-badge stat-attack">Attack @_selected.Attack</span>
+                    <span class="stat-badge stat-damage">Damage @_selected.Damage</span>
+                    <span class="stat-badge stat-range">Range @_selected.Range</span>
                 </div>
             </div>
 
