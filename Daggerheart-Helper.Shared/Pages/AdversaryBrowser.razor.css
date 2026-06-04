@@ -101,36 +101,28 @@
 }
 
 ::deep .badge-tier {
-    display: inline-block;
-    font-size: 0.68rem;
-    font-weight: 600;
-    padding: 1px 7px;
-    border-radius: 8px;
-    background: rgba(139, 92, 246, 0.15);
-    color: #a78bfa;
-    border: 1px solid rgba(139, 92, 246, 0.25);
+    --badge-fill-highlight: rgba(139, 92, 246, 0.15);
+    --badge-color-highlight: #a78bfa;
+    --badge-fill-lowlight: transparent;
+    --badge-color-lowlight: #a78bfa;
 }
 
 ::deep .badge-type {
-    display: inline-block;
-    font-size: 0.65rem;
-    font-weight: 600;
-    padding: 1px 7px;
-    border-radius: 8px;
+    font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.4px;
 }
 
-::deep .type-solo { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-color: rgba(239, 68, 68, 0.25); }
-::deep .type-bruiser { background: rgba(249, 115, 22, 0.15); color: #fdba74; border-color: rgba(249, 115, 22, 0.25); }
-::deep .type-horde { background: rgba(234, 179, 8, 0.15); color: #fde047; border-color: rgba(234, 179, 8, 0.25); }
-::deep .type-leader { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; border-color: rgba(168, 85, 247, 0.25); }
-::deep .type-minion { background: rgba(107, 114, 128, 0.15); color: #d1d5db; border-color: rgba(107, 114, 128, 0.25); }
-::deep .type-ranged { background: rgba(34, 197, 94, 0.15); color: #86efac; border-color: rgba(34, 197, 94, 0.25); }
-::deep .type-skulk { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border-color: rgba(59, 130, 246, 0.25); }
-::deep .type-social { background: rgba(236, 72, 153, 0.15); color: #f9a8d4; border-color: rgba(236, 72, 153, 0.25); }
-::deep .type-standard { background: rgba(20, 184, 166, 0.15); color: #5eead4; border-color: rgba(20, 184, 166, 0.25); }
-::deep .type-support { background: rgba(6, 182, 212, 0.15); color: #67e8f9; border-color: rgba(6, 182, 212, 0.25); }
+::deep .type-solo      { --badge-fill-highlight: rgba(239, 68, 68, 0.15);    --badge-color-highlight: #fca5a5; }
+::deep .type-bruiser   { --badge-fill-highlight: rgba(249, 115, 22, 0.15);  --badge-color-highlight: #fdba74; }
+::deep .type-horde     { --badge-fill-highlight: rgba(234, 179, 8, 0.15);   --badge-color-highlight: #fde047; }
+::deep .type-leader    { --badge-fill-highlight: rgba(168, 85, 247, 0.15);  --badge-color-highlight: #d8b4fe; }
+::deep .type-minion    { --badge-fill-highlight: rgba(107, 114, 128, 0.15); --badge-color-highlight: #d1d5db; }
+::deep .type-ranged    { --badge-fill-highlight: rgba(34, 197, 94, 0.15);   --badge-color-highlight: #86efac; }
+::deep .type-skulk     { --badge-fill-highlight: rgba(59, 130, 246, 0.15);  --badge-color-highlight: #93c5fd; }
+::deep .type-social    { --badge-fill-highlight: rgba(236, 72, 153, 0.15);  --badge-color-highlight: #f9a8d4; }
+::deep .type-standard  { --badge-fill-highlight: rgba(20, 184, 166, 0.15);  --badge-color-highlight: #5eead4; }
+::deep .type-support   { --badge-fill-highlight: rgba(6, 182, 212, 0.15);   --badge-color-highlight: #67e8f9; }
 
 .detail-overlay {
     position: fixed;
@@ -189,24 +181,19 @@
     margin: 10px 0;
 }
 
-.stat-badge {
-    display: inline-flex;
-    align-items: center;
+::deep .stat-block fluent-badge {
     font-size: 0.72rem;
     font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 6px;
-    gap: 4px;
-    white-space: nowrap;
+    padding: 0 4px;
 }
 
-.stat-difficulty  { background: rgba(239, 68, 68, 0.2);   color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
-.stat-thresholds { background: rgba(168, 85, 247, 0.2);  color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.35); }
-.stat-hp  { background: rgba(34, 197, 94, 0.2);   color: #86efac; border: 1px solid rgba(34, 197, 94, 0.35); }
-.stat-stress { background: rgba(234, 179, 8, 0.2);   color: #fde047; border: 1px solid rgba(234, 179, 8, 0.35); }
-.stat-atk { background: rgba(249, 115, 22, 0.2);  color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.35); }
-.stat-attack { background: rgba(59, 130, 246, 0.2);  color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.35); }
-.stat-damage { background: rgba(220, 38, 38, 0.2);   color: #fca5a5; border: 1px solid rgba(220, 38, 38, 0.35); }
+::deep .stat-difficulty  { --badge-fill-highlight: rgba(239, 68, 68, 0.2);   --badge-color-highlight: #fca5a5; }
+::deep .stat-thresholds  { --badge-fill-highlight: rgba(168, 85, 247, 0.2);  --badge-color-highlight: #d8b4fe; }
+::deep .stat-hp          { --badge-fill-highlight: rgba(34, 197, 94, 0.2);   --badge-color-highlight: #86efac; }
+::deep .stat-stress      { --badge-fill-highlight: rgba(234, 179, 8, 0.2);   --badge-color-highlight: #fde047; }
+::deep .stat-atk         { --badge-fill-highlight: rgba(249, 115, 22, 0.2);  --badge-color-highlight: #fdba74; }
+::deep .stat-attack      { --badge-fill-highlight: rgba(59, 130, 246, 0.2);  --badge-color-highlight: #93c5fd; }
+::deep .stat-damage      { --badge-fill-highlight: rgba(220, 38, 38, 0.2);   --badge-color-highlight: #fca5a5; }
 
 .detail-motives {
     font-size: 0.82rem;
@@ -228,13 +215,12 @@
     margin-top: 3px;
 }
 
-.adv-exp-chip {
-    background: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.2);
-    border-radius: 4px;
-    padding: 2px 8px;
+::deep .adv-exp-chip {
+    --badge-fill-highlight: rgba(56, 189, 248, 0.1);
+    --badge-color-highlight: #7dd3fc;
+    --badge-fill-lowlight: transparent;
+    --badge-color-lowlight: #7dd3fc;
     font-size: 0.75rem;
-    color: #7dd3fc;
 }
 
 .features-heading {

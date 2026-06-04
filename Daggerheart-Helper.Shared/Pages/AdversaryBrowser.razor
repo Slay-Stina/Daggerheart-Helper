@@ -68,10 +68,10 @@
                             OnRowClick="@((FluentDataGridRow<AdversarySummary> row) => { if (row.Item is not null) ShowDetail(row.Item); })">
                     <PropertyColumn Property="@(a => a.Name)" Title="Name" Sortable="true" />
                     <TemplateColumn Title="Tier" Sortable="true" Align="Align.Center">
-                        <span class="badge-tier">T@(context.Tier)</span>
+                        <FluentBadge Class="badge-tier">T@(context.Tier)</FluentBadge>
                     </TemplateColumn>
                     <TemplateColumn Title="Type" Sortable="true" Align="Align.Center">
-                        <span class="badge-type type-@context.Type.ToString().ToLowerInvariant()">@context.Type</span>
+                        <FluentBadge Class="@($"badge-type type-{context.Type.ToString().ToLowerInvariant()}")">@context.Type</FluentBadge>
                     </TemplateColumn>
                     <PropertyColumn Property="@(a => a.Difficulty)" Title="Difficulty" Sortable="true" Align="Align.Center" />
                     <PropertyColumn Property="@(a => a.Hp)" Title="HP" Sortable="true" Align="Align.Center" />
@@ -106,13 +106,13 @@
             }
 
             <div class="stat-block">
-                <span class="stat-badge stat-difficulty">Difficulty: @_selected.Difficulty</span>
-                <span class="stat-badge stat-thresholds">Thresholds: @(!string.IsNullOrEmpty(_selected.Thresholds) ? _selected.Thresholds : "—")</span>
-                <span class="stat-badge stat-hp">Hp: @_selected.Hp</span>
-                <span class="stat-badge stat-stress">Stress: @_selected.Stress</span>
-                <span class="stat-badge stat-atk">Atk: @_selected.Atk</span>
-                <span class="stat-badge stat-attack">@_selected.Attack: @_selected.Range</span>
-                <span class="stat-badge stat-damage">@_selected.Damage</span>
+                <FluentBadge Class="stat-difficulty">Difficulty: @_selected.Difficulty</FluentBadge>
+                <FluentBadge Class="stat-thresholds">Thresholds: @(!string.IsNullOrEmpty(_selected.Thresholds) ? _selected.Thresholds : "—")</FluentBadge>
+                <FluentBadge Class="stat-hp">Hp: @_selected.Hp</FluentBadge>
+                <FluentBadge Class="stat-stress">Stress: @_selected.Stress</FluentBadge>
+                <FluentBadge Class="stat-atk">Atk: @_selected.Atk</FluentBadge>
+                <FluentBadge Class="stat-attack">@_selected.Attack: @_selected.Range</FluentBadge>
+                <FluentBadge Class="stat-damage">@_selected.Damage</FluentBadge>
             </div>
 
             @if (!string.IsNullOrEmpty(_selected.Experience))
@@ -122,7 +122,7 @@
                     <div class="adv-exp-list">
                         @foreach (var exp in _selected.Experience.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
                         {
-                            <span class="adv-exp-chip">@exp</span>
+                            <FluentBadge Class="adv-exp-chip">@exp</FluentBadge>
                         }
                     </div>
                 </div>
