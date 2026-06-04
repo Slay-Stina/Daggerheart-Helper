@@ -100,29 +100,41 @@
     min-height: 32px;
 }
 
-::deep .badge-tier {
-    --badge-fill-highlight: rgba(139, 92, 246, 0.15);
-    --badge-color-highlight: #a78bfa;
-    --badge-fill-lowlight: transparent;
-    --badge-color-lowlight: #a78bfa;
-}
+::deep > fluent-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    --badge-color-highlight: white;
 
-::deep .badge-type {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
+    --badge-fill-tier: var(--dh-purple);
+    --badge-fill-difficulty: var(--dh-negative);
+    --badge-fill-thresholds: var(--dh-purple);
+    --badge-fill-hp: var(--dh-hp);
+    --badge-fill-stress: var(--dh-stress);
+    --badge-fill-atk: var(--dh-stress);
+    --badge-fill-attack: var(--dh-hope);
+    --badge-fill-damage: var(--dh-negative);
+    --badge-fill-exp: var(--dh-hope);
+    --badge-fill-solo: var(--dh-hp);
+    --badge-color-solo: white;
+    --badge-fill-bruiser: var(--dh-stress);
+    --badge-color-bruiser: white;
+    --badge-fill-horde: #eab308;
+    --badge-color-horde: #000;
+    --badge-fill-leader: var(--dh-purple);
+    --badge-color-leader: white;
+    --badge-fill-minion: var(--dh-neutral);
+    --badge-color-minion: white;
+    --badge-fill-ranged: var(--dh-positive);
+    --badge-color-ranged: white;
+    --badge-fill-skulk: #3b82f6;
+    --badge-color-skulk: white;
+    --badge-fill-social: #ec4899;
+    --badge-color-social: white;
+    --badge-fill-standard: #14b8a6;
+    --badge-color-standard: white;
+    --badge-fill-support: #06b6d4;
+    --badge-color-support: white;
 }
-
-::deep .type-solo      { --badge-fill-highlight: rgba(239, 68, 68, 0.15);    --badge-color-highlight: #fca5a5; }
-::deep .type-bruiser   { --badge-fill-highlight: rgba(249, 115, 22, 0.15);  --badge-color-highlight: #fdba74; }
-::deep .type-horde     { --badge-fill-highlight: rgba(234, 179, 8, 0.15);   --badge-color-highlight: #fde047; }
-::deep .type-leader    { --badge-fill-highlight: rgba(168, 85, 247, 0.15);  --badge-color-highlight: #d8b4fe; }
-::deep .type-minion    { --badge-fill-highlight: rgba(107, 114, 128, 0.15); --badge-color-highlight: #d1d5db; }
-::deep .type-ranged    { --badge-fill-highlight: rgba(34, 197, 94, 0.15);   --badge-color-highlight: #86efac; }
-::deep .type-skulk     { --badge-fill-highlight: rgba(59, 130, 246, 0.15);  --badge-color-highlight: #93c5fd; }
-::deep .type-social    { --badge-fill-highlight: rgba(236, 72, 153, 0.15);  --badge-color-highlight: #f9a8d4; }
-::deep .type-standard  { --badge-fill-highlight: rgba(20, 184, 166, 0.15);  --badge-color-highlight: #5eead4; }
-::deep .type-support   { --badge-fill-highlight: rgba(6, 182, 212, 0.15);   --badge-color-highlight: #67e8f9; }
 
 .detail-overlay {
     position: fixed;
@@ -181,20 +193,6 @@
     margin: 10px 0;
 }
 
-::deep .stat-block fluent-badge {
-    font-size: 0.72rem;
-    font-weight: 600;
-    padding: 0 4px;
-}
-
-::deep .stat-difficulty  { --badge-fill-highlight: rgba(239, 68, 68, 0.2);   --badge-color-highlight: #fca5a5; }
-::deep .stat-thresholds  { --badge-fill-highlight: rgba(168, 85, 247, 0.2);  --badge-color-highlight: #d8b4fe; }
-::deep .stat-hp          { --badge-fill-highlight: rgba(34, 197, 94, 0.2);   --badge-color-highlight: #86efac; }
-::deep .stat-stress      { --badge-fill-highlight: rgba(234, 179, 8, 0.2);   --badge-color-highlight: #fde047; }
-::deep .stat-atk         { --badge-fill-highlight: rgba(249, 115, 22, 0.2);  --badge-color-highlight: #fdba74; }
-::deep .stat-attack      { --badge-fill-highlight: rgba(59, 130, 246, 0.2);  --badge-color-highlight: #93c5fd; }
-::deep .stat-damage      { --badge-fill-highlight: rgba(220, 38, 38, 0.2);   --badge-color-highlight: #fca5a5; }
-
 .detail-motives {
     font-size: 0.82rem;
     color: #c4c4d0;
@@ -213,14 +211,6 @@
     flex-wrap: wrap;
     gap: 5px;
     margin-top: 3px;
-}
-
-::deep .adv-exp-chip {
-    --badge-fill-highlight: rgba(56, 189, 248, 0.1);
-    --badge-color-highlight: #7dd3fc;
-    --badge-fill-lowlight: transparent;
-    --badge-color-lowlight: #7dd3fc;
-    font-size: 0.75rem;
 }
 
 .features-heading {
