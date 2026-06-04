@@ -71,6 +71,7 @@ public sealed class AdversaryCatalogQueries(DaggerheartDbContext context) : IAdv
         a.Hp,
         a.Stress,
         a.Thresholds,
+        a.Atk,
         a.Attack,
         a.Damage,
         a.Range,

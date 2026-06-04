@@ -12,6 +12,7 @@ public sealed record AdversarySummary(
     int Hp,
     int Stress,
     string Thresholds,
+    string Atk,
     string Attack,
     string Damage,
     string Range,
