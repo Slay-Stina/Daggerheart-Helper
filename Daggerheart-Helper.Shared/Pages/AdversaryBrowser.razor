@@ -1,0 +1,215 @@
+@page "/dm-tools/adversaries"
+@inject IAdversaryCatalogQueries AdversaryQueries
+@inject NavigationManager NavigationManager
+
+<PageTitle>Adversary Browser — DM Tools</PageTitle>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="header-text">
+            <h2>Adversary Browser</h2>
+            <p>Browse and search Daggerheart adversaries from the SRD</p>
+        </div>
+        <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Filled.Size20.ArrowLeft())" OnClick="@GoBack">
+            Back to DM Tools
+        </FluentButton>
+    </div>
+
+    <div class="filters-bar">
+        <FluentTextField Placeholder="Search by name..." @bind-Value="_searchTerm" Style="max-width: 250px;" />
+        <FluentSelect Items="@_typeFilters" OptionText="@(f => f.Label)" OptionSelectedChanged="@((AdversaryTypeFilterOption f) => OnTypeChanged(f))" Style="max-width: 180px;" />
+        <FluentSelect Items="@_tierFilters" OptionText="@(f => f.Label)" OptionSelectedChanged="@((TierFilterOption f) => OnTierChanged(f))" Style="max-width: 120px;" />
+        <FluentButton Appearance="Appearance.Accent" IconStart="@(new Icons.Filled.Size20.Search())" OnClick="@ApplyFilters">Search</FluentButton>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="loading-container">
+            <FluentProgressRing />
+            <p>Loading adversaries...</p>
+        </div>
+    }
+    else if (!_adversaries.Any())
+    {
+        <div class="empty-state animate-fade">
+            <FluentIcon Value="@(new Icons.Filled.Size48.PeopleCommunity())" Color="Color.Neutral" />
+            <h3>No adversaries found</h3>
+            <p>Try adjusting your search or filter criteria.</p>
+        </div>
+    }
+    else
+    {
+        <div class="result-count">Showing @_adversaries.Count adversary@(_adversaries.Count != 1 ? "ies" : "y")</div>
+        <div class="adversary-grid animate-fade">
+            @foreach (var adv in _adversaries)
+            {
+                <div class="adversary-card" @onclick="@(() => SelectAdversary(adv))">
+                    <div class="card-accent type-@adv.Type.ToString().ToLowerInvariant()"></div>
+                    <div class="card-header">
+                        <div class="adv-title">
+                            <h3>@adv.Name</h3>
+                            <div class="adv-tags">
+                                <span class="tag tier">Tier @adv.Tier</span>
+                                <span class="tag type">@adv.Type</span>
+                                <span class="tag diff">DV @adv.Difficulty</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="adv-desc">@adv.Description</p>
+                        <div class="adv-stats">
+                            <div class="stat"><span class="stat-label">HP</span><span class="stat-val">@adv.Hp</span></div>
+                            <div class="stat"><span class="stat-label">Stress</span><span class="stat-val">@adv.Stress</span></div>
+                            <div class="stat"><span class="stat-label">Threshold</span><span class="stat-val">@adv.Thresholds</span></div>
+                            <div class="stat"><span class="stat-label">ATK</span><span class="stat-val">@adv.Attack</span></div>
+                            <div class="stat"><span class="stat-label">Dmg</span><span class="stat-val">@adv.Damage</span></div>
+                            <div class="stat"><span class="stat-label">Range</span><span class="stat-val">@adv.Range</span></div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (_selected is not null)
+{
+    <FluentOverlay />
+    <div class="detail-overlay" @onclick="@ClearSelection">
+        <FluentCard class="detail-card animate-fade" @onclick:stopPropagation>
+            <div class="detail-header">
+                <h2>@_selected.Name</h2>
+                <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Filled.Size20.Dismiss())" OnClick="@ClearSelection" />
+            </div>
+            <div class="detail-tags">
+                <span class="tag tier">Tier @_selected.Tier</span>
+                <span class="tag type">@_selected.Type</span>
+                <span class="tag diff">DV @_selected.Difficulty</span>
+            </div>
+            <p class="detail-desc">@_selected.Description</p>
+
+            <div class="detail-stats-grid">
+                <div class="detail-stat"><span>HP</span><strong>@_selected.Hp</strong></div>
+                <div class="detail-stat"><span>Stress</span><strong>@_selected.Stress</strong></div>
+                <div class="detail-stat"><span>Thresholds</span><strong>@_selected.Thresholds</strong></div>
+                <div class="detail-stat"><span>ATK Bonus</span><strong>@_selected.Attack</strong></div>
+                <div class="detail-stat"><span>Damage</span><strong>@_selected.Damage</strong></div>
+                <div class="detail-stat"><span>Range</span><strong>@_selected.Range</strong></div>
+            </div>
+
+            @if (_selected.Features.Count > 0)
+            {
+                <FluentDivider />
+                <h3 class="features-title">Features</h3>
+                <div class="features-list">
+                    @foreach (var f in _selected.Features)
+                    {
+                        <div class="feature-card">
+                            <strong>@f.Name</strong>
+                            <p>@f.Description</p>
+                        </div>
+                    }
+                </div>
+            }
+        </FluentCard>
+    </div>
+}
+
+@code {
+    private List<AdversarySummary> _adversaries = [];
+    private bool _loading = true;
+
+    private string _searchTerm = string.Empty;
+    private AdversaryType? _selectedType;
+    private int? _selectedTier;
+
+    private AdversarySummary? _selected;
+
+    private List<AdversaryTypeFilterOption> _typeFilters = new()
+    {
+        new("All Types", null),
+        new("Solo", AdversaryType.Solo),
+        new("Bruiser", AdversaryType.Bruiser),
+        new("Horde", AdversaryType.Horde),
+        new("Leader", AdversaryType.Leader),
+        new("Minion", AdversaryType.Minion),
+        new("Ranged", AdversaryType.Ranged),
+        new("Skulk", AdversaryType.Skulk),
+        new("Social", AdversaryType.Social),
+        new("Standard", AdversaryType.Standard),
+        new("Support", AdversaryType.Support),
+    };
+
+    private List<TierFilterOption> _tierFilters = new()
+    {
+        new("All Tiers", 0),
+        new("Tier 1", 1),
+        new("Tier 2", 2),
+        new("Tier 3", 3),
+        new("Tier 4", 4),
+        new("Tier 5", 5),
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAdversaries();
+    }
+
+    private async Task LoadAdversaries()
+    {
+        _loading = true;
+        try
+        {
+            _adversaries = await AdversaryQueries.GetAllAsync();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task ApplyFilters()
+    {
+        _loading = true;
+        try
+        {
+            _adversaries = await AdversaryQueries.SearchAsync(
+                _searchTerm,
+                _selectedType,
+                _selectedTier is 0 ? null : _selectedTier,
+                null, null);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void OnTypeChanged(AdversaryTypeFilterOption option)
+    {
+        _selectedType = option.Value;
+    }
+
+    private void OnTierChanged(TierFilterOption option)
+    {
+        _selectedTier = option.Value;
+    }
+
+    private void SelectAdversary(AdversarySummary adv)
+    {
+        _selected = adv;
+    }
+
+    private void ClearSelection()
+    {
+        _selected = null;
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/dm-tools");
+    }
+
+    public sealed record AdversaryTypeFilterOption(string Label, AdversaryType? Value);
+    public sealed record TierFilterOption(string Label, int Value);
+}
