@@ -1,6 +1,7 @@
 @page "/dm-tools/adversaries"
 @inject IAdversaryCatalogQueries AdversaryQueries
 @inject NavigationManager NavigationManager
+@inject IDialogService DialogService
 
 <PageTitle>Adversary Browser — DM Tools</PageTitle>
 
@@ -16,9 +17,28 @@
     </div>
 
     <div class="filters-bar">
-        <FluentTextField Placeholder="Search by name..." @bind-Value="_searchTerm" Style="max-width: 250px;" />
-        <FluentSelect Items="@_typeFilters" OptionText="@(f => f.Label)" OptionSelectedChanged="@((AdversaryTypeFilterOption f) => OnTypeChanged(f))" Style="max-width: 180px;" />
-        <FluentSelect Items="@_tierFilters" OptionText="@(f => f.Label)" OptionSelectedChanged="@((TierFilterOption f) => OnTierChanged(f))" Style="max-width: 120px;" />
+        <FluentTextField Placeholder="Search by name..." Value="@_searchTerm" ValueChanged="@OnSearchChanged" Style="max-width: 250px;" Immediate ImmediateDelay="300" />
+        <select @onchange="@OnTypeChanged" class="filter-select" value="@_selectedTypeStr">
+            <option value="">All Types</option>
+            <option value="Solo">Solo</option>
+            <option value="Bruiser">Bruiser</option>
+            <option value="Horde">Horde</option>
+            <option value="Leader">Leader</option>
+            <option value="Minion">Minion</option>
+            <option value="Ranged">Ranged</option>
+            <option value="Skulk">Skulk</option>
+            <option value="Social">Social</option>
+            <option value="Standard">Standard</option>
+            <option value="Support">Support</option>
+        </select>
+        <select @onchange="@OnTierChanged" class="filter-select" value="@_selectedTierStr">
+            <option value="0">All Tiers</option>
+            <option value="1">Tier 1</option>
+            <option value="2">Tier 2</option>
+            <option value="3">Tier 3</option>
+            <option value="4">Tier 4</option>
+            <option value="5">Tier 5</option>
+        </select>
         <FluentButton Appearance="Appearance.Accent" IconStart="@(new Icons.Filled.Size20.Search())" OnClick="@ApplyFilters">Search</FluentButton>
     </div>
 
@@ -31,7 +51,7 @@
     }
     else if (!_adversaries.Any())
     {
-        <div class="empty-state animate-fade">
+        <div class="empty-state">
             <FluentIcon Value="@(new Icons.Filled.Size48.PeopleCommunity())" Color="Color.Neutral" />
             <h3>No adversaries found</h3>
             <p>Try adjusting your search or filter criteria.</p>
@@ -39,36 +59,27 @@
     }
     else
     {
-        <div class="result-count">Showing @_adversaries.Count adversary@(_adversaries.Count != 1 ? "ies" : "y")</div>
-        <div class="adversary-grid animate-fade">
-            @foreach (var adv in _adversaries)
-            {
-                <div class="adversary-card" @onclick="@(() => SelectAdversary(adv))">
-                    <div class="card-accent type-@adv.Type.ToString().ToLowerInvariant()"></div>
-                    <div class="card-header">
-                        <div class="adv-title">
-                            <h3>@adv.Name</h3>
-                            <div class="adv-tags">
-                                <span class="tag tier">Tier @adv.Tier</span>
-                                <span class="tag type">@adv.Type</span>
-                                <span class="tag diff">DV @adv.Difficulty</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <p class="adv-desc">@adv.Description</p>
-                        <div class="adv-stats">
-                            <div class="stat stat-hp"><span class="stat-label">HP</span><span class="stat-val">@adv.Hp</span></div>
-                            <div class="stat stat-stress"><span class="stat-label">Stress</span><span class="stat-val">@adv.Stress</span></div>
-                            <div class="stat stat-threshold"><span class="stat-label">Threshold</span><span class="stat-val">@adv.Thresholds</span></div>
-                            <div class="stat stat-atk"><span class="stat-label">ATK</span><span class="stat-val">@adv.Attack</span></div>
-                            <div class="stat stat-dmg"><span class="stat-label">Dmg</span><span class="stat-val">@adv.Damage</span></div>
-                            <div class="stat stat-range"><span class="stat-label">Range</span><span class="stat-val">@adv.Range</span></div>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
+        <div class="result-count">@_adversaries.Count adversary@(_adversaries.Count != 1 ? "ies" : "y")</div>
+        <FluentStack Orientation="Orientation.Vertical" Gap="8">
+            <FluentDataGrid Items="@(_adversaries.AsQueryable())" GenerateHeader="GenerateHeaderOption.Sticky" Class="adversary-grid" ShowHover="@(true)" ResizableColumns="@(true)" OnRowClick="@((FluentDataGridRow<AdversarySummary> row) => ShowDetail(row.Item))">
+                <ChildContent>
+                    <PropertyColumn Property="@(a => a.Name)" Title="Name" Tooltip="@(true)" />
+                    <TemplateColumn Title="Tier" TextAlign="Align.Center">
+                        <span class="badge-tier">T@(context.Tier)</span>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Type" TextAlign="Align.Center">
+                        <span class="badge-type type-@context.Type.ToString().ToLowerInvariant()">@context.Type</span>
+                    </TemplateColumn>
+                    <PropertyColumn Property="@(a => a.Difficulty)" Title="DV" TextAlign="Align.Center" />
+                    <PropertyColumn Property="@(a => a.Hp)" Title="HP" TextAlign="Align.Center" />
+                    <PropertyColumn Property="@(a => a.Stress)" Title="Stress" TextAlign="Align.Center" />
+                    <PropertyColumn Property="@(a => a.Attack)" Title="Attack" />
+                    <PropertyColumn Property="@(a => a.Damage)" Title="Damage" />
+                    <PropertyColumn Property="@(a => a.Range)" Title="Range" />
+                    <PropertyColumn Property="@(a => a.Thresholds)" Title="Threshold" TextAlign="Align.Center" />
+                </ChildContent>
+            </FluentDataGrid>
+        </FluentStack>
     }
 </div>
 
@@ -76,26 +87,26 @@
 {
     <FluentOverlay />
     <div class="detail-overlay" @onclick="@ClearSelection">
-        <FluentCard class="detail-card animate-fade" @onclick:stopPropagation>
+        <FluentCard class="detail-card" @onclick:stopPropagation>
             <div class="detail-header">
                 <h2>@_selected.Name</h2>
                 <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Filled.Size20.Dismiss())" OnClick="@ClearSelection" />
             </div>
             <div class="detail-tags">
-                <span class="tag tier">Tier @_selected.Tier</span>
-                <span class="tag type">@_selected.Type</span>
-                <span class="tag diff">DV @_selected.Difficulty</span>
+                <span class="badge-tier">T@(_selected.Tier)</span>
+                <span class="badge-type type-@_selected.Type.ToString().ToLowerInvariant()">@_selected.Type</span>
+                <span class="badge-dv">DV @_selected.Difficulty</span>
             </div>
             <p class="detail-desc">@_selected.Description</p>
 
-            <div class="detail-stats-grid">
-                <div class="detail-stat"><span>HP</span><strong>@_selected.Hp</strong></div>
-                <div class="detail-stat"><span>Stress</span><strong>@_selected.Stress</strong></div>
-                <div class="detail-stat"><span>Thresholds</span><strong>@_selected.Thresholds</strong></div>
-                <div class="detail-stat"><span>ATK Bonus</span><strong>@_selected.Attack</strong></div>
-                <div class="detail-stat"><span>Damage</span><strong>@_selected.Damage</strong></div>
-                <div class="detail-stat"><span>Range</span><strong>@_selected.Range</strong></div>
-            </div>
+            <FluentStack Orientation="Orientation.Horizontal" Gap="10" Wrap="@(true)">
+                <FluentBadge Color="Color.Info">HP @_selected.Hp</FluentBadge>
+                <FluentBadge Color="Color.Error">Stress @_selected.Stress</FluentBadge>
+                <FluentBadge Color="Color.Warning">Threshold @_selected.Thresholds</FluentBadge>
+                <FluentBadge Color="Color.Success">ATK @_selected.Attack</FluentBadge>
+                <FluentBadge Color="Color.Info">@_selected.Damage</FluentBadge>
+                <FluentBadge Color="Color.Accent">@_selected.Range</FluentBadge>
+            </FluentStack>
 
             @if (_selected.Features.Count > 0)
             {
@@ -118,37 +129,10 @@
 @code {
     private List<AdversarySummary> _adversaries = [];
     private bool _loading = true;
-
     private string _searchTerm = string.Empty;
-    private AdversaryType? _selectedType;
-    private int? _selectedTier;
-
+    private string _selectedTypeStr = "";
+    private string _selectedTierStr = "0";
     private AdversarySummary? _selected;
-
-    private List<AdversaryTypeFilterOption> _typeFilters = new()
-    {
-        new("All Types", null),
-        new("Solo", AdversaryType.Solo),
-        new("Bruiser", AdversaryType.Bruiser),
-        new("Horde", AdversaryType.Horde),
-        new("Leader", AdversaryType.Leader),
-        new("Minion", AdversaryType.Minion),
-        new("Ranged", AdversaryType.Ranged),
-        new("Skulk", AdversaryType.Skulk),
-        new("Social", AdversaryType.Social),
-        new("Standard", AdversaryType.Standard),
-        new("Support", AdversaryType.Support),
-    };
-
-    private List<TierFilterOption> _tierFilters = new()
-    {
-        new("All Tiers", 0),
-        new("Tier 1", 1),
-        new("Tier 2", 2),
-        new("Tier 3", 3),
-        new("Tier 4", 4),
-        new("Tier 5", 5),
-    };
 
     protected override async Task OnInitializedAsync()
     {
@@ -168,15 +152,39 @@
         }
     }
 
+    private void OnSearchChanged(string value)
+    {
+        _searchTerm = value;
+        _ = ApplyFilters();
+    }
+
+    private async Task OnTypeChanged(ChangeEventArgs e)
+    {
+        _selectedTypeStr = e.Value?.ToString() ?? "";
+        await ApplyFilters();
+    }
+
+    private async Task OnTierChanged(ChangeEventArgs e)
+    {
+        _selectedTierStr = e.Value?.ToString() ?? "0";
+        await ApplyFilters();
+    }
+
     private async Task ApplyFilters()
     {
         _loading = true;
         try
         {
+            AdversaryType? type = null;
+            if (Enum.TryParse<AdversaryType>(_selectedTypeStr, ignoreCase: true, out var parsed))
+                type = parsed;
+
+            var tier = int.TryParse(_selectedTierStr, out var t) ? t : 0;
+
             _adversaries = await AdversaryQueries.SearchAsync(
                 _searchTerm,
-                _selectedType,
-                _selectedTier is 0 ? null : _selectedTier,
+                type,
+                tier is 0 ? null : tier,
                 null, null);
         }
         finally
@@ -185,17 +193,7 @@
         }
     }
 
-    private void OnTypeChanged(AdversaryTypeFilterOption option)
-    {
-        _selectedType = option.Value;
-    }
-
-    private void OnTierChanged(TierFilterOption option)
-    {
-        _selectedTier = option.Value;
-    }
-
-    private void SelectAdversary(AdversarySummary adv)
+    private void ShowDetail(AdversarySummary adv)
     {
         _selected = adv;
     }
@@ -209,7 +207,4 @@
     {
         NavigationManager.NavigateTo("/dm-tools");
     }
-
-    public sealed record AdversaryTypeFilterOption(string Label, AdversaryType? Value);
-    public sealed record TierFilterOption(string Label, int Value);
 }
