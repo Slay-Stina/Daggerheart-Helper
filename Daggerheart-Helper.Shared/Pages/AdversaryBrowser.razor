@@ -17,28 +17,20 @@
 
     <div class="filters-bar">
         <FluentTextField Placeholder="Search by name..." Value="@_searchTerm" ValueChanged="@OnSearchChanged" Style="max-width: 250px;" Immediate ImmediateDelay="300" />
-        <select @onchange="@OnTypeChanged" class="filter-select" value="@_selectedTypeStr">
-            <option value="">All Types</option>
-            <option value="Solo">Solo</option>
-            <option value="Bruiser">Bruiser</option>
-            <option value="Horde">Horde</option>
-            <option value="Leader">Leader</option>
-            <option value="Minion">Minion</option>
-            <option value="Ranged">Ranged</option>
-            <option value="Skulk">Skulk</option>
-            <option value="Social">Social</option>
-            <option value="Standard">Standard</option>
-            <option value="Support">Support</option>
-        </select>
-        <select @onchange="@OnTierChanged" class="filter-select" value="@_selectedTierStr">
-            <option value="0">All Tiers</option>
-            <option value="1">Tier 1</option>
-            <option value="2">Tier 2</option>
-            <option value="3">Tier 3</option>
-            <option value="4">Tier 4</option>
-            <option value="5">Tier 5</option>
-        </select>
-        <FluentButton Appearance="Appearance.Accent" IconStart="@(new Icons.Filled.Size20.Search())" OnClick="@ApplyFilters">Search</FluentButton>
+        <FluentSelect TOption="FilterOption"
+                      Items="@_typeOptions"
+                      OptionValue="@(o => o.Value)"
+                      OptionText="@(o => o.Text)"
+                      @bind-Value="@SelectedTypeValue"
+                      Placeholder="All Types"
+                      Width="160px" />
+        <FluentSelect TOption="FilterOption"
+                      Items="@_tierOptions"
+                      OptionValue="@(o => o.Value)"
+                      OptionText="@(o => o.Text)"
+                      @bind-Value="@SelectedTierValue"
+                      Placeholder="All Tiers"
+                      Width="140px" />
     </div>
 
     @if (_loading)
@@ -143,13 +135,29 @@
 }
 
 @code {
+    private record FilterOption(string Value, string Text);
+
     private List<AdversarySummary> _adversaries = [];
+    private List<FilterOption> _typeOptions = [];
+    private List<FilterOption> _tierOptions = [];
     private bool _loading = true;
     private string _searchTerm = string.Empty;
-    private string _selectedTypeStr = "";
-    private string _selectedTierStr = "0";
+    private string? _selectedTypeBacking;
+    private string? _selectedTierBacking;
     private AdversarySummary? _selected;
-    
+
+    private string SelectedTypeValue
+    {
+        get => _selectedTypeBacking ?? "";
+        set { _selectedTypeBacking = value; _ = ApplyFilters(); }
+    }
+
+    private string SelectedTierValue
+    {
+        get => _selectedTierBacking ?? "0";
+        set { _selectedTierBacking = value; _ = ApplyFilters(); }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await LoadAdversaries();
@@ -161,6 +169,14 @@
         try
         {
             _adversaries = await AdversaryQueries.GetAllAsync();
+            _typeOptions = _adversaries
+                .Select(a => a.Type).Distinct().OrderBy(t => t.ToString())
+                .Select(t => new FilterOption(t.ToString(), t.ToString()))
+                .ToList();
+            _tierOptions = _adversaries
+                .Select(a => a.Tier).Distinct().OrderBy(t => t)
+                .Select(t => new FilterOption(t.ToString(), $"Tier {t}"))
+                .ToList();
         }
         finally
         {
@@ -174,34 +190,21 @@
         _ = ApplyFilters();
     }
 
-    private async Task OnTypeChanged(ChangeEventArgs e)
-    {
-        _selectedTypeStr = e.Value?.ToString() ?? "";
-        await ApplyFilters();
-    }
-
-    private async Task OnTierChanged(ChangeEventArgs e)
-    {
-        _selectedTierStr = e.Value?.ToString() ?? "0";
-        await ApplyFilters();
-    }
-
     private async Task ApplyFilters()
     {
         _loading = true;
         try
         {
             AdversaryType? type = null;
-            if (Enum.TryParse<AdversaryType>(_selectedTypeStr, ignoreCase: true, out var parsed))
+            if (!string.IsNullOrEmpty(_selectedTypeBacking) && Enum.TryParse<AdversaryType>(_selectedTypeBacking, ignoreCase: true, out var parsed))
                 type = parsed;
 
-            var tier = int.TryParse(_selectedTierStr, out var t) ? t : 0;
+            int? tier = null;
+            if (int.TryParse(_selectedTierBacking, out var t) && t > 0)
+                tier = t;
 
             _adversaries = await AdversaryQueries.SearchAsync(
-                _searchTerm,
-                type,
-                tier is 0 ? null : tier,
-                null, null);
+                _searchTerm, type, tier, null, null);
         }
         finally
         {

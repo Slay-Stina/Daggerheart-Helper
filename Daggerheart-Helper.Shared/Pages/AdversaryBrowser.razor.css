@@ -36,23 +36,6 @@
     flex-wrap: wrap;
 }
 
-.filter-select {
-    background: rgba(25, 25, 40, 0.7);
-    color: #e5e7eb;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 6px;
-    padding: 5px 10px;
-    font-size: 0.85rem;
-    font-family: inherit;
-    cursor: pointer;
-    max-width: 160px;
-}
-
-.filter-select option {
-    background: #1e1e2e;
-    color: #e5e7eb;
-}
-
 .loading-container {
     display: flex;
     flex-direction: column;
@@ -103,37 +86,46 @@
 ::deep > fluent-badge {
     font-size: 0.75rem;
     font-weight: 600;
-    --badge-color-highlight: white;
 
-    --badge-fill-tier: var(--dh-purple);
-    --badge-fill-difficulty: var(--dh-negative);
-    --badge-fill-thresholds: var(--dh-purple);
-    --badge-fill-hp: var(--dh-hp);
-    --badge-fill-stress: var(--dh-stress);
-    --badge-fill-atk: var(--dh-stress);
-    --badge-fill-attack: var(--dh-hope);
-    --badge-fill-damage: var(--dh-negative);
-    --badge-fill-exp: var(--dh-hope);
-    --badge-fill-solo: var(--dh-hp);
-    --badge-color-solo: white;
-    --badge-fill-bruiser: var(--dh-stress);
-    --badge-color-bruiser: white;
-    --badge-fill-horde: #eab308;
-    --badge-color-horde: #000;
-    --badge-fill-leader: var(--dh-purple);
-    --badge-color-leader: white;
-    --badge-fill-minion: var(--dh-neutral);
-    --badge-color-minion: white;
-    --badge-fill-ranged: var(--dh-positive);
-    --badge-color-ranged: white;
-    --badge-fill-skulk: #3b82f6;
-    --badge-color-skulk: white;
-    --badge-fill-social: #ec4899;
-    --badge-color-social: white;
-    --badge-fill-standard: #14b8a6;
-    --badge-color-standard: white;
-    --badge-fill-support: #06b6d4;
-    --badge-color-support: white;
+    --badge-fill-tier: color-mix(in srgb, var(--dh-purple) 15%, transparent);
+    --badge-color-tier: var(--dh-purple);
+    --badge-fill-difficulty: color-mix(in srgb, var(--dh-negative) 15%, transparent);
+    --badge-color-difficulty: var(--dh-negative);
+    --badge-fill-thresholds: color-mix(in srgb, var(--dh-purple) 15%, transparent);
+    --badge-color-thresholds: var(--dh-purple);
+    --badge-fill-hp: color-mix(in srgb, var(--dh-hp) 15%, transparent);
+    --badge-color-hp: var(--dh-hp);
+    --badge-fill-stress: color-mix(in srgb, var(--dh-stress) 15%, transparent);
+    --badge-color-stress: var(--dh-stress);
+    --badge-fill-atk: color-mix(in srgb, var(--dh-stress) 15%, transparent);
+    --badge-color-atk: var(--dh-stress);
+    --badge-fill-attack: color-mix(in srgb, var(--dh-hope) 15%, transparent);
+    --badge-color-attack: var(--dh-hope);
+    --badge-fill-damage: color-mix(in srgb, var(--dh-negative) 15%, transparent);
+    --badge-color-damage: var(--dh-negative);
+    --badge-fill-exp: color-mix(in srgb, var(--dh-hope) 15%, transparent);
+    --badge-color-exp: var(--dh-hope);
+
+    --badge-fill-solo: color-mix(in srgb, var(--dh-hp) 15%, transparent);
+    --badge-color-solo: var(--dh-hp);
+    --badge-fill-bruiser: color-mix(in srgb, var(--dh-stress) 15%, transparent);
+    --badge-color-bruiser: var(--dh-stress);
+    --badge-fill-horde: color-mix(in srgb, #eab308 15%, transparent);
+    --badge-color-horde: #eab308;
+    --badge-fill-leader: color-mix(in srgb, var(--dh-purple) 15%, transparent);
+    --badge-color-leader: var(--dh-purple);
+    --badge-fill-minion: color-mix(in srgb, var(--dh-neutral) 15%, transparent);
+    --badge-color-minion: var(--dh-neutral);
+    --badge-fill-ranged: color-mix(in srgb, var(--dh-positive) 15%, transparent);
+    --badge-color-ranged: var(--dh-positive);
+    --badge-fill-skulk: color-mix(in srgb, #3b82f6 15%, transparent);
+    --badge-color-skulk: #3b82f6;
+    --badge-fill-social: color-mix(in srgb, #ec4899 15%, transparent);
+    --badge-color-social: #ec4899;
+    --badge-fill-standard: color-mix(in srgb, #14b8a6 15%, transparent);
+    --badge-color-standard: #14b8a6;
+    --badge-fill-support: color-mix(in srgb, #06b6d4 15%, transparent);
+    --badge-color-support: #06b6d4;
 }
 
 .detail-overlay {
