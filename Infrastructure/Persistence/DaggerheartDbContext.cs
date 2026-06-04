@@ -20,6 +20,7 @@ public class DaggerheartDbContext(DbContextOptions<DaggerheartDbContext> options
     public DbSet<Heritage> Heritages => Set<Heritage>();
     public DbSet<CharacterAbility> CharacterAbilities => Set<CharacterAbility>();
     public DbSet<Item> Items => Set<Item>();
+    public DbSet<Adversary> Adversaries => Set<Adversary>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -354,6 +355,24 @@ public class DaggerheartDbContext(DbContextOptions<DaggerheartDbContext> options
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
             entity.Property(x => x.Description).HasMaxLength(2000);
+        });
+
+        modelBuilder.Entity<Adversary>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
+            entity.Property(x => x.Description).HasMaxLength(2000);
+            entity.Property(x => x.Thresholds).HasMaxLength(50);
+            entity.Property(x => x.Atk).HasMaxLength(20);
+            entity.Property(x => x.Attack).HasMaxLength(100);
+            entity.Property(x => x.Damage).HasMaxLength(100);
+            entity.Property(x => x.Range).HasMaxLength(50);
+            entity.Property(x => x.Experience).HasMaxLength(500);
+            entity.Property(x => x.MotivesAndTactics).HasMaxLength(1000);
+            entity.HasMany(x => x.Features)
+                .WithOne()
+                .HasForeignKey("AdversaryId")
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<CharacterAbility>(entity =>

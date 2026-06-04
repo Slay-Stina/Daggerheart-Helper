@@ -136,6 +136,12 @@ public class Seed
         await SaveChangesForBatchAsync("communities");
         logger.LogInformation("{CommunityCount} communities seeded", catalog.Communities.Count);
 
+        logger.LogInformation("Seeding {AdversaryCount} adversaries...", catalog.Adversaries.Count);
+        var adversaryEntities = catalog.Adversaries.ToEntities();
+        context.Adversaries.AddRange(adversaryEntities);
+        await SaveChangesForBatchAsync("adversaries");
+        logger.LogInformation("{AdversaryCount} adversaries seeded", catalog.Adversaries.Count);
+
         logger.LogInformation("Seeding {ClassCount} classes...", catalog.Classes.Count);
 
         // Build lookup dictionaries from tracked entities
