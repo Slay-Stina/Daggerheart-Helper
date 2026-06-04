@@ -67,16 +67,16 @@
                             AutoFit="true" 
                             OnRowClick="@((FluentDataGridRow<AdversarySummary> row) => { if (row.Item is not null) ShowDetail(row.Item); })">
                     <PropertyColumn Property="@(a => a.Name)" Title="Name" Sortable="true" />
-                    <TemplateColumn Title="Tier" Sortable="true" SortBy="@SortByTier" Align="Align.Center">
+                    <TemplateColumn Title="Tier" Sortable="true" Align="Align.Center">
                         <span class="badge-tier">T@(context.Tier)</span>
                     </TemplateColumn>
-                    <TemplateColumn Title="Type" Sortable="true" SortBy="@SortByType" Align="Align.Center">
+                    <TemplateColumn Title="Type" Sortable="true" Align="Align.Center">
                         <span class="badge-type type-@context.Type.ToString().ToLowerInvariant()">@context.Type</span>
                     </TemplateColumn>
                     <PropertyColumn Property="@(a => a.Difficulty)" Title="Difficulty" Sortable="true" Align="Align.Center" />
                     <PropertyColumn Property="@(a => a.Hp)" Title="HP" Sortable="true" Align="Align.Center" />
                     <PropertyColumn Property="@(a => a.Stress)" Title="Stress" Sortable="true" Align="Align.Center" />
-                    <TemplateColumn Title="Thresholds" Sortable="true" SortBy="@SortByThreshold" Align="Align.Center">
+                    <TemplateColumn Title="Thresholds" Sortable="true" Align="Align.Center">
                         <span>@(string.IsNullOrEmpty(context.Thresholds) ? "—" : context.Thresholds)</span>
                     </TemplateColumn>
             </FluentDataGrid>
@@ -102,16 +102,15 @@
 
             <div class="stat-block">
                 <div class="stat-row-core">
-                    <span class="stat-badge stat-difficulty">Difficulty @_selected.Difficulty</span>
-                    <span class="stat-badge stat-thresholds">Thresholds @(!string.IsNullOrEmpty(_selected.Thresholds) ? _selected.Thresholds : "—")</span>
-                    <span class="stat-badge stat-hp">Hp @_selected.Hp</span>
-                    <span class="stat-badge stat-stress">Stress @_selected.Stress</span>
+                    <span class="stat-badge stat-difficulty">Difficulty: @_selected.Difficulty</span>
+                    <span class="stat-badge stat-thresholds">Thresholds: @(!string.IsNullOrEmpty(_selected.Thresholds) ? _selected.Thresholds : "—")</span>
+                    <span class="stat-badge stat-hp">Hp: @_selected.Hp</span>
+                    <span class="stat-badge stat-stress">Stress: @_selected.Stress</span>
                 </div>
                 <div class="stat-row-attack">
-                    <span class="stat-badge stat-atk">Atk @_selected.Atk</span>
-                    <span class="stat-badge stat-attack">Attack @_selected.Attack</span>
-                    <span class="stat-badge stat-damage">Damage @_selected.Damage</span>
-                    <span class="stat-badge stat-range">Range @_selected.Range</span>
+                    <span class="stat-badge stat-atk">Atk: @_selected.Atk</span>
+                    <span class="stat-badge stat-attack">@_selected.Attack &mdash; @_selected.Range</span>
+                    <span class="stat-badge stat-damage">@_selected.Damage</span>
                 </div>
             </div>
 
@@ -139,11 +138,7 @@
     private string _selectedTypeStr = "";
     private string _selectedTierStr = "0";
     private AdversarySummary? _selected;
-
-    private static readonly GridSort<AdversarySummary> SortByTier = GridSort<AdversarySummary>.ByAscending(a => a.Tier);
-    private static readonly GridSort<AdversarySummary> SortByType = GridSort<AdversarySummary>.ByAscending(a => a.Type.ToString());
-    private static readonly GridSort<AdversarySummary> SortByThreshold = GridSort<AdversarySummary>.ByAscending(a => a.Thresholds);
-
+    
     protected override async Task OnInitializedAsync()
     {
         await LoadAdversaries();
