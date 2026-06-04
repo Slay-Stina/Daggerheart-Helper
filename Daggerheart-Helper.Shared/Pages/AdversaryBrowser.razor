@@ -102,7 +102,7 @@
 
             @if (!string.IsNullOrEmpty(_selected.MotivesAndTactics))
             {
-                <p class="detail-motives"><strong>Motives &amp; Tactics:</strong> @_selected.MotivesAndTactics</p>
+                <p class="detail-motives"><strong>Motives & Tactics:</strong> @_selected.MotivesAndTactics</p>
             }
 
             <div class="stat-block">
@@ -117,18 +117,26 @@
 
             @if (!string.IsNullOrEmpty(_selected.Experience))
             {
-                <p class="detail-experience"><strong>Experience:</strong> @_selected.Experience</p>
+                <div class="adv-exp-section">
+                    <strong>Experience:</strong>
+                    <div class="adv-exp-list">
+                        @foreach (var exp in _selected.Experience.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            <span class="adv-exp-chip">@exp</span>
+                        }
+                    </div>
+                </div>
             }
 
             @if (_selected.Features.Count > 0)
             {
                 <h4 class="features-heading">Features</h4>
-                <div class="features-list">
+                <FluentStack Orientation="Orientation.Vertical" Gap="8">
                     @foreach (var f in _selected.Features)
                     {
                         <p class="feature-item"><strong>@f.Name:</strong> @f.Description.ToMarkdownHtml()</p>
                     }
-                </div>
+                </FluentStack>
             }
         </FluentCard>
     </div>
