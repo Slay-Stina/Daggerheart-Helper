@@ -16,4 +16,6 @@ public sealed record AdversarySummary(
     string Attack,
     string Damage,
     string Range,
+    string MotivesAndTactics,
+    string Experience,
     List<FeatureSummary> Features);

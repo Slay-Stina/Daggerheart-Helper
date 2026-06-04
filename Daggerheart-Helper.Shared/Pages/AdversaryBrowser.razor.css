@@ -184,16 +184,9 @@
 
 .stat-block {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 6px;
-}
-
-.stat-row-core,
-.stat-row-attack {
-    display: flex;
-    gap: 6px;
+    gap: 5px;
     flex-wrap: wrap;
+    margin: 10px 0;
 }
 
 .stat-badge {
@@ -214,21 +207,36 @@
 .stat-atk { background: rgba(249, 115, 22, 0.2);  color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.35); }
 .stat-attack { background: rgba(59, 130, 246, 0.2);  color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.35); }
 .stat-damage { background: rgba(220, 38, 38, 0.2);   color: #fca5a5; border: 1px solid rgba(220, 38, 38, 0.35); }
-.stat-range { background: rgba(20, 184, 166, 0.2);  color: #5eead4; border: 1px solid rgba(20, 184, 166, 0.35); }
+
+.detail-motives {
+    font-size: 0.82rem;
+    color: #c4c4d0;
+    line-height: 1.45;
+    margin: 0 0 6px 0;
+}
+
+.detail-experience {
+    font-size: 0.8rem;
+    color: #c4c4d0;
+    margin: 0 0 4px 0;
+}
 
 .features-heading {
-    margin: 12px 0 8px 0;
+    margin: 14px 0 8px 0;
     font-size: 0.9rem;
     color: #f3f4f6;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-::deep .detail-accordion {
-    font-size: 0.85rem;
+.features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-::deep .detail-accordion fluent-accordion-item::part(region) {
+.feature-item {
+    margin: 0;
     font-size: 0.82rem;
     color: #c4c4d0;
     line-height: 1.45;

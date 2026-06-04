@@ -93,39 +93,42 @@
                 <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Filled.Size20.Dismiss())" OnClick="@ClearSelection" />
             </div>
 
-            <div class="detail-subtitle">@_selected.Type — Tier @_selected.Tier</div>
+            <div class="detail-subtitle">Tier @_selected.Tier @_selected.Type</div>
 
             @if (!string.IsNullOrEmpty(_selected.Description))
             {
                 <p class="detail-desc">@_selected.Description</p>
             }
 
+            @if (!string.IsNullOrEmpty(_selected.MotivesAndTactics))
+            {
+                <p class="detail-motives"><strong>Motives &amp; Tactics:</strong> @_selected.MotivesAndTactics</p>
+            }
+
             <div class="stat-block">
-                <div class="stat-row-core">
-                    <span class="stat-badge stat-difficulty">Difficulty: @_selected.Difficulty</span>
-                    <span class="stat-badge stat-thresholds">Thresholds: @(!string.IsNullOrEmpty(_selected.Thresholds) ? _selected.Thresholds : "—")</span>
-                    <span class="stat-badge stat-hp">Hp: @_selected.Hp</span>
-                    <span class="stat-badge stat-stress">Stress: @_selected.Stress</span>
-                </div>
-                <div class="stat-row-attack">
-                    <span class="stat-badge stat-atk">Atk: @_selected.Atk</span>
-                    <span class="stat-badge stat-attack">@_selected.Attack &mdash; @_selected.Range</span>
-                    <span class="stat-badge stat-damage">@_selected.Damage</span>
-                </div>
+                <span class="stat-badge stat-difficulty">Difficulty: @_selected.Difficulty</span>
+                <span class="stat-badge stat-thresholds">Thresholds: @(!string.IsNullOrEmpty(_selected.Thresholds) ? _selected.Thresholds : "—")</span>
+                <span class="stat-badge stat-hp">Hp: @_selected.Hp</span>
+                <span class="stat-badge stat-stress">Stress: @_selected.Stress</span>
+                <span class="stat-badge stat-atk">Atk: @_selected.Atk</span>
+                <span class="stat-badge stat-attack">@_selected.Attack: @_selected.Range</span>
+                <span class="stat-badge stat-damage">@_selected.Damage</span>
             </div>
+
+            @if (!string.IsNullOrEmpty(_selected.Experience))
+            {
+                <p class="detail-experience"><strong>Experience:</strong> @_selected.Experience</p>
+            }
 
             @if (_selected.Features.Count > 0)
             {
-                <FluentDivider />
                 <h4 class="features-heading">Features</h4>
-                <FluentAccordion Class="detail-accordion" ExpandMode="AccordionExpandMode.Multi">
+                <div class="features-list">
                     @foreach (var f in _selected.Features)
                     {
-                        <FluentAccordionItem Heading="@f.Name">
-                            <p>@f.Description.ToMarkdownHtml()</p>
-                        </FluentAccordionItem>
+                        <p class="feature-item"><strong>@f.Name:</strong> @f.Description.ToMarkdownHtml()</p>
                     }
-                </FluentAccordion>
+                </div>
             }
         </FluentCard>
     </div>

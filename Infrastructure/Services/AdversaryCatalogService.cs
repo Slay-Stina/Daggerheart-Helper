@@ -75,5 +75,7 @@ public sealed class AdversaryCatalogQueries(DaggerheartDbContext context) : IAdv
         a.Attack,
         a.Damage,
         a.Range,
+        a.MotivesAndTactics,
+        a.Experience,
         a.Features.Select(f => new FeatureSummary(f.Id, f.Name, f.Description)).ToList());
 }
