@@ -60,8 +60,12 @@
     {
         <div class="result-count">@_adversaries.Count adversary@(_adversaries.Count != 1 ? "ies" : "y")</div>
         <FluentStack Orientation="Orientation.Vertical" Gap="8">
-            <FluentDataGrid Items="@(_adversaries.AsQueryable())" GenerateHeader="GenerateHeaderOption.Sticky" Class="adversary-grid" ShowHover="@(true)" ResizableColumns="@(true)" AutoFit="@(true)" GridTemplateColumns="1fr 60px 90px 50px 50px 55px 80px 110px 80px 65px" OnRowClick="@((FluentDataGridRow<AdversarySummary> row) => { if (row.Item is not null) ShowDetail(row.Item); })">
-                <ChildContent>
+            <FluentDataGrid Items="@(_adversaries.AsQueryable())" 
+                            GenerateHeader="GenerateHeaderOption.Sticky" 
+                            Class="adversary-grid" 
+                            ShowHover="@(true)" 
+                            AutoFit="true" 
+                            OnRowClick="@((FluentDataGridRow<AdversarySummary> row) => { if (row.Item is not null) ShowDetail(row.Item); })">
                     <PropertyColumn Property="@(a => a.Name)" Title="Name" Sortable="true" />
                     <TemplateColumn Title="Tier" Sortable="true" SortBy="@SortByTier" Align="Align.Center">
                         <span class="badge-tier">T@(context.Tier)</span>
@@ -69,16 +73,12 @@
                     <TemplateColumn Title="Type" Sortable="true" SortBy="@SortByType" Align="Align.Center">
                         <span class="badge-type type-@context.Type.ToString().ToLowerInvariant()">@context.Type</span>
                     </TemplateColumn>
-                    <PropertyColumn Property="@(a => a.Difficulty)" Title="DV" Sortable="true" Align="Align.Center" />
+                    <PropertyColumn Property="@(a => a.Difficulty)" Title="Difficulty" Sortable="true" Align="Align.Center" />
                     <PropertyColumn Property="@(a => a.Hp)" Title="HP" Sortable="true" Align="Align.Center" />
-                    <PropertyColumn Property="@(a => a.Stress)" Title="STA" Sortable="true" Align="Align.Center" />
-                    <PropertyColumn Property="@(a => a.Attack)" Title="ATK" Sortable="true" />
-                    <PropertyColumn Property="@(a => a.Damage)" Title="DMG" Sortable="true" />
-                    <PropertyColumn Property="@(a => a.Range)" Title="RNG" Sortable="true" />
-                    <TemplateColumn Title="THR" Sortable="true" SortBy="@SortByThreshold" Align="Align.Center">
+                    <PropertyColumn Property="@(a => a.Stress)" Title="Stress" Sortable="true" Align="Align.Center" />
+                    <TemplateColumn Title="Thresholds" Sortable="true" SortBy="@SortByThreshold" Align="Align.Center">
                         <span>@(string.IsNullOrEmpty(context.Thresholds) ? "—" : context.Thresholds)</span>
                     </TemplateColumn>
-                </ChildContent>
             </FluentDataGrid>
         </FluentStack>
     }
@@ -92,26 +92,32 @@
                 <h3>@_selected.Name</h3>
                 <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Filled.Size20.Dismiss())" OnClick="@ClearSelection" />
             </div>
-            <div class="detail-tags">
-                <span class="badge-tier">T@(_selected.Tier)</span>
-                <span class="badge-type type-@_selected.Type.ToString().ToLowerInvariant()">@_selected.Type</span>
-                <span class="badge-dv">DV @_selected.Difficulty</span>
-            </div>
+
+            <div class="detail-subtitle">@_selected.Type — Tier @_selected.Tier</div>
+
             @if (!string.IsNullOrEmpty(_selected.Description))
             {
                 <p class="detail-desc">@_selected.Description</p>
             }
-            <FluentStack Orientation="Orientation.Horizontal" Gap="8" Wrap="@(true)" Class="detail-stats">
-                <FluentBadge Color="Color.Info">HP @_selected.Hp</FluentBadge>
-                <FluentBadge Color="Color.Error">STA @_selected.Stress</FluentBadge>
-                <FluentBadge Color="Color.Warning">THR @(!string.IsNullOrEmpty(_selected.Thresholds) ? _selected.Thresholds : "—")</FluentBadge>
-                <FluentBadge Color="Color.Success">ATK @_selected.Attack</FluentBadge>
-                <FluentBadge Color="Color.Accent">DMG @_selected.Damage</FluentBadge>
-                <FluentBadge Color="Color.Neutral">RNG @_selected.Range</FluentBadge>
-            </FluentStack>
+
+            <div class="stat-block">
+                <div class="stat-row-core">
+                    <span class="stat-badge stat-dv">DV @_selected.Difficulty</span>
+                    <span class="stat-badge stat-thr">@(!string.IsNullOrEmpty(_selected.Thresholds) ? _selected.Thresholds : "—")</span>
+                    <span class="stat-badge stat-hp">HP @_selected.Hp</span>
+                    <span class="stat-badge stat-sta">STA @_selected.Stress</span>
+                </div>
+                <div class="stat-row-attack">
+                    <span class="stat-badge stat-atk">ATK @_selected.Attack</span>
+                    <span class="stat-badge stat-rng">@_selected.Range</span>
+                    <span class="stat-badge stat-dmg">@_selected.Damage</span>
+                </div>
+            </div>
+
             @if (_selected.Features.Count > 0)
             {
                 <FluentDivider />
+                <h4 class="features-heading">Features</h4>
                 <FluentAccordion Class="detail-accordion" ExpandMode="AccordionExpandMode.Multi">
                     @foreach (var f in _selected.Features)
                     {
