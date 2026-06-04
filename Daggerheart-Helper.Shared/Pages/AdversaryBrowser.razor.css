@@ -83,7 +83,7 @@
     min-height: 32px;
 }
 
-::deep > fluent-badge {
+::deep fluent-badge {
     font-size: 0.75rem;
     font-weight: 600;
 
@@ -99,10 +99,8 @@
     --badge-color-stress: var(--dh-stress);
     --badge-fill-atk: color-mix(in srgb, var(--dh-stress) 15%, transparent);
     --badge-color-atk: var(--dh-stress);
-    --badge-fill-attack: color-mix(in srgb, var(--dh-hope) 15%, transparent);
-    --badge-color-attack: var(--dh-hope);
-    --badge-fill-damage: color-mix(in srgb, var(--dh-negative) 15%, transparent);
-    --badge-color-damage: var(--dh-negative);
+    --badge-fill-attack: color-mix(in srgb, var(--dh-negative) 15%, transparent);
+    --badge-color-attack: var(--dh-negative);
     --badge-fill-exp: color-mix(in srgb, var(--dh-hope) 15%, transparent);
     --badge-color-exp: var(--dh-hope);
 

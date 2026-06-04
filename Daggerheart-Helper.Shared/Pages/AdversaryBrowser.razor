@@ -103,8 +103,7 @@
                 <FluentBadge Fill="hp">Hp: @_selected.Hp</FluentBadge>
                 <FluentBadge Fill="stress">Stress: @_selected.Stress</FluentBadge>
                 <FluentBadge Fill="atk">Atk: @_selected.Atk</FluentBadge>
-                <FluentBadge Fill="attack">@_selected.Attack: @_selected.Range</FluentBadge>
-                <FluentBadge Fill="damage">@_selected.Damage</FluentBadge>
+                <FluentBadge Fill="attack">@_selected.Attack: @_selected.Range | @_selected.Damage</FluentBadge>
             </div>
 
             @if (!string.IsNullOrEmpty(_selected.Experience))
