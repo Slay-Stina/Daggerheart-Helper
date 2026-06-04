@@ -2,7 +2,6 @@
 @inject IAdversaryCatalogQueries AdversaryQueries
 @inject NavigationManager NavigationManager
 
-
 <PageTitle>Adversary Browser — DM Tools</PageTitle>
 
 <div class="dashboard-container">
@@ -61,22 +60,24 @@
     {
         <div class="result-count">@_adversaries.Count adversary@(_adversaries.Count != 1 ? "ies" : "y")</div>
         <FluentStack Orientation="Orientation.Vertical" Gap="8">
-            <FluentDataGrid Items="@(_adversaries.AsQueryable())" GenerateHeader="GenerateHeaderOption.Sticky" Class="adversary-grid" ShowHover="@(true)" ResizableColumns="@(true)" OnRowClick="@((FluentDataGridRow<AdversarySummary> row) => ShowDetail(row.Item))">
+            <FluentDataGrid Items="@(_adversaries.AsQueryable())" GenerateHeader="GenerateHeaderOption.Sticky" Class="adversary-grid" ShowHover="@(true)" ResizableColumns="@(true)" AutoFit="@(true)" GridTemplateColumns="1fr 60px 90px 50px 50px 55px 80px 110px 80px 65px" OnRowClick="@((FluentDataGridRow<AdversarySummary> row) => { if (row.Item is not null) ShowDetail(row.Item); })">
                 <ChildContent>
-                    <PropertyColumn Property="@(a => a.Name)" Title="Name" />
-                    <TemplateColumn Title="Tier">
+                    <PropertyColumn Property="@(a => a.Name)" Title="Name" Sortable="true" />
+                    <TemplateColumn Title="Tier" Sortable="true" SortBy="@SortByTier" Align="Align.Center">
                         <span class="badge-tier">T@(context.Tier)</span>
                     </TemplateColumn>
-                    <TemplateColumn Title="Type">
+                    <TemplateColumn Title="Type" Sortable="true" SortBy="@SortByType" Align="Align.Center">
                         <span class="badge-type type-@context.Type.ToString().ToLowerInvariant()">@context.Type</span>
                     </TemplateColumn>
-                    <PropertyColumn Property="@(a => a.Difficulty)" Title="DV" />
-                    <PropertyColumn Property="@(a => a.Hp)" Title="HP" />
-                    <PropertyColumn Property="@(a => a.Stress)" Title="Stress" />
-                    <PropertyColumn Property="@(a => a.Attack)" Title="Attack" />
-                    <PropertyColumn Property="@(a => a.Damage)" Title="Damage" />
-                    <PropertyColumn Property="@(a => a.Range)" Title="Range" />
-                    <PropertyColumn Property="@(a => a.Thresholds)" Title="Threshold" />
+                    <PropertyColumn Property="@(a => a.Difficulty)" Title="DV" Sortable="true" Align="Align.Center" />
+                    <PropertyColumn Property="@(a => a.Hp)" Title="HP" Sortable="true" Align="Align.Center" />
+                    <PropertyColumn Property="@(a => a.Stress)" Title="STA" Sortable="true" Align="Align.Center" />
+                    <PropertyColumn Property="@(a => a.Attack)" Title="ATK" Sortable="true" />
+                    <PropertyColumn Property="@(a => a.Damage)" Title="DMG" Sortable="true" />
+                    <PropertyColumn Property="@(a => a.Range)" Title="RNG" Sortable="true" />
+                    <TemplateColumn Title="THR" Sortable="true" SortBy="@SortByThreshold" Align="Align.Center">
+                        <span>@(string.IsNullOrEmpty(context.Thresholds) ? "—" : context.Thresholds)</span>
+                    </TemplateColumn>
                 </ChildContent>
             </FluentDataGrid>
         </FluentStack>
@@ -85,11 +86,10 @@
 
 @if (_selected is not null)
 {
-    <FluentOverlay />
     <div class="detail-overlay" @onclick="@ClearSelection">
         <FluentCard class="detail-card" @onclick:stopPropagation>
             <div class="detail-header">
-                <h2>@_selected.Name</h2>
+                <h3>@_selected.Name</h3>
                 <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Filled.Size20.Dismiss())" OnClick="@ClearSelection" />
             </div>
             <div class="detail-tags">
@@ -97,30 +97,29 @@
                 <span class="badge-type type-@_selected.Type.ToString().ToLowerInvariant()">@_selected.Type</span>
                 <span class="badge-dv">DV @_selected.Difficulty</span>
             </div>
-            <p class="detail-desc">@_selected.Description</p>
-
-            <FluentStack Orientation="Orientation.Horizontal" Gap="10" Wrap="@(true)">
+            @if (!string.IsNullOrEmpty(_selected.Description))
+            {
+                <p class="detail-desc">@_selected.Description</p>
+            }
+            <FluentStack Orientation="Orientation.Horizontal" Gap="8" Wrap="@(true)" Class="detail-stats">
                 <FluentBadge Color="Color.Info">HP @_selected.Hp</FluentBadge>
-                <FluentBadge Color="Color.Error">Stress @_selected.Stress</FluentBadge>
-                <FluentBadge Color="Color.Warning">Threshold @_selected.Thresholds</FluentBadge>
+                <FluentBadge Color="Color.Error">STA @_selected.Stress</FluentBadge>
+                <FluentBadge Color="Color.Warning">THR @(!string.IsNullOrEmpty(_selected.Thresholds) ? _selected.Thresholds : "—")</FluentBadge>
                 <FluentBadge Color="Color.Success">ATK @_selected.Attack</FluentBadge>
-                <FluentBadge Color="Color.Info">@_selected.Damage</FluentBadge>
-                <FluentBadge Color="Color.Accent">@_selected.Range</FluentBadge>
+                <FluentBadge Color="Color.Accent">DMG @_selected.Damage</FluentBadge>
+                <FluentBadge Color="Color.Neutral">RNG @_selected.Range</FluentBadge>
             </FluentStack>
-
             @if (_selected.Features.Count > 0)
             {
                 <FluentDivider />
-                <h3 class="features-title">Features</h3>
-                <div class="features-list">
+                <FluentAccordion Class="detail-accordion" ExpandMode="AccordionExpandMode.Multi">
                     @foreach (var f in _selected.Features)
                     {
-                        <div class="feature-card">
-                            <strong>@f.Name</strong>
+                        <FluentAccordionItem Heading="@f.Name">
                             <p>@f.Description.ToMarkdownHtml()</p>
-                        </div>
+                        </FluentAccordionItem>
                     }
-                </div>
+                </FluentAccordion>
             }
         </FluentCard>
     </div>
@@ -133,6 +132,10 @@
     private string _selectedTypeStr = "";
     private string _selectedTierStr = "0";
     private AdversarySummary? _selected;
+
+    private static readonly GridSort<AdversarySummary> SortByTier = GridSort<AdversarySummary>.ByAscending(a => a.Tier);
+    private static readonly GridSort<AdversarySummary> SortByType = GridSort<AdversarySummary>.ByAscending(a => a.Type.ToString());
+    private static readonly GridSort<AdversarySummary> SortByThreshold = GridSort<AdversarySummary>.ByAscending(a => a.Thresholds);
 
     protected override async Task OnInitializedAsync()
     {

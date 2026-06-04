@@ -1,5 +1,5 @@
 .dashboard-container {
-    padding: 30px;
+    padding: 24px;
     background: radial-gradient(circle at top, var(--dh-bg-start) 0%, var(--dh-bg-end) 100%);
     min-height: 90vh;
     color: #f0f0f5;
@@ -9,14 +9,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding-bottom: 20px;
+    padding-bottom: 16px;
 }
 
 .header-text h2 {
-    font-size: 2.2rem;
-    margin: 0 0 5px 0;
+    font-size: 1.6rem;
+    margin: 0 0 3px 0;
     background: linear-gradient(135deg, var(--dh-purple) 0%, var(--dh-pink) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -25,14 +25,14 @@
 .header-text p {
     margin: 0;
     color: var(--dh-neutral);
-    font-size: 0.95rem;
+    font-size: 0.85rem;
 }
 
 .filters-bar {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     flex-wrap: wrap;
 }
 
@@ -41,11 +41,11 @@
     color: #e5e7eb;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 0.88rem;
+    padding: 5px 10px;
+    font-size: 0.85rem;
     font-family: inherit;
     cursor: pointer;
-    max-width: 180px;
+    max-width: 160px;
 }
 
 .filter-select option {
@@ -58,7 +58,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 80px 0;
+    padding: 60px 0;
     color: var(--dh-purple);
 }
 
@@ -82,16 +82,30 @@
     font-size: 0.9rem;
 }
 
+.result-count {
+    font-size: 0.8rem;
+    color: var(--dh-neutral);
+    margin-bottom: 6px;
+}
+
 ::deep .adversary-grid {
-    --col-gap: 4px;
+    font-size: 0.82rem;
+}
+
+::deep .adversary-grid fluent-data-grid-cell {
+    padding: 4px 6px;
+}
+
+::deep .adversary-grid fluent-data-grid-row {
+    min-height: 32px;
 }
 
 ::deep .badge-tier {
     display: inline-block;
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 10px;
+    padding: 1px 7px;
+    border-radius: 8px;
     background: rgba(139, 92, 246, 0.15);
     color: #a78bfa;
     border: 1px solid rgba(139, 92, 246, 0.25);
@@ -99,12 +113,12 @@
 
 ::deep .badge-type {
     display: inline-block;
-    font-size: 0.72rem;
+    font-size: 0.65rem;
     font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 10px;
+    padding: 1px 7px;
+    border-radius: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
 }
 
 ::deep .badge-dv {
@@ -129,26 +143,66 @@
 ::deep .type-standard { background: rgba(20, 184, 166, 0.15); color: #5eead4; border-color: rgba(20, 184, 166, 0.25); }
 ::deep .type-support { background: rgba(6, 182, 212, 0.15); color: #67e8f9; border-color: rgba(6, 182, 212, 0.25); }
 
-::deep .dialog-tags {
+.detail-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
     display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 16px;
+    backdrop-filter: blur(2px);
 }
 
-.dialog-title {
+::deep .detail-card {
+    max-width: 520px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 20px !important;
+    background: #1e1e30 !important;
+    color: #f0f0f5;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.detail-header h3 {
     margin: 0;
-    font-size: 1.5rem;
-}
-
-.dialog-desc {
-    font-size: 0.95rem;
-    color: var(--dh-neutral);
-    line-height: 1.5;
-    margin: 0 0 20px 0;
-}
-
-.features-title {
-    margin: 16px 0 12px 0;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     color: #f3f4f6;
+}
+
+.detail-tags {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.detail-desc {
+    font-size: 0.85rem;
+    color: #c4c4d0;
+    line-height: 1.45;
+    margin: 0 0 14px 0;
+}
+
+::deep .detail-stats {
+    margin-bottom: 6px;
+}
+
+::deep .detail-accordion {
+    font-size: 0.85rem;
+}
+
+::deep .detail-accordion fluent-accordion-item::part(region) {
+    font-size: 0.82rem;
+    color: #c4c4d0;
+    line-height: 1.45;
 }
