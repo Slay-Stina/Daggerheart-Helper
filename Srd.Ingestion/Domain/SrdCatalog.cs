@@ -8,5 +8,6 @@ public sealed record SrdCatalog(
     IReadOnlyList<CommunityCard> Communities,
     IReadOnlyList<SubclassCard> Subclasses,
     IReadOnlyList<ClassCard> Classes,
-    IReadOnlyList<ItemCard> Items);
+    IReadOnlyList<ItemCard> Items,
+    IReadOnlyList<AdversaryCard> Adversaries);
 

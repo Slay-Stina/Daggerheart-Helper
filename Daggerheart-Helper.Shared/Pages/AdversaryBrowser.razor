@@ -1,0 +1,228 @@
+@page "/dm-tools/adversaries"
+@inject IAdversaryCatalogQueries AdversaryQueries
+@inject NavigationManager NavigationManager
+
+<PageTitle>Adversary Browser — DM Tools</PageTitle>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="header-text">
+            <h2>Adversary Browser</h2>
+            <p>Browse and search Daggerheart adversaries from the SRD</p>
+        </div>
+        <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Filled.Size20.ArrowLeft())" OnClick="@GoBack">
+            Back to DM Tools
+        </FluentButton>
+    </div>
+
+    <div class="filters-bar">
+        <FluentTextField Placeholder="Search by name..." Value="@_searchTerm" ValueChanged="@OnSearchChanged" Style="max-width: 250px;" Immediate ImmediateDelay="300" />
+        <FluentSelect TOption="FilterOption"
+                      Items="@_typeOptions"
+                      OptionValue="@(o => o.Value)"
+                      OptionText="@(o => o.Text)"
+                      @bind-Value="@SelectedTypeValue"
+                      Placeholder="All Types"
+                      Width="160px" />
+        <FluentSelect TOption="FilterOption"
+                      Items="@_tierOptions"
+                      OptionValue="@(o => o.Value)"
+                      OptionText="@(o => o.Text)"
+                      @bind-Value="@SelectedTierValue"
+                      Placeholder="All Tiers"
+                      Width="140px" />
+    </div>
+
+    @if (_loading)
+    {
+        <div class="loading-container">
+            <FluentProgressRing />
+            <p>Loading adversaries...</p>
+        </div>
+    }
+    else if (!_adversaries.Any())
+    {
+        <div class="empty-state">
+            <FluentIcon Value="@(new Icons.Filled.Size48.PeopleCommunity())" Color="Color.Neutral" />
+            <h3>No adversaries found</h3>
+            <p>Try adjusting your search or filter criteria.</p>
+        </div>
+    }
+    else
+    {
+        <div class="result-count">@_adversaries.Count adversary@(_adversaries.Count != 1 ? "ies" : "y")</div>
+        <FluentStack Orientation="Orientation.Vertical" Gap="8">
+            <FluentDataGrid Items="@(_adversaries.AsQueryable())" 
+                            GenerateHeader="GenerateHeaderOption.Sticky" 
+                            Class="adversary-grid" 
+                            ShowHover="@(true)" 
+                            AutoFit="true" 
+                            OnRowClick="@((FluentDataGridRow<AdversarySummary> row) => { if (row.Item is not null) ShowDetail(row.Item); })">
+                    <PropertyColumn Property="@(a => a.Name)" Title="Name" Sortable="true" />
+                    <TemplateColumn Title="Tier" Sortable="true" Align="Align.Center">
+                        <FluentBadge Fill="tier">T@(context.Tier)</FluentBadge>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Type" Sortable="true" Align="Align.Center">
+                        <FluentBadge Fill="@context.Type.ToString().ToLowerInvariant()">@context.Type</FluentBadge>
+                    </TemplateColumn>
+                    <PropertyColumn Property="@(a => a.Difficulty)" Title="Difficulty" Sortable="true" Align="Align.Center" />
+                    <PropertyColumn Property="@(a => a.Hp)" Title="HP" Sortable="true" Align="Align.Center" />
+                    <PropertyColumn Property="@(a => a.Stress)" Title="Stress" Sortable="true" Align="Align.Center" />
+                    <TemplateColumn Title="Thresholds" Sortable="true" Align="Align.Center">
+                        <span>@(string.IsNullOrEmpty(context.Thresholds) ? "—" : context.Thresholds)</span>
+                    </TemplateColumn>
+            </FluentDataGrid>
+        </FluentStack>
+    }
+</div>
+
+@if (_selected is not null)
+{
+    <div class="detail-overlay" @onclick="@ClearSelection">
+        <FluentCard class="detail-card" @onclick:stopPropagation>
+            <div class="detail-header">
+                <h3>@_selected.Name</h3>
+                <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Filled.Size20.Dismiss())" OnClick="@ClearSelection" />
+            </div>
+
+            <div class="detail-subtitle">Tier @_selected.Tier @_selected.Type</div>
+
+            @if (!string.IsNullOrEmpty(_selected.Description))
+            {
+                <p class="detail-desc">@_selected.Description</p>
+            }
+
+            @if (!string.IsNullOrEmpty(_selected.MotivesAndTactics))
+            {
+                <p class="detail-motives"><strong>Motives & Tactics:</strong> @_selected.MotivesAndTactics</p>
+            }
+
+            <div class="stat-block">
+                <FluentBadge Fill="difficulty">Difficulty: @_selected.Difficulty</FluentBadge>
+                <FluentBadge Fill="thresholds">Thresholds: @(!string.IsNullOrEmpty(_selected.Thresholds) ? _selected.Thresholds : "—")</FluentBadge>
+                <FluentBadge Fill="hp">Hp: @_selected.Hp</FluentBadge>
+                <FluentBadge Fill="stress">Stress: @_selected.Stress</FluentBadge>
+                <FluentBadge Fill="atk">Atk: @_selected.Atk</FluentBadge>
+                <FluentBadge Fill="attack">@_selected.Attack: @_selected.Range | @_selected.Damage</FluentBadge>
+            </div>
+
+            @if (!string.IsNullOrEmpty(_selected.Experience))
+            {
+                <div class="adv-exp-section">
+                    <strong>Experience:</strong>
+                    <div class="adv-exp-list">
+                        @foreach (var exp in _selected.Experience.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            <FluentBadge Fill="exp">@exp</FluentBadge>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (_selected.Features.Count > 0)
+            {
+                <h4 class="features-heading">Features</h4>
+                <FluentStack Orientation="Orientation.Vertical" Gap="8">
+                    @foreach (var f in _selected.Features)
+                    {
+                        <p class="feature-item"><strong>@f.Name:</strong> @f.Description.ToMarkdownHtml()</p>
+                    }
+                </FluentStack>
+            }
+        </FluentCard>
+    </div>
+}
+
+@code {
+    private record FilterOption(string Value, string Text);
+
+    private List<AdversarySummary> _adversaries = [];
+    private List<FilterOption> _typeOptions = [];
+    private List<FilterOption> _tierOptions = [];
+    private bool _loading = true;
+    private string _searchTerm = string.Empty;
+    private string? _selectedTypeBacking;
+    private string? _selectedTierBacking;
+    private AdversarySummary? _selected;
+
+    private string SelectedTypeValue
+    {
+        get => _selectedTypeBacking ?? "";
+        set { _selectedTypeBacking = value; _ = ApplyFilters(); }
+    }
+
+    private string SelectedTierValue
+    {
+        get => _selectedTierBacking ?? "0";
+        set { _selectedTierBacking = value; _ = ApplyFilters(); }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAdversaries();
+    }
+
+    private async Task LoadAdversaries()
+    {
+        _loading = true;
+        try
+        {
+            _adversaries = await AdversaryQueries.GetAllAsync();
+            _typeOptions = _adversaries
+                .Select(a => a.Type).Distinct().OrderBy(t => t.ToString())
+                .Select(t => new FilterOption(t.ToString(), t.ToString()))
+                .ToList();
+            _tierOptions = _adversaries
+                .Select(a => a.Tier).Distinct().OrderBy(t => t)
+                .Select(t => new FilterOption(t.ToString(), $"Tier {t}"))
+                .ToList();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void OnSearchChanged(string value)
+    {
+        _searchTerm = value;
+        _ = ApplyFilters();
+    }
+
+    private async Task ApplyFilters()
+    {
+        _loading = true;
+        try
+        {
+            AdversaryType? type = null;
+            if (!string.IsNullOrEmpty(_selectedTypeBacking) && Enum.TryParse<AdversaryType>(_selectedTypeBacking, ignoreCase: true, out var parsed))
+                type = parsed;
+
+            int? tier = null;
+            if (int.TryParse(_selectedTierBacking, out var t) && t > 0)
+                tier = t;
+
+            _adversaries = await AdversaryQueries.SearchAsync(
+                _searchTerm, type, tier, null, null);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void ShowDetail(AdversarySummary adv)
+    {
+        _selected = adv;
+    }
+
+    private void ClearSelection()
+    {
+        _selected = null;
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/dm-tools");
+    }
+}

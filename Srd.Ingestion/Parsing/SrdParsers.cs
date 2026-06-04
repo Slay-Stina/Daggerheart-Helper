@@ -106,6 +106,12 @@ public static partial class SrdParsers
 
     public static AbilityType ParseAbilityType(string value) => ParseEnum<AbilityType>(value, "type");
 
+    public static AdversaryType ParseAdversaryType(string value)
+    {
+        var cleaned = value.Split(' ')[0];
+        return ParseEnum<AdversaryType>(cleaned, "adversary type");
+    }
+
     private static TEnum ParseEnum<TEnum>(string value, string fieldName)
         where TEnum : struct, Enum
     {
