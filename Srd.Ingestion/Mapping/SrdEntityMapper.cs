@@ -15,6 +15,8 @@ public static class SrdEntityMapper
 
     public static List<Item> ToEntities(this IEnumerable<ItemCard> cards) => cards.Select(ToEntity).ToList();
 
+    public static List<Adversary> ToEntities(this IEnumerable<AdversaryCard> cards) => cards.Select(ToEntity).ToList();
+
     public static Item ToEntity(this ItemCard card)
     {
         return new Item
@@ -61,6 +63,32 @@ public static class SrdEntityMapper
             RecallCost = card.RecallCost,
             Type = card.Type,
             FeatureDescription = card.Text
+        };
+    }
+
+    public static Adversary ToEntity(this AdversaryCard card)
+    {
+        return new Adversary
+        {
+            Name = card.Name,
+            Description = card.Description,
+            Tier = card.Tier,
+            Type = card.Type,
+            Difficulty = card.Difficulty,
+            Hp = card.Hp,
+            Stress = card.Stress,
+            Thresholds = card.Thresholds,
+            Atk = card.Atk,
+            Attack = card.Attack,
+            Damage = card.Damage,
+            Range = card.Range,
+            Experience = card.Experience,
+            MotivesAndTactics = card.MotivesAndTactics,
+            Features = card.Features.Select(f => new Feature
+            {
+                Name = f.Name,
+                Description = f.Text
+            }).ToList()
         };
     }
 

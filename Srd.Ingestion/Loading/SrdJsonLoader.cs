@@ -25,6 +25,7 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
         var rawSubclasses = await LoadFileAsync<RawSubclassDto>(jsonDirectoryPath, "subclasses.json", cancellationToken);
         var rawClasses = await LoadFileAsync<RawClassDto>(jsonDirectoryPath, "classes.json", cancellationToken);
         var rawItems = await LoadFileAsync<RawItemDto>(jsonDirectoryPath, "items.json", cancellationToken);
+        var rawAdversaries = await LoadFileAsync<RawAdversaryDto>(jsonDirectoryPath, "adversaries.json", cancellationToken);
         var subclasses = rawSubclasses.Select(ToSubclassCard).ToList();
         var armors = rawArmors.Select(ToArmorCard).ToList();
         var weapons = rawWeapons.Select(ToWeaponCard).ToList();
@@ -37,7 +38,8 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             rawCommunities.Select(ToCommunityCard).ToList(),
             subclasses,
             rawClasses.Select(raw => ToClassCard(raw, subclasses, weapons, armors)).ToList(),
-            rawItems.Select(ToItemCard).ToList()
+            rawItems.Select(ToItemCard).ToList(),
+            rawAdversaries.Select(ToAdversaryCard).ToList()
             );
     }
 
@@ -146,6 +148,26 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             );
     }
     
+    private static AdversaryCard ToAdversaryCard(RawAdversaryDto raw)
+    {
+        return new AdversaryCard(
+            raw.Name,
+            raw.Description,
+            SrdParsers.ParseTier(raw.Tier),
+            SrdParsers.ParseAdversaryType(raw.Type),
+            SrdParsers.ParseInt(raw.Difficulty, "difficulty"),
+            SrdParsers.ParseInt(raw.Hp, "hp"),
+            SrdParsers.ParseInt(raw.Stress, "stress"),
+            raw.Thresholds,
+            raw.Atk,
+            raw.Attack,
+            raw.Damage,
+            raw.Range,
+            raw.Experience,
+            raw.MotivesAndTactics,
+            SrdParsers.ParseFeatures(raw.Feature?.ToList()));
+    }
+
     private static ItemCard ToItemCard(RawItemDto raw)
     {
         return new ItemCard(raw.Name, raw.Description);

@@ -29,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<IHeritageCatalogQueries, HeritageCatalogQueries>();
         services.AddScoped<IWeaponCatalogQueries, WeaponCatalogQueries>();
         services.AddScoped<IItemCatalogQueries, ItemCatalogService>();
+        services.AddScoped<IAdversaryCatalogQueries, AdversaryCatalogQueries>();
         services.AddScoped<ICharacterService, CharacterService>();
         return services;
     }
