@@ -16,7 +16,19 @@ public class Seed
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Seed>>();
     
     // Create database schema from model
-    await context.Database.EnsureCreatedAsync();
+    var created = await context.Database.EnsureCreatedAsync();
+    if (!created)
+    {
+        // Database existed from prior deployment — check if schema is current
+        var hasAdv = (await context.Database
+            .ExecuteSqlRawAsync("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='Adversaries'")) > 0;
+        if (!hasAdv)
+        {
+            logger.LogWarning("Database schema outdated (missing Adversaries). Recreating...");
+            await context.Database.EnsureDeletedAsync();
+            await context.Database.EnsureCreatedAsync();
+        }
+    }
     await EnsureConcurrencyTriggersAsync(context);
     
     // Check if already seeded
