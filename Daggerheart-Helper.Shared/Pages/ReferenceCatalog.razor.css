@@ -1,0 +1,78 @@
+::deep fluent-data-grid {
+    background: var(--neutral-layer-1);
+    border-radius: 8px;
+}
+
+::deep fluent-data-grid-row {
+    background: var(--neutral-layer-1);
+}
+
+::deep fluent-data-grid-row:hover {
+    background: var(--neutral-layer-3);
+}
+
+::deep fluent-data-grid-cell {
+    padding: 6px 8px;
+}
+
+.tab-bar {
+    margin-bottom: 12px;
+    gap: 4px;
+}
+
+.tab-content {
+    min-height: 200px;
+}
+
+.detail-section {
+    margin-top: 12px;
+}
+
+.detail-card {
+    padding: 16px;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.detail-header h3 {
+    margin: 0;
+}
+
+.detail-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.detail-stats span {
+    background: var(--neutral-layer-3);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.9em;
+}
+
+.feature-block {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: var(--neutral-layer-2);
+    border-radius: 6px;
+}
+
+.feature-block p {
+    margin: 4px 0 0;
+}
+
+::deep fluent-badge {
+    --badge-fill-hp: color-mix(in srgb, var(--dh-hp) 15%, transparent);
+    --badge-color-hp: var(--dh-hp);
+    --badge-fill-tier: color-mix(in srgb, var(--dh-purple) 15%, transparent);
+    --badge-color-tier: var(--dh-purple);
+    --badge-fill-recall: color-mix(in srgb, var(--dh-positive) 15%, transparent);
+    --badge-color-recall: var(--dh-positive);
+}

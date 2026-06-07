@@ -16,11 +16,10 @@
             <p>Browse and search all adversaries from the SRD. Filter by type, tier, and difficulty.</p>
         </div>
 
-        <div class="tool-card disabled">
-            <FluentIcon Value="@(new Icons.Filled.Size20.BookOpen())" Color="Color.Neutral" />
-            <h3>SRD Reference</h3>
-            <p>Browse abilities, items, ancestries, and more from the SRD.</p>
-            <span class="coming-soon">Coming soon</span>
+        <div class="tool-card" @onclick="GoToReferenceCatalog">
+            <FluentIcon Value="@(new Icons.Filled.Size20.BookOpen())" Color="Color.Accent" />
+            <h3>Reference Catalog</h3>
+            <p>Browse abilities, items, ancestries, classes, armor, and weapons from the SRD.</p>
         </div>
 
         <div class="tool-card disabled">
@@ -36,5 +35,10 @@
     private void GoToAdversaries()
     {
         NavigationManager.NavigateTo("/dm-tools/adversaries");
+    }
+
+    private void GoToReferenceCatalog()
+    {
+        NavigationManager.NavigateTo("/dm-tools/reference-catalog");
     }
 }

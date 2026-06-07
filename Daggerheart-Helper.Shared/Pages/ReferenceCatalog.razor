@@ -1,0 +1,382 @@
+@page "/dm-tools/reference-catalog"
+@inject IAbilityCatalogQueries AbilityQueries
+@inject IItemCatalogQueries ItemQueries
+@inject IHeritageCatalogQueries HeritageQueries
+@inject IClassCatalogQueries ClassQueries
+@inject IArmorCatalogQueries ArmorQueries
+@inject IWeaponCatalogQueries WeaponQueries
+@inject NavigationManager NavigationManager
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <FluentAnchor Href="/dm-tools" Appearance="Appearance.Hypertext">
+            <FluentIcon Value="@(new Icons.Filled.Size20.ArrowLeft())" /> Back to DM Tools
+        </FluentAnchor>
+        <div class="header-text">
+            <h2>Reference Catalog</h2>
+            <p>Browse all SRD reference data</p>
+        </div>
+    </div>
+
+    @if (_loading)
+    {
+        <FluentProgressRing />
+    }
+    else
+    {
+        <FluentStack Orientation="Orientation.Horizontal" Wrap="true" Class="tab-bar">
+            @foreach (var tab in _tabs)
+            {
+                <FluentButton Appearance="@(_activeTab == tab.Key ? Appearance.Accent : Appearance.Neutral)"
+                              OnClick="@(() => _activeTab = tab.Key)">
+                    @tab.Label
+                </FluentButton>
+            }
+        </FluentStack>
+
+        @* Abilities *@
+        <div class="tab-content" style="display: @(_activeTab == 0 ? null : "none")">
+            <FluentTextField Placeholder="Search by name..." Value="@_abilitySearch" Immediate ImmediateDelay="200" ValueChanged="@(v => { _abilitySearch = v; _abilityItems = FilterAbilities().AsQueryable(); StateHasChanged(); })" />
+            <FluentDataGrid Items="@_abilityItems" GridTemplateColumns="1fr 100px 80px 100px 80px 80px">
+                <PropertyColumn Property="@(a => a.Title)" Title="Name" Sortable="true" />
+                <PropertyColumn Property="@(a => a.DomainType)" Title="Domain" Sortable="true" />
+                <TemplateColumn Title="Level" Sortable="true" Align="Align.Center" SortBy="GridSort<Ability>.ByAscending(a => a.Level)">
+                    <FluentBadge>@context.Level</FluentBadge>
+                </TemplateColumn>
+                <PropertyColumn Property="@(a => a.Type)" Title="Type" Sortable="true" />
+                <TemplateColumn Title="Recall" Align="Align.Center">
+                    <FluentBadge Fill="@(context.RecallCost > 0 ? "recall" : "none")">@(context.RecallCost > 0 ? $"{context.RecallCost}" : "—")</FluentBadge>
+                </TemplateColumn>
+                <TemplateColumn Title="">
+                    <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => _selectedAbility = context)">View</FluentButton>
+                </TemplateColumn>
+            </FluentDataGrid>
+            @if (_selectedAbility is not null)
+            {
+                <div class="detail-section">
+                    <FluentCard Class="detail-card">
+                        <div class="detail-header">
+                            <h3>@_selectedAbility.Title</h3>
+                            <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => _selectedAbility = null)">
+                                <FluentIcon Value="@(new Icons.Regular.Size20.Dismiss())" />
+                            </FluentButton>
+                        </div>
+                        <div class="detail-stats">
+                            <span><strong>Domain:</strong> @_selectedAbility.DomainType</span>
+                            <span><strong>Level:</strong> @_selectedAbility.Level</span>
+                            <span><strong>Recall:</strong> @_selectedAbility.RecallCost</span>
+                            <span><strong>Type:</strong> @_selectedAbility.Type</span>
+                        </div>
+                        <p>@_selectedAbility.FeatureDescription</p>
+                    </FluentCard>
+                </div>
+            }
+        </div>
+
+        @* Items *@
+        <div class="tab-content" style="display: @(_activeTab == 1 ? null : "none")">
+            <FluentTextField Placeholder="Search by name..." Value="@_itemSearch" Immediate ImmediateDelay="200" ValueChanged="@(v => { _itemSearch = v; _itemItems = FilterItems().AsQueryable(); StateHasChanged(); })" />
+            <FluentDataGrid Items="@_itemItems" GridTemplateColumns="1fr 2fr 80px">
+                <PropertyColumn Property="@(i => i.Name)" Title="Name" Sortable="true" />
+                <PropertyColumn Property="@(i => i.Description)" Title="Description" />
+                <TemplateColumn Title="">
+                    <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => _selectedItem = context)">View</FluentButton>
+                </TemplateColumn>
+            </FluentDataGrid>
+            @if (_selectedItem is not null)
+            {
+                <div class="detail-section">
+                    <FluentCard Class="detail-card">
+                        <div class="detail-header">
+                            <h3>@_selectedItem.Name</h3>
+                            <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => _selectedItem = null)">
+                                <FluentIcon Value="@(new Icons.Regular.Size20.Dismiss())" />
+                            </FluentButton>
+                        </div>
+                        <p>@_selectedItem.Description</p>
+                    </FluentCard>
+                </div>
+            }
+        </div>
+
+        @* Ancestries *@
+        <div class="tab-content" style="display: @(_activeTab == 2 ? null : "none")">
+            <FluentTextField Placeholder="Search by name..." Value="@_ancestrySearch" Immediate ImmediateDelay="200" ValueChanged="@(v => { _ancestrySearch = v; _ancestryItems = FilterAncestries().AsQueryable(); StateHasChanged(); })" />
+            <FluentDataGrid Items="@_ancestryItems" GridTemplateColumns="1fr 100px 80px">
+                <PropertyColumn Property="@(a => a.Name)" Title="Name" Sortable="true" />
+                <TemplateColumn Title="Features">
+                    @string.Join(", ", context.Features.Select(f => f.Name))
+                </TemplateColumn>
+                <TemplateColumn Title="">
+                    <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => _selectedAncestry = context)">View</FluentButton>
+                </TemplateColumn>
+            </FluentDataGrid>
+            @if (_selectedAncestry is not null)
+            {
+                <div class="detail-section">
+                    <FluentCard Class="detail-card">
+                        <div class="detail-header">
+                            <h3>@_selectedAncestry.Name</h3>
+                            <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => _selectedAncestry = null)">
+                                <FluentIcon Value="@(new Icons.Regular.Size20.Dismiss())" />
+                            </FluentButton>
+                        </div>
+                        <p>@_selectedAncestry.Description</p>
+                        @if (_selectedAncestry.Features.Count > 0)
+                        {
+                            <h4>Features</h4>
+                            @foreach (var f in _selectedAncestry.Features)
+                            {
+                                <div class="feature-block">
+                                    <strong>@f.Name</strong>
+                                    <p>@f.Description</p>
+                                </div>
+                            }
+                        }
+                    </FluentCard>
+                </div>
+            }
+        </div>
+
+        @* Classes *@
+        <div class="tab-content" style="display: @(_activeTab == 3 ? null : "none")">
+            <FluentTextField Placeholder="Search by name..." Value="@_classSearch" Immediate ImmediateDelay="200" ValueChanged="@(v => { _classSearch = v; _classItems = FilterClasses().AsQueryable(); StateHasChanged(); })" />
+            <FluentDataGrid Items="@_classItems" GridTemplateColumns="1fr 100px 100px 80px 80px 80px">
+                <PropertyColumn Property="@(c => c.Name)" Title="Name" Sortable="true" />
+                <PropertyColumn Property="@(c => c.Domain1)" Title="Domain 1" Sortable="true" />
+                <PropertyColumn Property="@(c => c.Domain2)" Title="Domain 2" Sortable="true" />
+                <TemplateColumn Title="HP" Align="Align.Center">
+                    <FluentBadge Fill="hp">@context.BaseHealth</FluentBadge>
+                </TemplateColumn>
+                <TemplateColumn Title="Evasion" Align="Align.Center">
+                    <FluentBadge>@context.BaseEvasion</FluentBadge>
+                </TemplateColumn>
+                <TemplateColumn Title="">
+                    <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => _selectedClass = context)">View</FluentButton>
+                </TemplateColumn>
+            </FluentDataGrid>
+            @if (_selectedClass is not null)
+            {
+                <div class="detail-section">
+                    <FluentCard Class="detail-card">
+                        <div class="detail-header">
+                            <h3>@_selectedClass.Name</h3>
+                            <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => _selectedClass = null)">
+                                <FluentIcon Value="@(new Icons.Regular.Size20.Dismiss())" />
+                            </FluentButton>
+                        </div>
+                        <div class="detail-stats">
+                            <span><strong>Domains:</strong> @_selectedClass.Domain1, @_selectedClass.Domain2</span>
+                            <span><strong>HP:</strong> @_selectedClass.BaseHealth</span>
+                            <span><strong>Evasion:</strong> @_selectedClass.BaseEvasion</span>
+                        </div>
+                        <p>@_selectedClass.Description</p>
+                        @if (_selectedClass.HopeFeature is not null)
+                        {
+                            <div class="feature-block">
+                                <strong>Hope — @_selectedClass.HopeFeature.Name</strong>
+                                <p>@_selectedClass.HopeFeature.Description</p>
+                            </div>
+                        }
+                        @if (_selectedClass.ClassFeatures.Count > 0)
+                        {
+                            <h4>Class Features</h4>
+                            @foreach (var f in _selectedClass.ClassFeatures)
+                            {
+                                <div class="feature-block">
+                                    <strong>@f.Name</strong>
+                                    <p>@f.Description</p>
+                                </div>
+                            }
+                        }
+                    </FluentCard>
+                </div>
+            }
+        </div>
+
+        @* Armor *@
+        <div class="tab-content" style="display: @(_activeTab == 4 ? null : "none")">
+            <FluentTextField Placeholder="Search by name..." Value="@_armorSearch" Immediate ImmediateDelay="200" ValueChanged="@(v => { _armorSearch = v; _armorItems = FilterArmor().AsQueryable(); StateHasChanged(); })" />
+            <FluentDataGrid Items="@_armorItems" GridTemplateColumns="1fr 80px 100px 120px 80px">
+                <PropertyColumn Property="@(a => a.Name)" Title="Name" Sortable="true" />
+                <TemplateColumn Title="Tier" Sortable="true" Align="Align.Center" SortBy="GridSort<Armor>.ByAscending(a => a.Tier)">
+                    <FluentBadge Fill="tier">T@(context.Tier)</FluentBadge>
+                </TemplateColumn>
+                <TemplateColumn Title="Armor" Align="Align.Center">
+                    <FluentBadge>@context.ArmorScore</FluentBadge>
+                </TemplateColumn>
+                <TemplateColumn Title="Thresholds" Align="Align.Center">
+                    @(context.DamageThresholds.Major)/@(context.DamageThresholds.Severe)
+                </TemplateColumn>
+                <TemplateColumn Title="">
+                    <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => _selectedArmor = context)">View</FluentButton>
+                </TemplateColumn>
+            </FluentDataGrid>
+            @if (_selectedArmor is not null)
+            {
+                <div class="detail-section">
+                    <FluentCard Class="detail-card">
+                        <div class="detail-header">
+                            <h3>@_selectedArmor.Name</h3>
+                            <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => _selectedArmor = null)">
+                                <FluentIcon Value="@(new Icons.Regular.Size20.Dismiss())" />
+                            </FluentButton>
+                        </div>
+                        <div class="detail-stats">
+                            <span><strong>Tier:</strong> @_selectedArmor.Tier</span>
+                            <span><strong>Armor Score:</strong> @_selectedArmor.ArmorScore</span>
+                            <span><strong>Major Threshold:</strong> @_selectedArmor.DamageThresholds.Major</span>
+                            <span><strong>Severe Threshold:</strong> @_selectedArmor.DamageThresholds.Severe</span>
+                        </div>
+                        @if (_selectedArmor.Feature is not null)
+                        {
+                            <div class="feature-block">
+                                <strong>@_selectedArmor.Feature.Name</strong>
+                                <p>@_selectedArmor.Feature.Description</p>
+                            </div>
+                        }
+                    </FluentCard>
+                </div>
+            }
+        </div>
+
+        @* Weapons *@
+        <div class="tab-content" style="display: @(_activeTab == 5 ? null : "none")">
+            <FluentTextField Placeholder="Search by name..." Value="@_weaponSearch" Immediate ImmediateDelay="200" ValueChanged="@(v => { _weaponSearch = v; _weaponItems = FilterWeapons().AsQueryable(); StateHasChanged(); })" />
+            <FluentDataGrid Items="@_weaponItems" GridTemplateColumns="1fr 60px 80px 80px 80px 100px 80px">
+                <PropertyColumn Property="@(w => w.Name)" Title="Name" Sortable="true" />
+                <TemplateColumn Title="Tier" Sortable="true" Align="Align.Center" SortBy="GridSort<Weapon>.ByAscending(w => w.Tier)">
+                    <FluentBadge Fill="tier">T@(context.Tier)</FluentBadge>
+                </TemplateColumn>
+                <TemplateColumn Title="Damage" Align="Align.Center">
+                    @(context.Damage.NumberOfDice)d@(context.Damage.NumberOfSides)@(context.Damage.Bonus > 0 ? "+" + context.Damage.Bonus : "")
+                </TemplateColumn>
+                <PropertyColumn Property="@(w => w.Damage.Type)" Title="Type" Sortable="true" />
+                <PropertyColumn Property="@(w => w.Trait)" Title="Trait" Sortable="true" />
+                <PropertyColumn Property="@(w => w.RangeType)" Title="Range" Sortable="true" />
+                <TemplateColumn Title="">
+                    <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => _selectedWeapon = context)">View</FluentButton>
+                </TemplateColumn>
+            </FluentDataGrid>
+            @if (_selectedWeapon is not null)
+            {
+                <div class="detail-section">
+                    <FluentCard Class="detail-card">
+                        <div class="detail-header">
+                            <h3>@_selectedWeapon.Name</h3>
+                            <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => _selectedWeapon = null)">
+                                <FluentIcon Value="@(new Icons.Regular.Size20.Dismiss())" />
+                            </FluentButton>
+                        </div>
+                        <div class="detail-stats">
+                            <span><strong>Tier:</strong> @_selectedWeapon.Tier</span>
+                            <span><strong>Damage:</strong> @(_selectedWeapon.Damage.NumberOfDice)d@(_selectedWeapon.Damage.NumberOfSides)@(_selectedWeapon.Damage.Bonus > 0 ? "+" + _selectedWeapon.Damage.Bonus : "") @_selectedWeapon.Damage.Type</span>
+                            <span><strong>Trait:</strong> @_selectedWeapon.Trait</span>
+                            <span><strong>Range:</strong> @_selectedWeapon.RangeType</span>
+                            <span><strong>Burden:</strong> @_selectedWeapon.Burden</span>
+                            <span><strong>Category:</strong> @_selectedWeapon.Category</span>
+                        </div>
+                        @if (_selectedWeapon.Feature is not null)
+                        {
+                            <div class="feature-block">
+                                <strong>@_selectedWeapon.Feature.Name</strong>
+                                <p>@_selectedWeapon.Feature.Description</p>
+                            </div>
+                        }
+                    </FluentCard>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private bool _loading = true;
+    private int _activeTab = 0;
+
+    private record TabInfo(int Key, string Label);
+    private TabInfo[] _tabs = new[]
+    {
+        new TabInfo(0, "Abilities"),
+        new TabInfo(1, "Items"),
+        new TabInfo(2, "Ancestries"),
+        new TabInfo(3, "Classes"),
+        new TabInfo(4, "Armor"),
+        new TabInfo(5, "Weapons"),
+    };
+
+    private List<Ability> _abilities = new();
+    private List<Item> _items = new();
+    private List<HeritageSummary> _ancestries = new();
+    private List<ClassCardSummary> _classes = new();
+    private List<Armor> _armors = new();
+    private List<Weapon> _weapons = new();
+
+    private IQueryable<Ability> _abilityItems = Enumerable.Empty<Ability>().AsQueryable();
+    private IQueryable<Item> _itemItems = Enumerable.Empty<Item>().AsQueryable();
+    private IQueryable<HeritageSummary> _ancestryItems = Enumerable.Empty<HeritageSummary>().AsQueryable();
+    private IQueryable<ClassCardSummary> _classItems = Enumerable.Empty<ClassCardSummary>().AsQueryable();
+    private IQueryable<Armor> _armorItems = Enumerable.Empty<Armor>().AsQueryable();
+    private IQueryable<Weapon> _weaponItems = Enumerable.Empty<Weapon>().AsQueryable();
+
+    private string _abilitySearch = "";
+    private string _itemSearch = "";
+    private string _ancestrySearch = "";
+    private string _classSearch = "";
+    private string _armorSearch = "";
+    private string _weaponSearch = "";
+
+    private Ability? _selectedAbility;
+    private Item? _selectedItem;
+    private HeritageSummary? _selectedAncestry;
+    private ClassCardSummary? _selectedClass;
+    private Armor? _selectedArmor;
+    private Weapon? _selectedWeapon;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _abilities = AbilityQueries.GetAll();
+        _items = await ItemQueries.GetAllAsync();
+        _ancestries = await HeritageQueries.GetSummariesAsync(HeritageType.Ancestry);
+        _classes = await ClassQueries.GetCardSummariesAsync();
+        _armors = ArmorQueries.GetAll();
+        _weapons = WeaponQueries.GetAll();
+        _abilityItems = FilterAbilities().AsQueryable();
+        _itemItems = FilterItems().AsQueryable();
+        _ancestryItems = FilterAncestries().AsQueryable();
+        _classItems = FilterClasses().AsQueryable();
+        _armorItems = FilterArmor().AsQueryable();
+        _weaponItems = FilterWeapons().AsQueryable();
+        _loading = false;
+    }
+
+    private IEnumerable<Ability> FilterAbilities() =>
+        string.IsNullOrWhiteSpace(_abilitySearch)
+            ? _abilities
+            : _abilities.Where(a => a.Title.Contains(_abilitySearch, StringComparison.OrdinalIgnoreCase));
+
+    private IEnumerable<Item> FilterItems() =>
+        string.IsNullOrWhiteSpace(_itemSearch)
+            ? _items
+            : _items.Where(i => i.Name.Contains(_itemSearch, StringComparison.OrdinalIgnoreCase));
+
+    private IEnumerable<HeritageSummary> FilterAncestries() =>
+        string.IsNullOrWhiteSpace(_ancestrySearch)
+            ? _ancestries
+            : _ancestries.Where(a => a.Name.Contains(_ancestrySearch, StringComparison.OrdinalIgnoreCase));
+
+    private IEnumerable<ClassCardSummary> FilterClasses() =>
+        string.IsNullOrWhiteSpace(_classSearch)
+            ? _classes
+            : _classes.Where(c => c.Name.Contains(_classSearch, StringComparison.OrdinalIgnoreCase));
+
+    private IEnumerable<Armor> FilterArmor() =>
+        string.IsNullOrWhiteSpace(_armorSearch)
+            ? _armors
+            : _armors.Where(a => a.Name.Contains(_armorSearch, StringComparison.OrdinalIgnoreCase));
+
+    private IEnumerable<Weapon> FilterWeapons() =>
+        string.IsNullOrWhiteSpace(_weaponSearch)
+            ? _weapons
+            : _weapons.Where(w => w.Name.Contains(_weaponSearch, StringComparison.OrdinalIgnoreCase));
+}
