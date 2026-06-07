@@ -139,7 +139,7 @@ public static partial class SrdParsers
         var bonus = string.IsNullOrWhiteSpace(match.Groups["bonus"].Value)
             ? 0
             : ParseInt(match.Groups["bonus"].Value, "damage.bonus");
-        
+
         var altKind = string.IsNullOrWhiteSpace(match.Groups["altkind"].Value)
             ? null
             : match.Groups["altkind"].Value;
@@ -147,8 +147,8 @@ public static partial class SrdParsers
         return (new Dice(diceCount, sides), bonus, match.Groups["kind"].Value, altKind);
     }
 
-    public static List<string> ParseItems(string rawItems) => 
-        string.IsNullOrEmpty(rawItems) ? 
+    public static List<string> ParseItems(string rawItems) =>
+        string.IsNullOrEmpty(rawItems) ?
             new List<string>() : rawItems.Split(" or a ").ToList();
 
     public static List<string> ParseQuestions(List<RawQuestion>? rawQuestions) =>
@@ -160,14 +160,14 @@ public static partial class SrdParsers
         var parsedTraits = rawSuggestedTraits.Split(',')
             .Select(s => ParseInt(s.Trim(), "trait"))
             .ToArray();
-        return parsedTraits.Length == 6 
+        return parsedTraits.Length == 6
             ? new TraitScores(
             parsedTraits[0],
             parsedTraits[1],
             parsedTraits[2],
             parsedTraits[3],
             parsedTraits[4],
-            parsedTraits[5]) 
+            parsedTraits[5])
             : throw new FormatException($"Invalid traits '{rawSuggestedTraits}'.");
     }
 }

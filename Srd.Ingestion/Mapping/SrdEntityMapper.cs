@@ -107,7 +107,7 @@ public static class SrdEntityMapper
     public static Subclass ToEntity(this SubclassCard card)
     {
         var id = Guid.NewGuid();
-        
+
         var foundation = ToEntity(card.Foundation) ?? throw new NullReferenceException();
         var specialization = ToEntity(card.Specialization) ?? throw new NullReferenceException();
         var mastery = ToEntity(card.Mastery) ?? throw new NullReferenceException();
@@ -154,7 +154,7 @@ public static class SrdEntityMapper
             Items = card.Items,
         };
     }
-    
+
     public static GameClass ToEntity(this ClassCard card, Dictionary<string, Armor> armorByName, Dictionary<string, Weapon> weaponsByName)
     {
         var id = Guid.NewGuid();
@@ -189,14 +189,14 @@ public static class SrdEntityMapper
             Items = card.Items,
         };
     }
-    
+
     private static Feature? ToEntity(FeatureBlock? feature)
     {
         return feature is null ? null :
             new Feature
-        {
-            Name = feature.Name,
-            Description = feature.Text
-        };
+            {
+                Name = feature.Name,
+                Description = feature.Text
+            };
     }
 }

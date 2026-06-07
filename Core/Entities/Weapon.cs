@@ -12,9 +12,9 @@ public class Weapon
     public Burden Burden { get; init; }
     public RangeType RangeType { get; init; }
     public WeaponPriority Category { get; init; }
-    
+
     public Guid? FeatureId { get; init; }
     public Feature? Feature { get; set; }
-    
+
     public int Tier { get; init; }
 }

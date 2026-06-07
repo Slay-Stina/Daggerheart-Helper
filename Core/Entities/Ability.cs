@@ -12,4 +12,4 @@ public class Ability
     public AbilityType Type { get; init; }
     public string FeatureDescription { get; init; } = string.Empty;
     public List<CharacterAbility> CharacterAbilities { get; set; } = new();
-}   
+}

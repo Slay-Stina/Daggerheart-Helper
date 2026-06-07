@@ -26,32 +26,32 @@ public sealed class RawClassDto
     public RawFeatureDto[] ClassFeature { get; set; } = null!;
 
     [JsonPropertyName("hope_feature_name")]
-    public string  HopeFeatureName { get; set; } = string.Empty;
-    
+    public string HopeFeatureName { get; set; } = string.Empty;
+
     [JsonPropertyName("hope_feature_text")]
     public string HopeFeatureText { get; set; } = string.Empty;
-    
+
     [JsonPropertyName("hp")]
-    public string BaseHp { get; set; } =  string.Empty;
-    
+    public string BaseHp { get; set; } = string.Empty;
+
     [JsonPropertyName("items")]
     public string Items { get; set; } = string.Empty;
-    
+
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
-    
+
     [JsonPropertyName("subclass_1")]
     public string SubClass1 { get; set; } = string.Empty;
-    
+
     [JsonPropertyName("subclass_2")]
     public string SubClass2 { get; set; } = string.Empty;
 
     [JsonPropertyName("suggested_armor")]
     public string SuggestedArmor { get; set; } = string.Empty;
-    
+
     [JsonPropertyName("suggested_primary")]
     public string SuggestedPrimary { get; set; } = string.Empty;
-    
+
     [JsonPropertyName("suggested_secondary")]
     public string SuggestedSecondary { get; set; } = string.Empty;
 
