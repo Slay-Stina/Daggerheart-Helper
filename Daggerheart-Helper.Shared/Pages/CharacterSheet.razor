@@ -3,7 +3,6 @@
 @inject ICharacterService CharacterService
 @inject IArmorCatalogQueries ArmorQueries
 @inject IWeaponCatalogQueries WeaponQueries
-@inject IAbilityCatalogQueries AbilityQueries
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
 
@@ -401,7 +400,7 @@
                 }
                 else
                 {
-                    var activeAbilities = _character.CharacterAbilities?.Where(ca => !ca.IsVaulted).ToList() ?? new();
+                    var activeAbilities = _character.CharacterAbilities.Where(ca => !ca.IsVaulted).ToList();
                     @if (activeAbilities.Count > 0)
                     {
                         <div class="abilities-list">
@@ -544,10 +543,6 @@
     private List<CharacterAbility> _editVaultAbilities = new();
     private List<AbilitySummary> _domainAbilities = new();
 
-    private List<ArmorSummary> _armors = new();
-    private List<WeaponSummary> _weapons = new();
-
-
     protected override async Task OnInitializedAsync()
     {
         await LoadCharacter();
@@ -608,11 +603,9 @@
 
     private async Task LoadEquipmentCatalogAsync()
     {
-        var armorsTask = ArmorQueries.GetSummariesByTierAsync(1);
-        var weaponsTask = WeaponQueries.GetSummariesByTierAsync(1);
-        await Task.WhenAll(armorsTask, weaponsTask);
-        _armors = armorsTask.Result;
-        _weapons = weaponsTask.Result;
+        await Task.WhenAll(
+            ArmorQueries.GetSummariesByTierAsync(1),
+            WeaponQueries.GetSummariesByTierAsync(1));
     }
 
     private async Task SaveEdit()

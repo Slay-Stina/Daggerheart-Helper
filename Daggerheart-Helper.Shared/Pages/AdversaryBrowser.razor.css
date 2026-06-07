@@ -118,8 +118,8 @@
     --badge-color-ranged: var(--dh-positive);
     --badge-fill-skulk: color-mix(in srgb, #3b82f6 15%, transparent);
     --badge-color-skulk: #3b82f6;
-    --badge-fill-social: color-mix(in srgb, #ec4899 15%, transparent);
-    --badge-color-social: #ec4899;
+    --badge-fill-social: color-mix(in srgb, var(--dh-pink) 15%, transparent);
+    --badge-color-social: var(--dh-pink);
     --badge-fill-standard: color-mix(in srgb, #14b8a6 15%, transparent);
     --badge-color-standard: #14b8a6;
     --badge-fill-support: color-mix(in srgb, #06b6d4 15%, transparent);
@@ -171,7 +171,7 @@
 
 .detail-subtitle {
     font-size: 0.82rem;
-    color: #a78bfa;
+    color: var(--dh-purple);
     font-style: italic;
     margin-bottom: 10px;
 }

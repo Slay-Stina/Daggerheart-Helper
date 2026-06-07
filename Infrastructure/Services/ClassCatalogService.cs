@@ -58,7 +58,7 @@ public sealed class ClassCatalogQueries(DaggerheartDbContext context) : IClassCa
             .Select(c => new ClassSetupData(
                 c.SuggestedTraits,
                 c.BackgroundQuestions,
-                c.SuggestedArmor != null ? c.SuggestedArmor.Id : (Guid?)null,
+                c.SuggestedArmor != null ? c.SuggestedArmor.Id : null,
                 c.SuggestedWeapons.Select(w => w.Id).ToList(),
                 c.Items))
             .FirstAsync();
