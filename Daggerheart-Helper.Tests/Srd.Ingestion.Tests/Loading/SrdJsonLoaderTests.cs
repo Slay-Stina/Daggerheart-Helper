@@ -42,24 +42,24 @@ public class SrdJsonLoaderTests
         Assert.Equal(1, runeWard.Level);
         Assert.Equal(0, runeWard.RecallCost);
         Assert.Equal(AbilityType.Spell, runeWard.Type);
-        
+
         var troubadour = Assert.Single(catalog.Subclasses, x => x.Name == "Troubadour");
         Assert.Equal(TraitType.Presence, troubadour.SpellcastTrait);
         Assert.Equal("Gifted Performer", troubadour.Foundation.Name);
-        
+
         var bard = Assert.Single(catalog.Classes, x => x.Name == "Bard");
         Assert.Equal("Rally", bard.ClassFeatures.Find(x => x.Name == "Rally")?.Name);
         Assert.Equal(10, bard.BaseEvasion);
         Assert.Equal(DomainType.Grace, bard.Domain1);
         Assert.Equal(bard.Subclasses.Single(s => s.Name == "Troubadour"), troubadour);
-        
-        var clank =  Assert.Single(catalog.Ancestries, x => x.Name == "Clank");
+
+        var clank = Assert.Single(catalog.Ancestries, x => x.Name == "Clank");
         Assert.Contains("sentient mechanical beings", clank.Description);
         Assert.Equal("Efficient", clank.Features.First(x => x.Name == "Efficient").Name);
-        
+
         var highborne = Assert.Single(catalog.Communities, x => x.Name == "Highborne");
-        Assert.Contains("life of elegance, opulence, and prestige",  highborne.Description);
-        Assert.Equal("Privilege",  highborne.Features.First(x => x.Name == "Privilege").Name);
+        Assert.Contains("life of elegance, opulence, and prestige", highborne.Description);
+        Assert.Equal("Privilege", highborne.Features.First(x => x.Name == "Privilege").Name);
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public class SrdJsonLoaderTests
         Assert.NotEmpty(catalog.Weapons);
         Assert.NotEmpty(catalog.Abilities);
     }
-    
+
     [Fact]
     public async Task LoadFileAsync_TrimsLoadedEntries()
     {
@@ -85,6 +85,6 @@ public class SrdJsonLoaderTests
 
         Assert.Equal("Test McTestson", actual[0].Name);
         Assert.Equal("Streetway 1", actual[0].Address?.Street);
-        Assert.Equal("1234",  actual[0].Address?.Code);
+        Assert.Equal("1234", actual[0].Address?.Code);
     }
 }

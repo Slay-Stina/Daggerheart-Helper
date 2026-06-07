@@ -71,45 +71,6 @@
     gap: 8px;
 }
 
-/* ---- POOLS ---- */
-.pools-section {
-    background: rgba(25, 25, 40, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 12px;
-    padding: 16px 20px;
-}
-
-.pools-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-}
-
-.pool-badge {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px 8px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    text-align: center;
-}
-
-.pool-name {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-}
-
-.pool-val {
-    font-size: 1rem;
-    font-weight: bold;
-}
-
-
-
 .pool-edit {
     display: flex;
     flex-direction: column;
@@ -144,41 +105,6 @@
     font-weight: bold;
     font-size: 1.1rem;
 }
-
-/* ---- TRAITS ---- */
-.traits-section {
-    background: rgba(25, 25, 40, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 12px;
-    padding: 14px 20px;
-}
-
-.traits-summary {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 6px;
-}
-
-.trait-chip {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
-    padding: 8px 4px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-}
-
-.trait-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--dh-neutral);
-    letter-spacing: 0.5px;
-}
-
-
 
 /* ---- CONTENT GRID ---- */
 .content-grid {
