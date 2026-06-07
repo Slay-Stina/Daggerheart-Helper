@@ -525,6 +525,14 @@
     private string _errorMessage = string.Empty;
     private string _equipmentTab = "equipped";
 
+    private int MajorThreshold => _character?.EquippedArmor != null 
+        ? _character.EquippedArmor.DamageThresholds.Major + _character.Level 
+        : _character?.Level ?? 0;
+
+    private int SevereThreshold => _character?.EquippedArmor != null 
+        ? _character.EquippedArmor.DamageThresholds.Severe + _character.Level 
+        : (_character?.Level ?? 0) * 2;
+
     private int _editHpCurrent;
     private int _editHpMax;
     private int _editStressCurrent;
