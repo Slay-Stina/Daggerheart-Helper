@@ -9,10 +9,10 @@ public sealed class RawCommunityDto
 
     [JsonPropertyName("feature")]
     public List<RawFeatureDto> Feature { get; set; } = null!;
-    
+
     [JsonPropertyName("name")]
-    public string Name { get; set; }  = string.Empty;
-    
+    public string Name { get; set; } = string.Empty;
+
     [JsonPropertyName("note")]
-    public string Note { get; set; }  = string.Empty;
+    public string Note { get; set; } = string.Empty;
 }

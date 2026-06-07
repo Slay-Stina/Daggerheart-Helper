@@ -48,6 +48,8 @@ public sealed class ClassCatalogQueries(DaggerheartDbContext context) : IClassCa
             .Select(s => new SubclassSummary(
                 s.Id, s.Name, s.Description,
                 new FeatureSummary(s.Foundation.Id, s.Foundation.Name, s.Foundation.Description),
+                new FeatureSummary(s.Specialization.Id, s.Specialization.Name, s.Specialization.Description),
+                new FeatureSummary(s.Mastery.Id, s.Mastery.Name, s.Mastery.Description),
                 s.SpellCastingTraitType))
             .ToListAsync();
 

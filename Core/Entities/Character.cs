@@ -29,9 +29,9 @@ public class Character
     public Heritage Ancestry { get; set; } = null!;
     public Guid CommunityId { get; set; }
     public Heritage Community { get; set; } = null!;
-    
-    public TraitScores Traits { get; set; } = new(0, 0,0,0,0,0);
-    public DamageThresholds DamageThresholds { get; set; } = new(0,0);
+
+    public TraitScores Traits { get; set; } = new(0, 0, 0, 0, 0, 0);
+    public DamageThresholds DamageThresholds { get; set; } = new(0, 0);
     public int Evasion { get; set; }
     public int ProficiencyBonus { get; set; }
     public int Proficiency => 1 + (Level >= 2 ? 1 : 0) + (Level >= 5 ? 1 : 0) + (Level >= 8 ? 1 : 0) + ProficiencyBonus;

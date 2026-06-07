@@ -647,15 +647,23 @@
         _domainAbilities = await CharacterService.GetAvailableAbilitiesAsync(_character!.Id);
     }
 
-    private async Task AddAbility(AbilitySummary ab)
+    private Task AddAbility(AbilitySummary ab)
     {
-        _editActiveAbilities.Add(new CharacterAbility
+        try
         {
-            AbilityId = ab.Id,
-            IsVaulted = false,
-            Ability = new Ability { Id = ab.Id, Title = ab.Title, DomainType = ab.DomainType, Level = ab.Level, RecallCost = ab.RecallCost, Type = ab.Type, FeatureDescription = ab.FeatureDescription },
-        });
-        _domainAbilities.RemoveAll(a => a.Id == ab.Id);
+            _editActiveAbilities.Add(new CharacterAbility
+            {
+                AbilityId = ab.Id,
+                IsVaulted = false,
+                Ability = new Ability { Id = ab.Id, Title = ab.Title, DomainType = ab.DomainType, Level = ab.Level, RecallCost = ab.RecallCost, Type = ab.Type, FeatureDescription = ab.FeatureDescription },
+            });
+            _domainAbilities.RemoveAll(a => a.Id == ab.Id);
+            return Task.CompletedTask;
+        }
+        catch (Exception exception)
+        {
+            return Task.FromException(exception);
+        }
     }
 
     private void VaultAbility(Guid abilityId)

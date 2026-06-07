@@ -6,7 +6,7 @@ public sealed class RawAncestryDto
 {
     [JsonPropertyName("description")]
     public string Description { get; set; } = string.Empty;
-    
+
     [JsonPropertyName("feature")]
     public List<RawFeatureDto>? Features { get; set; }
 
