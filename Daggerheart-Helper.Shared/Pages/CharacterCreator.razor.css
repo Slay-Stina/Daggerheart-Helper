@@ -39,17 +39,12 @@
 .selected-class-title {
     margin: 4px 0 8px 0;
     font-size: 1.3rem;
-    color: var(--dh-purple);
+    color: var(--dh-fear);
 }
 
 /* Accordion nested inside accordion content override */
 ::deep .selected-class-summary + fluent-accordion {
     margin-top: 12px;
-}
-
-::deep fluent-badge {
-    font-size: 0.75rem;
-    font-weight: 600;
 }
 
 /* Ancestries */
@@ -121,11 +116,5 @@
     padding: 10px 14px;
     margin-bottom: 16px;
 }
-
-::deep fluent-badge[fill="class"] { --badge-fill: color-mix(in srgb, var(--dh-purple) 20%, transparent); --badge-color: var(--dh-purple); }
-::deep fluent-badge[fill="subclass"] { --badge-fill: color-mix(in srgb, var(--dh-purple) 20%, transparent); --badge-color: #c4b5fd; }
-::deep fluent-badge[fill="ancestry"] { --badge-fill: color-mix(in srgb, var(--dh-positive) 20%, transparent); --badge-color: var(--dh-positive); }
-::deep fluent-badge[fill="community"] { --badge-fill: color-mix(in srgb, var(--dh-positive) 20%, transparent); --badge-color: #6ee7b7; }
-::deep fluent-badge[fill="name"] { --badge-fill: color-mix(in srgb, var(--dh-hope) 20%, transparent); --badge-color: var(--dh-hope); }
 
 

@@ -7,16 +7,14 @@
 @inject IWeaponCatalogQueries WeaponQueries
 @inject NavigationManager NavigationManager
 
-<div class="dashboard-container">
-    <div class="dashboard-header">
-        <FluentAnchor Href="/dm-tools" Appearance="Appearance.Hypertext">
-            <FluentIcon Value="@(new Icons.Filled.Size20.ArrowLeft())" /> Back to DM Tools
-        </FluentAnchor>
-        <div class="header-text">
-            <h2>Reference Catalog</h2>
-            <p>Browse all SRD reference data</p>
-        </div>
-    </div>
+<PageHeader Title="Reference Catalog" Subtitle="Browse all SRD reference data">
+    <BackButton>
+        <FluentButton Appearance="Appearance.Stealth"
+                      IconStart="@(new Icons.Filled.Size20.ArrowLeft())"
+                      OnClick="@(() => NavigationManager.NavigateTo("/dm-tools"))"
+                      Title="Back to DM Tools" />
+    </BackButton>
+</PageHeader>
 
     @if (_loading)
     {
@@ -25,25 +23,23 @@
     else
     {
         <FluentStack Orientation="Orientation.Horizontal" Wrap="true" Class="tab-bar">
-            @foreach (var tab in _tabs)
-            {
-                <FluentButton Appearance="@(_activeTab == tab.Key ? Appearance.Accent : Appearance.Neutral)"
-                              OnClick="@(() => _activeTab = tab.Key)">
-                    @tab.Label
-                </FluentButton>
-            }
+            <FluentButton Appearance="@(_activeTabId == "abilities" ? Appearance.Accent : Appearance.Neutral)" OnClick="@(() => _activeTabId = "abilities")">Abilities</FluentButton>
+            <FluentButton Appearance="@(_activeTabId == "items" ? Appearance.Accent : Appearance.Neutral)" OnClick="@(() => _activeTabId = "items")">Items</FluentButton>
+            <FluentButton Appearance="@(_activeTabId == "ancestries" ? Appearance.Accent : Appearance.Neutral)" OnClick="@(() => _activeTabId = "ancestries")">Ancestries</FluentButton>
+            <FluentButton Appearance="@(_activeTabId == "classes" ? Appearance.Accent : Appearance.Neutral)" OnClick="@(() => _activeTabId = "classes")">Classes</FluentButton>
+            <FluentButton Appearance="@(_activeTabId == "armor" ? Appearance.Accent : Appearance.Neutral)" OnClick="@(() => _activeTabId = "armor")">Armor</FluentButton>
+            <FluentButton Appearance="@(_activeTabId == "weapons" ? Appearance.Accent : Appearance.Neutral)" OnClick="@(() => _activeTabId = "weapons")">Weapons</FluentButton>
         </FluentStack>
 
-        @* Abilities *@
-        <div class="tab-content" style="display: @(_activeTab == 0 ? null : "none")">
+        <div class="tab-content" style="display: @(_activeTabId == "abilities" ? null : "none")">
             <FluentTextField Placeholder="Search by name..." Value="@_abilitySearch" Immediate ImmediateDelay="200" ValueChanged="@(v => { _abilitySearch = v; _abilityItems = FilterAbilities().AsQueryable(); StateHasChanged(); })" />
-            <FluentDataGrid Items="@_abilityItems" GridTemplateColumns="1fr 100px 80px 100px 80px 80px">
-                <PropertyColumn Property="@(a => a.Title)" Title="Name" Sortable="true" />
-                <PropertyColumn Property="@(a => a.DomainType)" Title="Domain" Sortable="true" />
+            <FluentDataGrid Items="@_abilityItems" GridTemplateColumns="minmax(150px,1fr) minmax(100px,auto) minmax(60px,auto) minmax(80px,auto) minmax(60px,auto) minmax(60px,auto)">
+                <PropertyColumn Property="@(a => a.Title)" Title="Name" Sortable="true"/>
+                <PropertyColumn Property="@(a => a.DomainType)" Title="Domain" Sortable="true"/>
                 <TemplateColumn Title="Level" Sortable="true" Align="Align.Center" SortBy="GridSort<Ability>.ByAscending(a => a.Level)">
                     <FluentBadge>@context.Level</FluentBadge>
                 </TemplateColumn>
-                <PropertyColumn Property="@(a => a.Type)" Title="Type" Sortable="true" />
+                <PropertyColumn Property="@(a => a.Type)" Title="Type" Sortable="true"/>
                 <TemplateColumn Title="Recall" Align="Align.Center">
                     <FluentBadge Fill="@(context.RecallCost > 0 ? "recall" : "none")">@(context.RecallCost > 0 ? $"{context.RecallCost}" : "—")</FluentBadge>
                 </TemplateColumn>
@@ -73,15 +69,11 @@
             }
         </div>
 
-        @* Items *@
-        <div class="tab-content" style="display: @(_activeTab == 1 ? null : "none")">
+        <div class="tab-content" style="display: @(_activeTabId == "items" ? null : "none")">
             <FluentTextField Placeholder="Search by name..." Value="@_itemSearch" Immediate ImmediateDelay="200" ValueChanged="@(v => { _itemSearch = v; _itemItems = FilterItems().AsQueryable(); StateHasChanged(); })" />
-            <FluentDataGrid Items="@_itemItems" GridTemplateColumns="1fr 2fr 80px">
+            <FluentDataGrid Items="@_itemItems" GridTemplateColumns="minmax(150px,1fr) minmax(200px,2fr)" MultiLine="true">
                 <PropertyColumn Property="@(i => i.Name)" Title="Name" Sortable="true" />
                 <PropertyColumn Property="@(i => i.Description)" Title="Description" />
-                <TemplateColumn Title="">
-                    <FluentButton Appearance="Appearance.Lightweight" OnClick="@(() => _selectedItem = context)">View</FluentButton>
-                </TemplateColumn>
             </FluentDataGrid>
             @if (_selectedItem is not null)
             {
@@ -99,10 +91,9 @@
             }
         </div>
 
-        @* Ancestries *@
-        <div class="tab-content" style="display: @(_activeTab == 2 ? null : "none")">
+        <div class="tab-content" style="display: @(_activeTabId == "ancestries" ? null : "none")">
             <FluentTextField Placeholder="Search by name..." Value="@_ancestrySearch" Immediate ImmediateDelay="200" ValueChanged="@(v => { _ancestrySearch = v; _ancestryItems = FilterAncestries().AsQueryable(); StateHasChanged(); })" />
-            <FluentDataGrid Items="@_ancestryItems" GridTemplateColumns="1fr 100px 80px">
+            <FluentDataGrid Items="@_ancestryItems" GridTemplateColumns="minmax(150px,1fr) minmax(150px,auto) minmax(60px,auto)">
                 <PropertyColumn Property="@(a => a.Name)" Title="Name" Sortable="true" />
                 <TemplateColumn Title="Features">
                     @string.Join(", ", context.Features.Select(f => f.Name))
@@ -138,10 +129,9 @@
             }
         </div>
 
-        @* Classes *@
-        <div class="tab-content" style="display: @(_activeTab == 3 ? null : "none")">
+        <div class="tab-content" style="display: @(_activeTabId == "classes" ? null : "none")">
             <FluentTextField Placeholder="Search by name..." Value="@_classSearch" Immediate ImmediateDelay="200" ValueChanged="@(v => { _classSearch = v; _classItems = FilterClasses().AsQueryable(); StateHasChanged(); })" />
-            <FluentDataGrid Items="@_classItems" GridTemplateColumns="1fr 100px 100px 80px 80px 80px">
+            <FluentDataGrid Items="@_classItems" GridTemplateColumns="minmax(150px,1fr) minmax(80px,auto) minmax(80px,auto) minmax(60px,auto) minmax(60px,auto) minmax(60px,auto)">
                 <PropertyColumn Property="@(c => c.Name)" Title="Name" Sortable="true" />
                 <PropertyColumn Property="@(c => c.Domain1)" Title="Domain 1" Sortable="true" />
                 <PropertyColumn Property="@(c => c.Domain2)" Title="Domain 2" Sortable="true" />
@@ -194,10 +184,9 @@
             }
         </div>
 
-        @* Armor *@
-        <div class="tab-content" style="display: @(_activeTab == 4 ? null : "none")">
+        <div class="tab-content" style="display: @(_activeTabId == "armor" ? null : "none")">
             <FluentTextField Placeholder="Search by name..." Value="@_armorSearch" Immediate ImmediateDelay="200" ValueChanged="@(v => { _armorSearch = v; _armorItems = FilterArmor().AsQueryable(); StateHasChanged(); })" />
-            <FluentDataGrid Items="@_armorItems" GridTemplateColumns="1fr 80px 100px 120px 80px">
+            <FluentDataGrid Items="@_armorItems" GridTemplateColumns="minmax(150px,1fr) minmax(60px,auto) minmax(60px,auto) minmax(80px,auto) minmax(60px,auto)">
                 <PropertyColumn Property="@(a => a.Name)" Title="Name" Sortable="true" />
                 <TemplateColumn Title="Tier" Sortable="true" Align="Align.Center" SortBy="GridSort<Armor>.ByAscending(a => a.Tier)">
                     <FluentBadge Fill="tier">T@(context.Tier)</FluentBadge>
@@ -240,10 +229,9 @@
             }
         </div>
 
-        @* Weapons *@
-        <div class="tab-content" style="display: @(_activeTab == 5 ? null : "none")">
+        <div class="tab-content" style="display: @(_activeTabId == "weapons" ? null : "none")">
             <FluentTextField Placeholder="Search by name..." Value="@_weaponSearch" Immediate ImmediateDelay="200" ValueChanged="@(v => { _weaponSearch = v; _weaponItems = FilterWeapons().AsQueryable(); StateHasChanged(); })" />
-            <FluentDataGrid Items="@_weaponItems" GridTemplateColumns="1fr 60px 80px 80px 80px 100px 80px">
+            <FluentDataGrid Items="@_weaponItems" GridTemplateColumns="minmax(150px,1fr) minmax(50px,auto) minmax(80px,auto) minmax(60px,auto) minmax(80px,auto) minmax(80px,auto) minmax(60px,auto)">
                 <PropertyColumn Property="@(w => w.Name)" Title="Name" Sortable="true" />
                 <TemplateColumn Title="Tier" Sortable="true" Align="Align.Center" SortBy="GridSort<Weapon>.ByAscending(w => w.Tier)">
                     <FluentBadge Fill="tier">T@(context.Tier)</FluentBadge>
@@ -288,22 +276,10 @@
             }
         </div>
     }
-</div>
 
 @code {
     private bool _loading = true;
-    private int _activeTab = 0;
-
-    private record TabInfo(int Key, string Label);
-    private TabInfo[] _tabs = new[]
-    {
-        new TabInfo(0, "Abilities"),
-        new TabInfo(1, "Items"),
-        new TabInfo(2, "Ancestries"),
-        new TabInfo(3, "Classes"),
-        new TabInfo(4, "Armor"),
-        new TabInfo(5, "Weapons"),
-    };
+    private string _activeTabId = "abilities";
 
     private List<Ability> _abilities = new();
     private List<Item> _items = new();

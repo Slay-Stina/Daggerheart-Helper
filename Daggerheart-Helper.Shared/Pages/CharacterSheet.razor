@@ -74,97 +74,131 @@
         }
 
         <FluentGrid Spacing="2">
+            @* Resource Pools & Damage Thresholds*@
             <FluentGridItem Xs="12" Sm="6">
-                @* Resource Pools *@
-                <div class="card-section">
-                    <FluentGrid Spacing="2">
-                        <FluentGridItem Xs="6" Sm="3">
-                            @if (_isEditing)
-                            {
-                                <div class="pool-edit hp">
-                                    <span class="pool-label">HP</span>
-                                    <div class="pool-inputs">
-                                        <FluentNumberField @bind-Value="_editHpCurrent" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
-                                        <span class="pool-sep">/</span>
-                                        <FluentNumberField @bind-Value="_editHpMax" Min="1" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
-                                    </div>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="chip-pool bg-hp-subtle border-hp">
-                                    <span class="text-hp text-sm">HITPOINTS</span>
-                                    <strong class="text-hp">@_character.HitPoints.Current / @_character.HitPoints.Max</strong>
-                                </div>
-                            }
-                        </FluentGridItem>
-                        <FluentGridItem Xs="6" Sm="3">
-                            @if (_isEditing)
-                            {
-                                <div class="pool-edit stress">
-                                    <span class="pool-label">STRESS</span>
-                                    <div class="pool-inputs">
-                                        <FluentNumberField @bind-Value="_editStressCurrent" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
-                                        <span class="pool-sep">/</span>
-                                        <FluentNumberField @bind-Value="_editStressMax" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
-                                    </div>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="chip-pool bg-stress-subtle border-stress">
-                                    <span class="text-stress text-sm">STRESS</span>
-                                    <strong class="text-stress">@_character.Stress.Current / @_character.Stress.Max</strong>
-                                </div>
-                            }
-                        </FluentGridItem>
-                        <FluentGridItem Xs="6" Sm="3">
-                            @if (_isEditing)
-                            {
-                                <div class="pool-edit hope">
-                                    <span class="pool-label">HOPE</span>
-                                    <div class="pool-inputs">
-                                        <FluentNumberField @bind-Value="_editHopeCurrent" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
-                                        <span class="pool-sep">/</span>
-                                        <FluentNumberField @bind-Value="_editHopeMax" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
-                                    </div>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="chip-pool bg-hope-subtle border-hope">
-                                    <span class="text-hope text-sm">HOPE</span>
-                                    <strong class="text-hope">@_character.Hope.Current / @_character.Hope.Max</strong>
-                                </div>
-                            }
-                        </FluentGridItem>
-                        <FluentGridItem Xs="6" Sm="3">
-                            @if (_isEditing)
-                            {
-                                <div class="pool-edit armor">
-                                    <span class="pool-label">ARMOR</span>
-                                    <div class="pool-inputs">
-                                        <FluentNumberField @bind-Value="_editArmorCurrent" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
-                                        <span class="pool-sep">/</span>
-                                        <FluentNumberField @bind-Value="_editArmorMax" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;" />
-                                    </div>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="chip-pool card-subtle">
-                                    <span class="text-neutral text-sm">ARMOR</span>
-                                    <strong class="text-neutral">@_character.ArmorSlots.Current / @_character.ArmorSlots.Max</strong>
-                                </div>
-                            }
-                        </FluentGridItem>
-                    </FluentGrid>
-                </div>
+                    <FluentCard>
+                        @* Resource Pools *@
+                        <FluentGrid Spacing="2">
+                            <FluentGridItem Xs="6" Sm="4"> 
+                                <FluentCard class="pool bg-evasion-subtle border-evasion text-positive">
+                                    <div class="text-positive text-sm">EVASION</div>
+                                    <strong>@_character.Evasion</strong>
+                                </FluentCard>
+                            </FluentGridItem>
+                            <FluentGridItem Xs="6" Sm="4">
+                                @if (_isEditing)
+                                {
+                                    <FluentCard class="pool border-hp text-hp">
+                                        <div class="text-hp text-sm">HITPOINTS</div>
+                                        <div class="pool-inputs">
+                                            <FluentNumberField @bind-Value="_editHpCurrent" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;"/>
+                                            <span class="pool-sep">/</span>
+                                            <FluentNumberField @bind-Value="_editHpMax" Min="1" HideStep="true" Style="flex: 1 1 0; min-width: 0;"/>
+                                        </div>
+                                    </FluentCard>
+                                }
+                                else
+                                {
+                                    <FluentCard class="pool bg-hp-subtle border-hp text-hp">
+                                        <div class="text-hp text-sm">HITPOINTS</div>
+                                        <strong>@_character.HitPoints.Current / @_character.HitPoints.Max</strong>
+                                    </FluentCard>
+                                }
+                            </FluentGridItem>
+                            <FluentGridItem Xs="6" Sm="4">
+                                @if (_isEditing)
+                                {
+                                    <FluentCard class="pool border-stress">
+                                        <div class="text-stress text-sm">STRESS</div>
+                                        <div class="pool-inputs">
+                                            <FluentNumberField @bind-Value="_editStressCurrent" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;"/>
+                                            <span class="pool-sep">/</span>
+                                            <FluentNumberField @bind-Value="_editStressMax" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;"/>
+                                        </div>
+                                    </FluentCard>
+                                }
+                                else
+                                {
+                                    <FluentCard class="pool bg-stress-subtle border-stress">
+                                        <div class="text-stress text-sm">STRESS</div>
+                                        <strong class="text-stress">@_character.Stress.Current / @_character.Stress.Max</strong>
+                                    </FluentCard>
+                                }
+                            </FluentGridItem>
+
+                        @* Armor & Damage Thresholds *@
+                            <FluentGridItem Xs="6" Sm="4">
+                                @if (_isEditing)
+                                {
+                                    <FluentCard class="pool border-armor">
+                                        <div class="text-neutral text-sm">ARMOR</div>
+                                        <div class="pool-inputs">
+                                            <FluentNumberField @bind-Value="_editArmorCurrent" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;"/>
+                                            <span class="pool-sep">/</span>
+                                            <FluentNumberField @bind-Value="_editArmorMax" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;"/>
+                                        </div>
+                                    </FluentCard>
+                                }
+                                else
+                                {
+                                    <FluentCard class="pool border-armor-subtle border-armor">
+                                        <div class="text-neutral text-sm">ARMOR</div>
+                                        <strong class="text-neutral">@_character.ArmorSlots.Current / @_character.ArmorSlots.Max</strong>
+                                    </FluentCard>
+                                }
+                            </FluentGridItem>
+                            <FluentGridItem Xs="12" Sm="8">
+                                <FluentCard class="pool" Style="display: flex">
+                                    <FluentStack Style="justify-content: space-between;">
+                                        <div>
+                                            <div class="text-sm">MAJOR THRESHOLD</div>
+                                            <strong>@MajorThreshold</strong>
+                                        </div>
+                                        <FluentDivider Orientation="Orientation.Vertical"/>
+                                        <div>
+                                            <div class="text-sm">SEVERE THRESHOLD</div>
+                                            <strong>@SevereThreshold</strong>
+                                        </div>
+                                    </FluentStack>
+                                </FluentCard>
+                            </FluentGridItem>
+                        
+                        @* Hope with feature *@
+                            <FluentGridItem Xs="4">
+                                @if (_isEditing)
+                                {
+                                    <FluentCard class="pool border-hope">
+                                        <div class="pool-label">HOPE</div>
+                                        <div class="pool-inputs">
+                                            <FluentNumberField @bind-Value="_editHopeCurrent" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;"/>
+                                            <span class="pool-sep">/</span>
+                                            <FluentNumberField @bind-Value="_editHopeMax" Min="0" HideStep="true" Style="flex: 1 1 0; min-width: 0;"/>
+                                        </div>
+                                    </FluentCard>
+                                }
+                                else
+                                {
+                                    <FluentCard class="pool bg-hope-subtle border-hope">
+                                        <div class="text-hope text-sm">HOPE</div>
+                                        <strong class="text-hope">@_character.Hope.Current / @_character.Hope.Max</strong>
+                                    </FluentCard>
+                                }
+                            </FluentGridItem>
+                            <FluentGridItem xs="8">
+
+                                <FluentCard class="pool">
+                                    <div class="text-hope">@_character.GameClass.HopeFeature.Name</div>
+                                    <div class="text-neutral">@_character.GameClass.HopeFeature.Description.ToMarkdownHtml()</div>
+                                </FluentCard>
+                                
+                            </FluentGridItem>
+                        </FluentGrid>
+                    </FluentCard>
 
             </FluentGridItem>
+            @* Traits *@
             <FluentGridItem Xs="12" Sm="6">
-                @* Traits *@
-                <div class="card-section">
+                <FluentCard>
                     <FluentGrid Spacing="1">
                         <FluentGridItem Xs="4" Sm="2">
                             <div class="card-subtle" style="padding:6px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;">
@@ -202,317 +236,333 @@
                                 <strong class="@TraitColorClass(_character.Traits.Knowledge)">@FormatModifier(_character.Traits.Knowledge)</strong>
                             </div>
                         </FluentGridItem>
+                        <FluentGridItem xs="12">
+                            <h4 class="section-title">Proficiency Bonus: +@_character.Proficiency</h4>
+                        </FluentGridItem>
                     </FluentGrid>
-                </div>
+                </FluentCard>
             </FluentGridItem>
-        </FluentGrid>
-
-        @* Two-column grid: Equipment + Abilities *@
-        <div class="content-grid">
-            @* Equipment *@
-            <FluentCard class="section-card">
-                <FluentTabs ActiveTabId="@_equipmentTab" ActiveTabIdChanged="@(v => _equipmentTab = v)">
-                    <FluentTab Id="equipped" Label="Equipped">
-                        <div class="tab-content">
-                            <div class="equipped-view">
-                                <div class="equip-row">
-                                    <span class="equip-label">Proficiency Bonus:</span>
-                                    <span class="equip-value">+@_character.Proficiency</span>
-                                </div>
-                                <div class="equip-row">
-                                    <span class="equip-label">Primary Weapon:</span>
-                                    <span class="equip-value">@(_character.PrimaryWeapon?.Name ?? "None") @FormatWeaponDamage(_character.PrimaryWeapon)</span>
-                                </div>
-                                @if (_character.SecondaryWeapon != null)
-                                {
-                                    <div class="equip-row">
-                                        <span class="equip-label">Secondary Weapon:</span>
-                                        <span class="equip-value">@_character.SecondaryWeapon.Name @FormatWeaponDamage(_character.SecondaryWeapon)</span>
-                                    </div>
-                                }
-                                <div class="equip-row">
-                                    <span class="equip-label">Armor:</span>
-                                    <span class="equip-value">@(_character.EquippedArmor?.Name ?? "None")</span>
-                                </div>
-                            </div>
+            @* Experiences & Abilities *@
+            <FluentGridItem xs="12" sm="6">
+                <FluentGrid Spacing="2">
+                    <FluentGridItem xs="12" sm="12">
+                        <FluentCard>
+                            <div class="section-title">Experiences</div>
                             @if (_isEditing)
                             {
-                                <div class="text-muted divider-section" style="margin-top: 12px;">
-                                    Equip items from the Inventory tab below.
+                                <div class="exp-edit">
+                                    @for (int i = 0; i < _editExperiences.Count; i++)
+                                    {
+                                        var idx = i;
+                                        <div style="display: flex; margin: 5px">
+                                            <FluentTextField @bind-Value="_editExperiences[idx]" Style="width: 100%;"/>
+                                            <FluentButton Appearance="Appearance.Stealth"
+                                                          IconStart="@(new Size20.Delete())"
+                                                          OnClick="@(() => RemoveExperience(idx))"
+                                                          Style="color: var(--dh-negative);"/>
+                                        </div>
+                                    }
+                                    <FluentButton Appearance="Appearance.Accent" OnClick="@AddExperience" Style="margin-top: 8px;">
+                                        Add Experience
+                                    </FluentButton>
                                 </div>
                             }
-                        </div>
-                    </FluentTab>
-                    <FluentTab Id="inventory" Label="Inventory">
-                        <div class="tab-content">
+                            else
+                            {
+                                @if (_character.Experiences.Count > 0)
+                                {
+                                    <FluentStack Wrap="true">
+                                        @foreach (var exp in _character.Experiences)
+                                        {
+                                            <FluentBadge Fill="exp">@exp +2</FluentBadge>
+                                        }
+                                    </FluentStack>
+                                }
+                                else
+                                {
+                                    <div class="text-muted">No experiences</div>
+                                }
+                            }
+                        </FluentCard>
+                    </FluentGridItem>
+                    <FluentGridItem xs="12" sm="12">
+                        <FluentCard>
+                            <div class="section-title">Class Features</div>
+                            @foreach (var cf in _character.GameClass.ClassFeatures)
+                            {
+                                <div class="ability-card">
+                                    <div class="ability-header">
+                                        <span class="ability-name">@cf.Name</span>
+                                         </div>
+                                    <div class="ability-desc">
+                                        @cf.Description.ToMarkdownHtml()
+                                    </div>
+                                </div>
+                            }
+                        </FluentCard>
+                    </FluentGridItem>
+                </FluentGrid>
+            </FluentGridItem>
+            @* Equipment & Inventory *@
+            <FluentGridItem xs="12" sm="6">
+                <FluentGrid Spacing="2">
+                    @* Equipment *@
+                    <FluentGridItem xs="12" sm="12">
+                        <FluentCard>
+                            <div class="section-title">Active Weapons</div>
+                            <div style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 5px">
+                                <div class="text-accent">Primary</div>
+                                <FluentStack Style="justify-content: space-between">
+                                    <p>@(_character.PrimaryWeapon?.Name ?? "None")</p>
+                                    <p>@_character.PrimaryWeapon?.Trait</p>
+                                    <p>@_character.PrimaryWeapon?.RangeType</p>
+                                    <p>@FormatWeaponDamage(_character.PrimaryWeapon)</p>
+                                </FluentStack>
+                                <p>@_character.PrimaryWeapon?.Feature</p>
+                            </div>
+                            <div style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 5px">
+                                <div class="text-accent">Secondary</div>
+                                <FluentStack Style="justify-content: space-between">
+                                    <p>@(_character.SecondaryWeapon?.Name ?? "None")</p>
+                                    <p>@_character.SecondaryWeapon?.Trait</p>
+                                    <p>@_character.SecondaryWeapon?.RangeType</p>
+                                    <p>@FormatWeaponDamage(_character.SecondaryWeapon)</p>
+                                </FluentStack>
+                                <p>@_character.SecondaryWeapon?.Feature</p>
+                            </div>
+                            <div class="section-title">Active Armor:</div>
+                            <FluentStack Style="justify-content: space-between">
+                                <p>@(_character.EquippedArmor?.Name ?? "None")</p>
+                                <p>@FormatArmorThresholds(_character.EquippedArmor)</p>
+                                <p>Score: @_character.EquippedArmor?.ArmorScore</p>
+                            </FluentStack>
+                            <p>@_character.EquippedArmor?.Feature</p>
+                        </FluentCard>
+                    </FluentGridItem>
+                    @* Inventory *@
+                    <FluentGridItem xs="12" sm="12">
+                        <FluentCard>
+                            <div class="section-title">Inventory</div>
                             @if (_isEditing)
                             {
-                                <div class="inventory-edit">
+                                <FluentStack class="inventory-edit" Orientation="Orientation.Vertical" >
                                     <div class="inventory-row">
-                                        <span class="equip-label">Gold:</span>
-                                        <FluentNumberField @bind-Value="_editGold" Min="0" HideStep="true" Style="width: 80px;" />
+                                        <div class="text-accent">Gold</div>
+                                        <FluentNumberField @bind-Value="_editGold" Min="0" HideStep="true" Style="width: 80px;"/>
                                         <span class="equip-value">handful(s)</span>
                                     </div>
-                                    <div style="margin-top: 12px;">
-                                        <span class="equip-label">Items:</span>
-                                        @for (int i = 0; i < _editInventory.Count; i++)
+                                    <div style="margin-top: 12px; width: inherit">
+                                        <div class="text-accent">Items</div>
+                                        @foreach (var item in _editInventory)
                                         {
-                                            var idx = i;
-                                            var entry = _editInventory[idx];
-                                            <div class="inventory-item-row">
-                                                <span class="inv-item-name @(entry.CatalogId != null ? "inv-match" : "")">@entry.Name</span>
-                                                @if (entry.CatalogId != null)
-                                                {
-                                                    var equipped = IsSlotEquipped(entry.CatalogId.Value, entry.SlotType!);
-                                                    <FluentButton Appearance="@(equipped ? Appearance.Accent : Appearance.Stealth)"
-                                                                   OnClick="@(() => ToggleEquip(idx))"
-                                                                   Style="min-width: 80px;">
-                                                        @(equipped ? "Unequip" : "Equip")
-                                                    </FluentButton>
-                                                }
+                                            <div style="display: flex; ">
+                                                <span class="inv-item-name">@item.Name</span>
                                                 <FluentButton Appearance="Appearance.Stealth"
-                                           IconStart="@(new Size20.Delete())"
-                                                           OnClick="@(() => RemoveInventoryItem(idx))"
-                                                           Style="color: var(--dh-negative);" />
+                                                              IconStart="@(new Size20.Delete())"
+                                                              OnClick="@(() => _editInventory.Remove(item))"
+                                                              Style="color: var(--dh-negative);"/>
                                             </div>
                                         }
                                         <FluentButton Appearance="Appearance.Accent" OnClick="@ShowAddItemPanel" Style="margin-top: 8px;">
                                             Add Item
                                         </FluentButton>
                                     </div>
-                                </div>
+                                </FluentStack>
                             }
                             else
                             {
                                 <div class="inventory-view">
-                                    <div class="equip-row">
-                                        <span class="equip-label">Gold:</span>
+                                    <div class="inventory-section">
+                                        <div class="text-accent">Gold</div>
                                         <span class="equip-value">@_character.GoldHandfuls handful(s)</span>
                                     </div>
-                                    @if (_character.Inventory.Count > 0)
+                                    <div class="inventory-section"> 
+                                        <div class="text-accent">Items</div>
+                                        @if (_character.Inventory.Count > 0)
+                                        {
+                                            <FluentStack Orientation="Orientation.Vertical">
+                                                @foreach (var item in _character.Inventory)
+                                                {
+                                                    <div>@item.Name</div>
+                                                }
+                                            </FluentStack>
+                                        }
+                                        else
+                                        {
+                                            <div class="text-muted" style="margin-top: 8px;">No items</div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </FluentCard>
+                    </FluentGridItem>
+                </FluentGrid>
+                
+            </FluentGridItem>
+            
+            @* Abilities *@
+            <FluentGridItem xs="12" sm="6">
+                <FluentCard>
+                    <div class="section-title">Domain Abilities</div>
+                    @if (_isEditing)
+                    {
+                        @* Available abilities *@
+                        <div class="ability-section">
+                            <div class="ability-section-header">
+                                <span class="text-sm">Available (@(_domainAbilities.Count))</span>
+                            </div>
+                            @if (_domainAbilities.Count > 0)
+                            {
+                                <div class="ability-pick-list">
+                                    @foreach (var ab in _domainAbilities)
                                     {
-                                        <div class="inventory-badges">
-                                            @foreach (var item in _character.Inventory)
-                                            {
-                                                <FluentBadge Appearance="Appearance.Neutral">@item.Name</FluentBadge>
-                                            }
+                                        <div class="ability-entry">
+                                            <div class="ability-info">
+                                                <span class="ability-name">@ab.Title</span>
+                                                <FluentBadge Appearance="Appearance.Neutral">@ab.DomainType · Lv @ab.Level · @ab.Type · Recall @ab.RecallCost</FluentBadge>
+                                            </div>
+                                            <FluentButton Appearance="Appearance.Accent" OnClick="@(() => AddAbility(ab))" Title="Add to active">
+                                                <FluentIcon Value="@(new Size20.ArrowRight())" />
+                                            </FluentButton>
                                         </div>
-                                    }
-                                    else
-                                    {
-                                        <div class="text-muted" style="margin-top: 8px;">No items</div>
                                     }
                                 </div>
                             }
-                        </div>
-                    </FluentTab>
-                </FluentTabs>
-            </FluentCard>
-
-            @* Abilities *@
-            <FluentCard class="section-card">
-                <div class="section-title">Domain Abilities</div>
-                @if (_isEditing)
-                {
-                    @* Available abilities *@
-                    <div class="ability-section">
-                        <div class="ability-section-header">
-                            <span class="text-sm">Available (@(_domainAbilities.Count))</span>
-                        </div>
-                        @if (_domainAbilities.Count > 0)
-                        {
-                            <div class="ability-pick-list">
-                                @foreach (var ab in _domainAbilities)
-                                {
-                                    <div class="ability-entry">
-                                        <div class="ability-info">
-                                            <span class="ability-name">@ab.Title</span>
-                                            <FluentBadge Appearance="Appearance.Neutral">@ab.DomainType · Lv @ab.Level · @ab.Type · Recall @ab.RecallCost</FluentBadge>
-                                        </div>
-                                        <FluentButton Appearance="Appearance.Accent" OnClick="@(() => AddAbility(ab))" Title="Add to active">
-                                            <FluentIcon Value="@(new Size20.ArrowRight())" />
-                                        </FluentButton>
-                                    </div>
-                                }
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="text-muted" style="padding: 8px;">All abilities acquired for your level and domains.</div>
-                        }
-                    </div>
-
-                    @* Active abilities *@
-                    <div class="ability-section">
-                        <div class="ability-section-header">
-                            <span class="text-sm">Active (@(_editActiveAbilities.Count) / 5)</span>
-                        </div>
-                        @if (_editActiveAbilities.Count > 0)
-                        {
-                            <div class="ability-pick-list">
-                                @foreach (var ca in _editActiveAbilities)
-                                {
-                                    <div class="ability-entry">
-                                        <div class="ability-info">
-                                            <span class="ability-name">@ca.Ability.Title</span>
-                                            <FluentBadge Appearance="Appearance.Neutral">@ca.Ability.DomainType · Recall @ca.Ability.RecallCost</FluentBadge>
-                                        </div>
-                                        <FluentButton Appearance="Appearance.Stealth" OnClick="@(() => VaultAbility(ca.AbilityId))" Title="Move to vault">
-                                            <FluentIcon Value="@(new Size20.ArrowDownload())" />
-                                        </FluentButton>
-                                    </div>
-                                }
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="text-muted" style="padding: 8px;">No active abilities.</div>
-                        }
-                    </div>
-
-                    @* Vault *@
-                    <div class="ability-section">
-                        <div class="ability-section-header">
-                            <span class="text-sm">Vault (@(_editVaultAbilities.Count))</span>
-                        </div>
-                        @if (_editVaultAbilities.Count > 0)
-                        {
-                            <div class="ability-pick-list">
-                                @foreach (var ca in _editVaultAbilities)
-                                {
-                                    <div class="ability-entry">
-                                        <div class="ability-info">
-                                            <span class="ability-name">@ca.Ability.Title</span>
-                                            <FluentBadge Appearance="Appearance.Neutral">@ca.Ability.DomainType · Recall @ca.Ability.RecallCost</FluentBadge>
-                                        </div>
-                                        <FluentButton Appearance="Appearance.Stealth" OnClick="@(() => ActivateAbility(ca.AbilityId))" Title="Move to active">
-                                            <FluentIcon Value="@(new Size20.ArrowUpload())" />
-                                        </FluentButton>
-                                    </div>
-                                }
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="text-muted" style="padding: 8px;">Vault is empty.</div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    var activeAbilities = _character.CharacterAbilities.Where(ca => !ca.IsVaulted).ToList();
-                    @if (activeAbilities.Count > 0)
-                    {
-                        <div class="abilities-list">
-                            @foreach (var ca in activeAbilities)
+                            else
                             {
-                                <div class="ability-card">
-                                    <div class="ability-header">
-                                        <span class="ability-name">@ca.Ability.Title</span>
-                                        <FluentBadge Appearance="Appearance.Neutral">@ca.Ability.Type · Recall @ca.Ability.RecallCost</FluentBadge>
-                                    </div>
-                                    <div class="ability-desc">
-                                        @ca.Ability.FeatureDescription.ToMarkdownHtml()
-                                    </div>
+                                <div class="text-muted" style="padding: 8px;">All abilities acquired for your level and domains.</div>
+                            }
+                        </div>
+
+                        @* Active abilities *@
+                        <div class="ability-section">
+                            <div class="ability-section-header">
+                                <span class="text-sm">Active (@(_editActiveAbilities.Count) / 5)</span>
+                            </div>
+                            @if (_editActiveAbilities.Count > 0)
+                            {
+                                <div class="ability-pick-list">
+                                    @foreach (var ca in _editActiveAbilities)
+                                    {
+                                        <div class="ability-entry">
+                                            <div class="ability-info">
+                                                <span class="ability-name">@ca.Ability.Title</span>
+                                                <FluentBadge Appearance="Appearance.Neutral">@ca.Ability.DomainType · Recall @ca.Ability.RecallCost</FluentBadge>
+                                            </div>
+                                            <FluentButton Appearance="Appearance.Stealth" OnClick="@(() => VaultAbility(ca.AbilityId))" Title="Move to vault">
+                                                <FluentIcon Value="@(new Size20.ArrowDownload())" />
+                                            </FluentButton>
+                                        </div>
+                                    }
                                 </div>
+                            }
+                            else
+                            {
+                                <div class="text-muted" style="padding: 8px;">No active abilities.</div>
+                            }
+                        </div>
+
+                        @* Vault *@
+                        <div class="ability-section">
+                            <div class="ability-section-header">
+                                <span class="text-sm">Vault (@(_editVaultAbilities.Count))</span>
+                            </div>
+                            @if (_editVaultAbilities.Count > 0)
+                            {
+                                <div class="ability-pick-list">
+                                    @foreach (var ca in _editVaultAbilities)
+                                    {
+                                        <div class="ability-entry">
+                                            <div class="ability-info">
+                                                <span class="ability-name">@ca.Ability.Title</span>
+                                                <FluentBadge Appearance="Appearance.Neutral">@ca.Ability.DomainType · Recall @ca.Ability.RecallCost</FluentBadge>
+                                            </div>
+                                            <FluentButton Appearance="Appearance.Stealth" OnClick="@(() => ActivateAbility(ca.AbilityId))" Title="Move to active">
+                                                <FluentIcon Value="@(new Size20.ArrowUpload())" />
+                                            </FluentButton>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-muted" style="padding: 8px;">Vault is empty.</div>
                             }
                         </div>
                     }
                     else
                     {
-                        <div class="text-muted" style="padding: 20px; text-align: center;">No domain abilities</div>
-                    }
-                }
-            </FluentCard>
-        </div>
-
-        @* Experiences (prominent, full width) *@
-        <FluentCard class="experiences-card">
-            <div class="section-title">Experiences</div>
-            @if (_isEditing)
-            {
-                <div class="exp-edit">
-                    @for (int i = 0; i < _editExperiences.Count; i++)
-                    {
-                        var idx = i;
-                        <div class="exp-edit-row">
-                            <FluentTextField @bind-Value="_editExperiences[idx]" Style="width: 100%;" />
-                            <FluentButton Appearance="Appearance.Stealth"
-                                           IconStart="@(new Size20.Delete())"
-                                           OnClick="@(() => RemoveExperience(idx))"
-                                           Style="color: var(--dh-negative);" />
-                        </div>
-                    }
-                    <FluentButton Appearance="Appearance.Accent" OnClick="@AddExperience" Style="margin-top: 8px;">
-                        Add Experience
-                    </FluentButton>
-                </div>
-            }
-            else
-            {
-                @if (_character.Experiences.Count > 0)
-                {
-                    <div class="exp-list">
-                        @foreach (var exp in _character.Experiences)
+                        var activeAbilities = _character.CharacterAbilities.Where(ca => !ca.IsVaulted).ToList();
+                        @if (activeAbilities.Count > 0)
                         {
-                            <div class="exp-chip-large">
-                                <FluentIcon Value="@(new Size20.Star())" Color="Color.Accent" />
-                                <span>@exp (+2)</span>
-                            </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <div class="text-muted">No experiences</div>
-                }
-            }
-        </FluentCard>
-
-        @* Background Questions *@
-        @if (_character.BackgroundAnswers.Any(a => !string.IsNullOrWhiteSpace(a)))
-        {
-            <FluentCard class="section-card full-width">
-                <div class="section-title">Background</div>
-                <div class="bg-list">
-                    @for (int i = 0; i < _character.BackgroundAnswers.Count; i += 2)
-                    {
-                        var question = _character.BackgroundAnswers[i];
-                        var answer = i + 1 < _character.BackgroundAnswers.Count ? _character.BackgroundAnswers[i + 1] : null;
-                        if (!string.IsNullOrWhiteSpace(question))
-                        {
-                            <div class="bg-item">
-                                <div class="bg-question">@question</div>
-                                @if (!string.IsNullOrWhiteSpace(answer))
+                            <div class="abilities-list">
+                                @foreach (var ca in activeAbilities)
                                 {
-                                    <div class="bg-answer">@answer</div>
+                                    <div class="ability-card">
+                                        <div class="ability-header">
+                                            <span class="ability-name">@ca.Ability.Title</span>
+                                            <FluentBadge Appearance="Appearance.Neutral">@ca.Ability.Type · Recall @ca.Ability.RecallCost</FluentBadge>
+                                        </div>
+                                        <div class="ability-desc">
+                                            @ca.Ability.FeatureDescription.ToMarkdownHtml()
+                                        </div>
+                                    </div>
                                 }
                             </div>
                         }
-                    }
-                </div>
-            </FluentCard>
-        }
-
-        @* Description *@
-        @if (DescriptionFields.Any(f => !string.IsNullOrWhiteSpace(f.Value)))
-        {
-            <FluentCard class="section-card full-width">
-                <div class="section-title">Description</div>
-                <div class="desc-grid">
-                    @foreach (var (label, val) in DescriptionFields)
-                    {
-                        if (!string.IsNullOrWhiteSpace(val))
+                        else
                         {
-                            <div class="desc-item">
-                                <span class="desc-label">@label:</span>
-                                <span class="desc-value">@val</span>
-                            </div>
+                            <div class="text-muted" style="padding: 20px; text-align: center;">No domain abilities</div>
                         }
                     }
-                </div>
-            </FluentCard>
-        }
+                </FluentCard>
+            </FluentGridItem>
+ 
+            @* Background Questions *@
+            @if (_character.BackgroundAnswers.Any(a => !string.IsNullOrWhiteSpace(a)))
+            {
+                <FluentCard class="section-card full-width">
+                    <div class="section-title">Background</div>
+                    <div class="bg-list">
+                        @for (int i = 0; i < _character.BackgroundAnswers.Count; i += 2)
+                        {
+                            var question = _character.BackgroundAnswers[i];
+                            var answer = i + 1 < _character.BackgroundAnswers.Count ? _character.BackgroundAnswers[i + 1] : null;
+                            if (!string.IsNullOrWhiteSpace(question))
+                            {
+                                <div class="bg-item">
+                                    <div class="bg-question">@question</div>
+                                    @if (!string.IsNullOrWhiteSpace(answer))
+                                    {
+                                        <div class="bg-answer">@answer</div>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                </FluentCard>
+            }
+
+            @* Description *@
+            @if (DescriptionFields.Any(f => !string.IsNullOrWhiteSpace(f.Value)))
+            {
+                <FluentCard class="section-card full-width">
+                    <div class="section-title">Description</div>
+                    <div class="desc-grid">
+                        @foreach (var (label, val) in DescriptionFields)
+                        {
+                            if (!string.IsNullOrWhiteSpace(val))
+                            {
+                                <div class="desc-item">
+                                    <span class="desc-label">@label:</span>
+                                    <span class="desc-value">@val</span>
+                                </div>
+                            }
+                        }
+                    </div>
+                </FluentCard>
+            }
+        </FluentGrid>
     }
 </div>
 
@@ -626,10 +676,8 @@
             _character.ArmorSlots = new ResourcePool(_editArmorCurrent, _editArmorMax);
             _character.GoldHandfuls = _editGold;
             _character.Inventory = _editInventory
-                .Where(e => e.SlotType is null)
-                .Select(e => e.CatalogId is not null
-                    ? new Item { Id = e.CatalogId.Value, Name = e.Name, Description = "" }
-                    : new Item { Id = Guid.NewGuid(), Name = e.Name, Description = "" })
+                .Where(e => string.IsNullOrWhiteSpace(e.SlotType))
+                .Select(e => new Item { Id = Guid.NewGuid(), Name = e.Name, Description = "" })
                 .ToList();
             _character.Experiences = _editExperiences;
             _character.EquippedArmorId = _editEquippedArmorId;
@@ -705,21 +753,6 @@
         _errorMessage = string.Empty;
     }
 
-    private void RemoveInventoryItem(int index)
-    {
-        var entry = _editInventory[index];
-        _editInventory.RemoveAt(index);
-        if (entry.CatalogId != null && IsSlotEquipped(entry.CatalogId.Value, entry.SlotType!))
-        {
-            switch (entry.SlotType)
-            {
-                case "Primary": _editPrimaryWeaponId = null; break;
-                case "Secondary": _editSecondaryWeaponId = null; break;
-                case "Armor": _editEquippedArmorId = null; break;
-            }
-        }
-    }
-
     private void AddExperience()
     {
         _editExperiences.Add(string.Empty);
@@ -742,8 +775,14 @@
 
     private string FormatWeaponDamage(Weapon? wp)
     {
-        if (wp == null) return "(0)";
-        return $"({wp.Damage.NumberOfDice}d{wp.Damage.NumberOfSides}{(wp.Damage.Bonus > 0 ? "+" + wp.Damage.Bonus : "")} {wp.Damage.Type})";
+        if (wp == null) return "";
+        return $"{wp.Damage.NumberOfDice}d{wp.Damage.NumberOfSides}{(wp.Damage.Bonus > 0 ? "+" + wp.Damage.Bonus : "")} {wp.Damage.Type}";
+    }
+    
+    private string FormatArmorThresholds(Armor? armor)
+    {
+        if (armor == null) return "";
+        return $"{armor.DamageThresholds.Major} / {armor.DamageThresholds.Severe}";
     }
 
     private bool IsSlotEquipped(Guid catalogId, string slotType)
