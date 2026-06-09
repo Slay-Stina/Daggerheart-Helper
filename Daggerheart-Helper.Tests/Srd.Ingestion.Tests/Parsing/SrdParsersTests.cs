@@ -68,13 +68,13 @@ public class SrdParsersTests
         Assert.Single(features);
         Assert.Equal(new FeatureBlock("Flexible", "+1 to Evasion"), features[0]);
     }
-    
+
     [Fact]
     public void ParseFeature_ReturnsCorrectValues()
     {
         var feature = SrdParsers.ParseFeature(new RawFeatureDto()
         { Name = "Flexible", Text = "+1 to Evasion" });
-        
+
         Assert.Null(SrdParsers.ParseFeature(null));
         Assert.NotNull(feature);
         Assert.Equal(new FeatureBlock("Flexible", "+1 to Evasion"), feature);
@@ -84,23 +84,23 @@ public class SrdParsersTests
     public void ParseTraitScores_TrimsAndReturnCorrectValues()
     {
         TraitScores traitScores = new TraitScores(0, 0, -1, 1, 1, 2);
-        
-        Assert.Equal( SrdParsers.ParseTraitScores("0, 0, -1, +1, +1, +2"), traitScores);
+
+        Assert.Equal(SrdParsers.ParseTraitScores("0, 0, -1, +1, +1, +2"), traitScores);
     }
 
     [Fact]
     public void ParseQuestions_ParsesListAndReturnsCorrectValues()
     {
-        var question = new RawQuestion() {Text = "Question"};
+        var question = new RawQuestion() { Text = "Question" };
         var questionList = new List<RawQuestion>()
         {
             question,
             question,
             question
         };
-        var expected = new List<string> {question.Text, question.Text,  question.Text};
+        var expected = new List<string> { question.Text, question.Text, question.Text };
         var result = SrdParsers.ParseQuestions(questionList);
-        
+
         Assert.Equal(expected, result);
     }
 

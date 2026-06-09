@@ -51,13 +51,13 @@ public class SrdEntityMapperTests
             DomainType.Grace, DomainType.Codex, 10, 5,
             new TraitScores(0, 0, -1, 1, 1, 2),
             new List<SubclassCard>(), new List<FeatureBlock>(), feature,
-            stringList, stringList, stringList, 
-            new ArmorCard("ArmorName",1,1, 
-                new DamageThresholds(1,2),null),
+            stringList, stringList, stringList,
+            new ArmorCard("ArmorName", 1, 1,
+                new DamageThresholds(1, 2), null),
             new List<WeaponCard>());
-        
+
         var entity = card.ToEntity();
-        
+
         Assert.Equal("Bard", entity.Name);
         Assert.Equal("ClassDescription", entity.Description);
         Assert.Equal(DomainType.Grace, entity.Domain1);
@@ -71,12 +71,12 @@ public class SrdEntityMapperTests
     {
         var feature = new FeatureBlock("FeatureName", "FeatureText");
         var wordsmith = new SubclassCard(
-            "Wordsmith", 
+            "Wordsmith",
             "SubclassDescription",
             TraitType.Presence,
             feature, feature, feature);
-        
-        var entity  = wordsmith.ToEntity();
+
+        var entity = wordsmith.ToEntity();
         Assert.Equal("Wordsmith", entity.Name);
         Assert.Equal("SubclassDescription", entity.Description);
         Assert.Equal(TraitType.Presence, entity.SpellCastingTraitType);
@@ -124,12 +124,12 @@ public class SrdEntityMapperTests
             WeaponPriority.Primary,
             TraitType.Agility,
             RangeType.Melee,
-            new Damage(1, 8, 0, DamageType.Physical), 
+            new Damage(1, 8, 0, DamageType.Physical),
             null
         );
-        
+
         var entity = weapon.ToEntity();
-        
+
         Assert.Equal("Broadsword", entity.Name);
         Assert.Equal(1, entity.Tier);
     }

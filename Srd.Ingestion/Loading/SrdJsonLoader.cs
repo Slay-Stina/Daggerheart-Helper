@@ -29,7 +29,7 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
         var subclasses = rawSubclasses.Select(ToSubclassCard).ToList();
         var armors = rawArmors.Select(ToArmorCard).ToList();
         var weapons = rawWeapons.Select(ToWeaponCard).ToList();
-        
+
         return new SrdCatalog(
             armors,
             weapons,
@@ -95,7 +95,7 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             SrdParsers.ParseAbilityType(raw.Type),
             raw.Text);
     }
-    
+
     private static AncestryCard ToAncestryCard(RawAncestryDto raw)
     {
         return new AncestryCard(
@@ -104,7 +104,7 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             SrdParsers.ParseFeatures(raw.Features),
             HeritageType.Ancestry);
     }
-    
+
     private static CommunityCard ToCommunityCard(RawCommunityDto raw)
     {
         return new CommunityCard(
@@ -114,16 +114,16 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             raw.Note,
             HeritageType.Community);
     }
-    
+
     private static ClassCard ToClassCard(RawClassDto raw, List<SubclassCard> subclasses, List<WeaponCard> weapons, List<ArmorCard> armors)
     {
         var classFeatures = raw.ClassFeature
             .Select((f, i) => SrdParsers.ParseFeature(f) ?? throw new ArgumentNullException(nameof(raw.ClassFeature), $"Class '{raw.Name}': ClassFeature[{i}] is null"))
             .ToList();
 
-        var suggestedArmor = armors.FirstOrDefault(a => 
+        var suggestedArmor = armors.FirstOrDefault(a =>
             string.Equals(a.Name, raw.SuggestedArmor, StringComparison.OrdinalIgnoreCase));
-        
+
         if (suggestedArmor is null)
             throw new FormatException($"Class '{raw.Name}': Suggested armor '{raw.SuggestedArmor}' not found in loaded armors.");
 
@@ -135,7 +135,7 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             SrdParsers.ParseInt(raw.BaseHp, "hp"),
             SrdParsers.ParseInt(raw.BaseEvasion, "evasion"),
             SrdParsers.ParseTraitScores(raw.SuggestedTraits),
-            subclasses.Where(s => string.Equals(s.Name, raw.SubClass1, StringComparison.OrdinalIgnoreCase) || 
+            subclasses.Where(s => string.Equals(s.Name, raw.SubClass1, StringComparison.OrdinalIgnoreCase) ||
                                  string.Equals(s.Name, raw.SubClass2, StringComparison.OrdinalIgnoreCase)).ToList(),
             classFeatures,
             SrdParsers.ParseFeature(new RawFeatureDto { Name = raw.HopeFeatureName, Text = raw.HopeFeatureText }) ?? throw new ArgumentNullException(nameof(raw.HopeFeatureName)),
@@ -143,11 +143,11 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
             SrdParsers.ParseQuestions(raw.BackgroundQuestions),
             SrdParsers.ParseQuestions(raw.ConnectionQuestions),
             suggestedArmor,
-            weapons.Where( w => string.Equals(w.Name, raw.SuggestedPrimary, StringComparison.OrdinalIgnoreCase) || 
+            weapons.Where(w => string.Equals(w.Name, raw.SuggestedPrimary, StringComparison.OrdinalIgnoreCase) ||
                                 string.Equals(w.Name, raw.SuggestedSecondary, StringComparison.OrdinalIgnoreCase)).ToList()
             );
     }
-    
+
     private static AdversaryCard ToAdversaryCard(RawAdversaryDto raw)
     {
         return new AdversaryCard(
@@ -188,7 +188,7 @@ public sealed class SrdJsonLoader : ISrdJsonLoader
     {
         if (features?.Length == 0)
             throw new FormatException($"Subclass '{fieldName}' has no features.");
-        
+
         var feature = SrdParsers.ParseFeature(features![0]);
         return feature ?? throw new FormatException($"Subclass '{fieldName}' feature is null.");
     }

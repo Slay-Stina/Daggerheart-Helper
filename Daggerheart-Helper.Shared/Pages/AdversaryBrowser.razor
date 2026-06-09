@@ -4,16 +4,14 @@
 
 <PageTitle>Adversary Browser — DM Tools</PageTitle>
 
-<div class="dashboard-container">
-    <div class="dashboard-header">
-        <div class="header-text">
-            <h2>Adversary Browser</h2>
-            <p>Browse and search Daggerheart adversaries from the SRD</p>
-        </div>
-        <FluentButton Appearance="Appearance.Stealth" IconStart="@(new Icons.Filled.Size20.ArrowLeft())" OnClick="@GoBack">
-            Back to DM Tools
-        </FluentButton>
-    </div>
+<PageHeader Title="Adversary Browser" Subtitle="Browse and search Daggerheart adversaries from the SRD">
+    <BackButton>
+        <FluentButton Appearance="Appearance.Stealth"
+                      IconStart="@(new Icons.Filled.Size20.ArrowLeft())"
+                      OnClick="@GoBack"
+                      Title="Back to DM Tools" />
+    </BackButton>
+</PageHeader>
 
     <div class="filters-bar">
         <FluentTextField Placeholder="Search by name..." Value="@_searchTerm" ValueChanged="@OnSearchChanged" Style="max-width: 250px;" Immediate ImmediateDelay="300" />
@@ -74,7 +72,6 @@
             </FluentDataGrid>
         </FluentStack>
     }
-</div>
 
 @if (_selected is not null)
 {

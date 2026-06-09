@@ -1,10 +1,7 @@
-using Android.Content.Res;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Microsoft.Extensions.Logging;
 using Microsoft.FluentUI.AspNetCore.Components;
-using Microsoft.Maui.Controls.Hosting;
-using Microsoft.Maui.Hosting;
 
 namespace Daggerheart_Helper;
 

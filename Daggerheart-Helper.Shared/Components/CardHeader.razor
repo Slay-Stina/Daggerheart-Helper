@@ -1,0 +1,15 @@
+@namespace DaggerheartHelper.Shared.Components
+
+<div class="card-header">
+    <div class="char-title">
+        <h3>@Title</h3>
+        <span class="char-class">@Subtitle</span>
+    </div>
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string Subtitle { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

@@ -7,4 +7,6 @@ public sealed record SubclassSummary(
     string Name,
     string Description,
     FeatureSummary Foundation,
+    FeatureSummary Specialization,
+    FeatureSummary Mastery,
     TraitType? SpellCastingTraitType = null);
