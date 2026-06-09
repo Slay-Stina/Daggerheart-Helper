@@ -1,33 +1,3 @@
-.dashboard-container {
-    padding: 24px;
-    background: radial-gradient(circle at top, var(--dh-bg-start) 0%, var(--dh-bg-end) 100%);
-    min-height: 90vh;
-    color: #f0f0f5;
-}
-
-.dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding-bottom: 16px;
-}
-
-.header-text h2 {
-    font-size: 1.6rem;
-    margin: 0 0 3px 0;
-    background: linear-gradient(135deg, var(--dh-purple) 0%, var(--dh-pink) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.header-text p {
-    margin: 0;
-    color: var(--dh-neutral);
-    font-size: 0.85rem;
-}
-
 .filters-bar {
     display: flex;
     gap: 10px;
@@ -42,7 +12,7 @@
     align-items: center;
     justify-content: center;
     padding: 60px 0;
-    color: var(--dh-purple);
+    color: var(--dh-fear);
 }
 
 .empty-state {
@@ -81,49 +51,6 @@
 
 ::deep .adversary-grid fluent-data-grid-row {
     min-height: 32px;
-}
-
-::deep fluent-badge {
-    font-size: 0.75rem;
-    font-weight: 600;
-
-    --badge-fill-tier: color-mix(in srgb, var(--dh-purple) 15%, transparent);
-    --badge-color-tier: var(--dh-purple);
-    --badge-fill-difficulty: color-mix(in srgb, var(--dh-negative) 15%, transparent);
-    --badge-color-difficulty: var(--dh-negative);
-    --badge-fill-thresholds: color-mix(in srgb, var(--dh-purple) 15%, transparent);
-    --badge-color-thresholds: var(--dh-purple);
-    --badge-fill-hp: color-mix(in srgb, var(--dh-hp) 15%, transparent);
-    --badge-color-hp: var(--dh-hp);
-    --badge-fill-stress: color-mix(in srgb, var(--dh-stress) 15%, transparent);
-    --badge-color-stress: var(--dh-stress);
-    --badge-fill-atk: color-mix(in srgb, var(--dh-stress) 15%, transparent);
-    --badge-color-atk: var(--dh-stress);
-    --badge-fill-attack: color-mix(in srgb, var(--dh-negative) 15%, transparent);
-    --badge-color-attack: var(--dh-negative);
-    --badge-fill-exp: color-mix(in srgb, var(--dh-hope) 15%, transparent);
-    --badge-color-exp: var(--dh-hope);
-
-    --badge-fill-solo: color-mix(in srgb, var(--dh-hp) 15%, transparent);
-    --badge-color-solo: var(--dh-hp);
-    --badge-fill-bruiser: color-mix(in srgb, var(--dh-stress) 15%, transparent);
-    --badge-color-bruiser: var(--dh-stress);
-    --badge-fill-horde: color-mix(in srgb, #eab308 15%, transparent);
-    --badge-color-horde: #eab308;
-    --badge-fill-leader: color-mix(in srgb, var(--dh-purple) 15%, transparent);
-    --badge-color-leader: var(--dh-purple);
-    --badge-fill-minion: color-mix(in srgb, var(--dh-neutral) 15%, transparent);
-    --badge-color-minion: var(--dh-neutral);
-    --badge-fill-ranged: color-mix(in srgb, var(--dh-positive) 15%, transparent);
-    --badge-color-ranged: var(--dh-positive);
-    --badge-fill-skulk: color-mix(in srgb, #3b82f6 15%, transparent);
-    --badge-color-skulk: #3b82f6;
-    --badge-fill-social: color-mix(in srgb, var(--dh-pink) 15%, transparent);
-    --badge-color-social: var(--dh-pink);
-    --badge-fill-standard: color-mix(in srgb, #14b8a6 15%, transparent);
-    --badge-color-standard: #14b8a6;
-    --badge-fill-support: color-mix(in srgb, #06b6d4 15%, transparent);
-    --badge-color-support: #06b6d4;
 }
 
 .detail-overlay {
@@ -171,7 +98,7 @@
 
 .detail-subtitle {
     font-size: 0.82rem;
-    color: var(--dh-purple);
+    color: var(--dh-fear);
     font-style: italic;
     margin-bottom: 10px;
 }

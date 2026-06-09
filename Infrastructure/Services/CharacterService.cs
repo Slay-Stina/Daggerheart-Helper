@@ -31,6 +31,9 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
         return await context.Characters
             .AsNoTracking()
             .Include(c => c.GameClass)
+            .ThenInclude(c => c.HopeFeature)
+            .Include(c => c.GameClass)
+            .ThenInclude(c => c.ClassFeatures)
             .Include(c => c.Subclass)
             .Include(c => c.Ancestry)
             .Include(c => c.Community)

@@ -1,4 +1,6 @@
+using Application.Services;
 using Core.Entities;
+using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -180,6 +182,60 @@ public class Seed
             logger.LogError(ex, "Failed to seed SRD data.");
             throw new InvalidOperationException("Failed to seed SRD data. See inner exception for details.", ex);
         }
+    }
+
+    public static async Task SampleCharacter(IServiceProvider services)
+    {
+        await using var scope = services.CreateAsyncScope();
+        var service = scope.ServiceProvider.GetRequiredService<ICharacterService>();
+        var context = scope.ServiceProvider.GetRequiredService<DaggerheartDbContext>();
+
+        if (await service.GetAllAsync() is { Count: > 0 })
+            return;
+
+        var itemNames = new[] { "Torch", "50 ft rope", "Basic supplies", "Minor Health Potion" };
+        var catalogItems = await context.Items
+            .Where(i => itemNames.Contains(i.Name))
+            .ToListAsync();
+        var inventoryItems = itemNames
+            .Select(name => catalogItems.FirstOrDefault(i => i.Name == name) ?? new Item { Name = name, Description = "" })
+            .ToList();
+
+        var character = new Character
+        {
+            Name = "Borin Ironhide",
+            Pronouns = "he/him",
+            Level = 1,
+            GameClassId = Guid.Parse("D17B68ED-FBBA-4F49-8C8D-5D372871593A"),
+            SubclassId = Guid.Parse("8847BD64-62C5-45C9-9FE3-EAEBA6CF7DD1"),
+            AncestryId = Guid.Parse("C3C7D875-B717-437C-88CD-77D049452FFB"),
+            CommunityId = Guid.Parse("1A996A6E-1381-4384-B370-436FEA5EF74E"),
+            EquippedArmorId = Guid.Parse("748526B9-AF83-4C61-B864-91376AF6791A"),
+            PrimaryWeaponId = Guid.Parse("DB5D5C9C-2B28-4C36-A536-C4DCEB59B747"),
+            Traits = new TraitScores(Agility: 1, Strength: 2, Finesse: -1, Instinct: 0, Presence: 0, Knowledge: 1),
+            DamageThresholds = new DamageThresholds(Major: 5, Severe: 3),
+            Evasion = 10,
+            HitPoints = new ResourcePool(7, 7),
+            Stress = new ResourcePool(0, 6),
+            Hope = new ResourcePool(2, 6),
+            ArmorSlots = new ResourcePool(4, 4),
+            GoldHandfuls = 1,
+            Experiences = new List<string> { "Survived the Goblin Wars", "Guardian of the Mountain Pass" },
+            BackgroundAnswers = new List<string>
+            {
+                "Where were you born?", "The Ironforge Mountains",
+                "Why did you become an adventurer?", "To protect my homeland from the darkness",
+                "What was your childhood like?", "Harsh but honorable, trained in the Forgehold garrison"
+            },
+            Inventory = inventoryItems,
+            CharacterAbilities = new List<CharacterAbility>
+            {
+                new() { AbilityId = Guid.Parse("C017284D-B04D-4C0B-90EA-95C31C869F63"), IsVaulted = false },
+                new() { AbilityId = Guid.Parse("BA159592-DFF9-4A48-8D3A-C2BB25A7B12B"), IsVaulted = false },
+            },
+        };
+
+        await service.SaveAsync(character);
     }
 
     public static async Task EnsureConcurrencyTriggersAsync(DaggerheartDbContext context)

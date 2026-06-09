@@ -31,6 +31,7 @@ var srdPath = Path.IsPathRooted(srdJsonPath)
     ? srdJsonPath
     : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, srdJsonPath));
 await Seed.SrdData(app.Services, srdPath);
+await Seed.SampleCharacter(app.Services);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

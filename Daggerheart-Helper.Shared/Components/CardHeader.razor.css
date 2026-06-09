@@ -1,0 +1,20 @@
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+}
+
+.char-title h3 {
+    margin: 0 0 4px 0;
+    font-size: 1.35rem;
+    color: var(--dh-neutral);
+}
+
+.char-class {
+    font-size: 0.82rem;
+    color: var(--dh-purple);
+    font-weight: 500;
+}

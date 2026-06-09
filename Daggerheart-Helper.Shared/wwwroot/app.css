@@ -6,12 +6,25 @@
     --dh-font-heading: 'Outfit', 'Inter', system-ui, sans-serif;
     --dh-font-body: 'Inter', 'Outfit', system-ui, -apple-system, sans-serif;
 
+    /* Domain colors — official Daggerheart */
+    --dh-arcana: #4e345b;
+    --dh-blade: #af231c;
+    --dh-bone: #a4a9a8;
+    --dh-codex: #24395d;
+    --dh-grace: #8d3965;
+    --dh-midnight: #1e201f;
+    --dh-sage: #244e30;
+    --dh-splendor: #b8a342;
+    --dh-valor: #e2680e;
+
     /* Colors */
+    --dh-fear: #160942;
     --dh-purple: #a78bfa;
     --dh-pink: #ec4899;
+    --dh-blue: #10a0b9;
     --dh-hp: #f87171;
     --dh-stress: #fb923c;
-    --dh-hope: #38bdf8;
+    --dh-hope: #e7c74b;
     --dh-positive: #10b981;
     --dh-negative: #ef4444;
     --dh-neutral: #9ca3af;
@@ -29,6 +42,10 @@ body {
     line-height: var(--type-ramp-base-line-height);
     margin: 0;
     min-height: 100dvh;
+    background-image: url('Images/dh-background.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -39,56 +56,7 @@ code {
     color: #c02d76;
 }
 
-/* ===== Layout Components ===== */
-.main {
-    min-height: calc(100dvh - 86px);
-    color: var(--neutral-foreground-rest);
-    align-items: stretch !important;
-    background: transparent;
-}
-
-.body-content {
-    align-self: stretch;
-    min-height: calc(100dvh - 86px) !important;
-    display: flex;
-}
-
-.content {
-    padding: 0.5rem 1.5rem;
-    align-self: stretch !important;
-    width: 100%;
-}
-
-.manage {
-    width: 100dvw;
-}
-
-footer {
-    background: var(--neutral-layer-4);
-    color: var(--neutral-foreground-rest);
-    align-items: center;
-    padding: 10px;
-
-    & a {
-        color: var(--neutral-foreground-rest);
-        text-decoration: none;
-
-        &:focus {
-            outline: 1px dashed;
-            outline-offset: 3px;
-        }
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-}
-
 /* ===== Blazor & UI Elements ===== */
-.navmenu-icon {
-    display: none;
-}
-
 .alert {
     border: 1px dashed var(--accent-fill-rest);
     padding: 5px;
@@ -139,7 +107,7 @@ footer {
         transform: rotate(-90deg);
 
         &:last-child {
-            stroke: #1b6ec2;
+            stroke: var(--dh-blue);
             stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
             transition: stroke-dasharray 0.05s ease-in-out;
         }
@@ -158,6 +126,38 @@ footer {
 }
 
 /* ===== Daggerheart Design System ===== */
+
+/* Page — standardiserad sidhuvud för alla sidor */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-title {
+    font-size: 2.2rem;
+    margin: 0 0 5px 0;
+    background: linear-gradient(135deg, var(--dh-purple) 0%, var(--dh-pink) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.page-subtitle {
+    margin: 0;
+    color: var(--dh-neutral);
+    font-size: 0.95rem;
+}
+
+/* Page — standardiserad wrapper för alla sidor */
+.dashboard-container {
+    padding: 30px;
+    background: radial-gradient(circle at top, var(--dh-bg-start) 0%, var(--dh-bg-end) 100%);
+    min-height: 90vh;
+    color: #f0f0f5;
+    max-width: 1200px;
+    margin: 0 auto;
+}
 
 /* Page */
 .page-bg {
@@ -243,14 +243,49 @@ footer {
 .text-accent    { color: var(--dh-purple); }
 .text-neutral   { color: var(--dh-neutral); }
 
+/* Domain colors */
+.text-arcana    { color: var(--dh-arcana); }
+.text-blade     { color: var(--dh-blade); }
+.text-bone      { color: var(--dh-bone); }
+.text-codex     { color: var(--dh-codex); }
+.text-grace     { color: var(--dh-grace); }
+.text-midnight  { color: var(--dh-midnight); }
+.text-sage      { color: var(--dh-sage); }
+.text-splendor  { color: var(--dh-splendor); }
+.text-valor     { color: var(--dh-valor); }
+
+.bg-arcana-subtle     { background: color-mix(in srgb, var(--dh-arcana) 20%, transparent); }
+.bg-blade-subtle      { background: color-mix(in srgb, var(--dh-blade) 15%, transparent); }
+.bg-bone-subtle       { background: color-mix(in srgb, var(--dh-bone) 15%, transparent); }
+.bg-codex-subtle      { background: color-mix(in srgb, var(--dh-codex) 20%, transparent); }
+.bg-grace-subtle      { background: color-mix(in srgb, var(--dh-grace) 15%, transparent); }
+.bg-midnight-subtle   { background: color-mix(in srgb, var(--dh-midnight) 25%, transparent); }
+.bg-sage-subtle       { background: color-mix(in srgb, var(--dh-sage) 20%, transparent); }
+.bg-splendor-subtle   { background: color-mix(in srgb, var(--dh-splendor) 15%, transparent); }
+.bg-valor-subtle      { background: color-mix(in srgb, var(--dh-valor) 15%, transparent); }
+
+.border-arcana    { border-color: color-mix(in srgb, var(--dh-arcana) 40%, transparent); }
+.border-blade     { border-color: color-mix(in srgb, var(--dh-blade) 35%, transparent); }
+.border-bone      { border-color: color-mix(in srgb, var(--dh-bone) 35%, transparent); }
+.border-codex     { border-color: color-mix(in srgb, var(--dh-codex) 40%, transparent); }
+.border-grace     { border-color: color-mix(in srgb, var(--dh-grace) 35%, transparent); }
+.border-midnight  { border-color: color-mix(in srgb, var(--dh-midnight) 50%, transparent); }
+.border-sage      { border-color: color-mix(in srgb, var(--dh-sage) 40%, transparent); }
+.border-splendor  { border-color: color-mix(in srgb, var(--dh-splendor) 35%, transparent); }
+.border-valor     { border-color: color-mix(in srgb, var(--dh-valor) 35%, transparent); }
+
 /* Semantic backgrounds & borders */
 .bg-hp-subtle     { background: color-mix(in srgb, var(--dh-hp) 5%, transparent); }
 .bg-stress-subtle { background: color-mix(in srgb, var(--dh-stress) 5%, transparent); }
 .bg-hope-subtle   { background: color-mix(in srgb, var(--dh-hope) 5%, transparent); }
+.bg-evasion-subtle { background: color-mix(in srgb, var(--dh-positive) 5%, transparent); }
+.bg-armor-subtle  { background: color-mix(in srgb, var(--dh-neutral) 5%, transparent); }
 
 .border-hp     { border-color: color-mix(in srgb, var(--dh-hp) 20%, transparent); }
 .border-stress { border-color: color-mix(in srgb, var(--dh-stress) 20%, transparent); }
 .border-hope   { border-color: color-mix(in srgb, var(--dh-hope) 20%, transparent); }
+.border-evasion { border-color: color-mix(in srgb, var(--dh-positive) 20%, transparent); }
+.border-armor  { border-color: color-mix(in srgb, var(--dh-neutral) 20%, transparent); }
 
 /* Cards */
 .card-section {
@@ -267,13 +302,9 @@ footer {
 }
 
 /* Pools */
-.chip-pool {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px 8px;
-    border-radius: 8px;
+.pool {
     text-align: center;
+    align-content: center;
 }
 
 .grid-traits {
@@ -301,56 +332,91 @@ footer {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== Responsive Styles ===== */
-@media (max-width: 600px) {
-    .header-gutters {
-        margin-block: 0.5rem;
-        margin-inline: 1.5rem 3rem !important;
-    }
+/* ===== FluentUI Component Overrides ===== */
 
-    .main {
-        flex-direction: column !important;
-        row-gap: 0 !important;
-    }
+/* FluentBadge — global fill variables, alla fill-värden från alla sidor */
+fluent-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
 
-    nav.sitenav {
-        width: 100%;
-        height: 100%;
-    }
+    /* Adversary role badges */
+    --badge-fill-solo: color-mix(in srgb, var(--dh-hp) 15%, transparent);
+    --badge-color-solo: var(--dh-hp);
+    --badge-fill-bruiser: color-mix(in srgb, var(--dh-stress) 15%, transparent);
+    --badge-color-bruiser: var(--dh-stress);
+    --badge-fill-horde: color-mix(in srgb, #eab308 15%, transparent);
+    --badge-color-horde: #eab308;
+    --badge-fill-leader: color-mix(in srgb, var(--dh-purple) 15%, transparent);
+    --badge-color-leader: var(--dh-purple);
+    --badge-fill-minion: color-mix(in srgb, var(--dh-neutral) 15%, transparent);
+    --badge-color-minion: var(--dh-neutral);
+    --badge-fill-ranged: color-mix(in srgb, var(--dh-positive) 15%, transparent);
+    --badge-color-ranged: var(--dh-positive);
+    --badge-fill-skulk: color-mix(in srgb, var(--dh-blue) 15%, transparent);
+    --badge-color-skulk: var(--dh-blue);
+    --badge-fill-social: color-mix(in srgb, var(--dh-pink) 15%, transparent);
+    --badge-color-social: var(--dh-pink);
+    --badge-fill-standard: color-mix(in srgb, #14b8a6 15%, transparent);
+    --badge-color-standard: #14b8a6;
+    --badge-fill-support: color-mix(in srgb, #06b6d4 15%, transparent);
+    --badge-color-support: #06b6d4;
 
-    #main-menu {
-        width: 100% !important;
+    /* Adversary stat badges */
+    --badge-fill-tier: color-mix(in srgb, var(--dh-purple) 15%, transparent);
+    --badge-color-tier: var(--dh-purple);
+    --badge-fill-difficulty: color-mix(in srgb, var(--dh-negative) 15%, transparent);
+    --badge-color-difficulty: var(--dh-negative);
+    --badge-fill-thresholds: color-mix(in srgb, var(--dh-purple) 15%, transparent);
+    --badge-color-thresholds: var(--dh-purple);
+    --badge-fill-hp: color-mix(in srgb, var(--dh-hp) 15%, transparent);
+    --badge-color-hp: var(--dh-hp);
+    --badge-fill-hope: color-mix(in srgb, var(--dh-hope) 15%, transparent);
+    --badge-color-hope: var(--dh-hope);
+    --badge-fill-stress: color-mix(in srgb, var(--dh-stress) 15%, transparent);
+    --badge-color-stress: var(--dh-stress);
+    --badge-fill-atk: color-mix(in srgb, var(--dh-stress) 15%, transparent);
+    --badge-color-atk: var(--dh-stress);
+    --badge-fill-attack: color-mix(in srgb, var(--dh-negative) 15%, transparent);
+    --badge-color-attack: var(--dh-negative);
+    --badge-fill-exp: color-mix(in srgb, var(--dh-blue) 15%, transparent);
+    --badge-color-exp: var(--dh-blue);
+    --badge-fill-evasion: color-mix(in srgb, var(--dh-positive) 15%, transparent);
+    --badge-color-evasion: var(--dh-positive);
+    --badge-fill-recall: color-mix(in srgb, var(--dh-positive) 15%, transparent);
+    --badge-color-recall: var(--dh-positive);
+    --badge-fill-armor: color-mix(in srgb, var(--dh-neutral) 15%, transparent);
+    --badge-color-armor: var(--dh-neutral);
 
-        & > div:first-child:is(.expander) {
-            display: none;
-        }
-    }
-
-    .navmenu {
-        width: 100%;
-    }
-
-    #navmenu-toggle {
-        appearance: none;
-
-        & ~ nav {
-            display: none;
-        }
-
-        &:checked ~ nav {
-            display: block;
-        }
-    }
-
-    .navmenu-icon {
-        cursor: pointer;
-        z-index: 10;
-        display: block;
-        position: absolute;
-        top: 15px;
-        inset-inline-end: 20px;
-        width: 20px;
-        height: 20px;
-        border: none;
-    }
+    /* Character Creator badges */
+    --badge-fill-class: color-mix(in srgb, var(--dh-purple) 20%, transparent);
+    --badge-color-class: var(--dh-purple);
+    --badge-fill-subclass: color-mix(in srgb, var(--dh-purple) 20%, transparent);
+    --badge-color-subclass: var(--dh-purple);
+    --badge-fill-ancestry: color-mix(in srgb, var(--dh-positive) 20%, transparent);
+    --badge-color-ancestry: var(--dh-positive);
+    --badge-fill-community: color-mix(in srgb, var(--dh-positive) 20%, transparent);
+    --badge-color-community: var(--dh-positive);
+    --badge-fill-name: color-mix(in srgb, var(--dh-hope) 20%, transparent);
+    --badge-color-name: var(--dh-hope);
 }
+
+/* FluentDataGrid — global grid-utseende */
+fluent-data-grid {
+    background: var(--neutral-layer-1);
+    border-radius: 8px;
+}
+
+fluent-data-grid-row {
+    background: var(--neutral-layer-1);
+}
+
+fluent-data-grid-row:hover {
+    background: var(--neutral-layer-3);
+}
+
+fluent-data-grid-cell {
+    padding: 6px 8px;
+}
+
+/* ===== Responsive Styles ===== */
+/* Responsiv layout hanteras av FluentMainLayout/FluentNavMenu (Collapsible) */

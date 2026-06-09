@@ -1,40 +1,47 @@
 @page "/dm-tools"
 @inject NavigationManager NavigationManager
 
-<div class="dashboard-container">
-    <div class="dashboard-header">
-        <div class="header-text">
-            <h2>DM Tools</h2>
-            <p>Resources and references for Game Masters</p>
-        </div>
-    </div>
+<PageHeader Title="DM Tools" Subtitle="Resources and references for Game Masters" />
 
-    <div class="tools-grid animate-fade">
-        <div class="tool-card" @onclick="GoToAdversaries">
-            <FluentIcon Value="@(new Icons.Filled.Size20.PersonLightning())" Color="Color.Accent" />
-            <h3>Adversary Browser</h3>
-            <p>Browse and search all adversaries from the SRD. Filter by type, tier, and difficulty.</p>
+<FluentGrid>
+    <FluentGridItem xs="12" sm="12" md="4" lg="4">
+        <div>
+            <FluentCard Class="tool-card" @onclick="GoToAdversaries">
+                <FluentIcon Value="@(new Icons.Filled.Size20.PersonLightning())" Color="Color.Accent"/>
+                <h3>Adversary Browser</h3>
+                <p>Browse and search all adversaries from the SRD. Filter by type, tier, and difficulty.</p>
+            </FluentCard>
         </div>
-
-        <div class="tool-card disabled">
-            <FluentIcon Value="@(new Icons.Filled.Size20.BookOpen())" Color="Color.Neutral" />
-            <h3>SRD Reference</h3>
-            <p>Browse abilities, items, ancestries, and more from the SRD.</p>
-            <span class="coming-soon">Coming soon</span>
+    </FluentGridItem>
+    <FluentGridItem xs="12" sm="12" md="4" lg="4">
+        <div>
+            <FluentCard Class="tool-card" @onclick="GoToReferenceCatalog">  
+                <FluentIcon Value="@(new Icons.Filled.Size20.BookOpen())" Color="Color.Accent"/>
+                <h3>Reference Catalog</h3>
+                <p>Browse abilities, items, ancestries, classes, armor, and weapons from the SRD.</p>
+            </FluentCard>
         </div>
-
-        <div class="tool-card disabled">
-            <FluentIcon Value="@(new Icons.Filled.Size20.Globe())" Color="Color.Neutral" />
-            <h3>Encounter Builder</h3>
-            <p>Build balanced encounters using adversary tier and difficulty ratings.</p>
-            <span class="coming-soon">Coming soon</span>
+    </FluentGridItem>
+    <FluentGridItem xs="12" sm="12" md="4" lg="4">
+        <div>
+            <FluentCard Class="tool-card disabled">
+                <FluentIcon Value="@(new Icons.Filled.Size20.Globe())" Color="Color.Neutral"/>
+                <h3>Encounter Builder</h3>
+                <p>Build balanced encounters using adversary tier and difficulty ratings.</p>
+                <span class="coming-soon">Coming soon</span>
+            </FluentCard>
         </div>
-    </div>
-</div>
+    </FluentGridItem>
+</FluentGrid>
 
 @code {
     private void GoToAdversaries()
     {
         NavigationManager.NavigateTo("/dm-tools/adversaries");
+    }
+
+    private void GoToReferenceCatalog()
+    {
+        NavigationManager.NavigateTo("/dm-tools/reference-catalog");
     }
 }

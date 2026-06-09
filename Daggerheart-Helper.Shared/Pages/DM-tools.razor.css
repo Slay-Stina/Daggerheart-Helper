@@ -1,38 +1,4 @@
-.dashboard-container {
-    padding: 30px;
-    background: radial-gradient(circle at top, var(--dh-bg-start) 0%, var(--dh-bg-end) 100%);
-    min-height: 90vh;
-    color: #f0f0f5;
-}
-
-.dashboard-header {
-    margin-bottom: 30px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding-bottom: 20px;
-}
-
-.header-text h2 {
-    font-size: 2.2rem;
-    margin: 0 0 5px 0;
-    background: linear-gradient(135deg, var(--dh-purple) 0%, var(--dh-pink) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.header-text p {
-    margin: 0;
-    color: var(--dh-neutral);
-    font-size: 0.95rem;
-}
-
-.tools-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-}
-
-.tool-card {
-    background: rgba(25, 25, 40, 0.55);
+::deep fluent-card.tool-card {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 14px;
@@ -40,30 +6,29 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     transition: all 0.25s ease;
     cursor: pointer;
-    display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
 }
 
-.tool-card:not(.disabled):hover {
+::deep fluent-card.tool-card:not(.disabled):hover {
     transform: translateY(-3px);
     border-color: color-mix(in srgb, var(--dh-purple) 25%, transparent);
     box-shadow: 0 12px 30px color-mix(in srgb, var(--dh-purple) 10%, transparent);
 }
 
-.tool-card.disabled {
+::deep fluent-card.tool-card.disabled {
     opacity: 0.45;
     cursor: default;
 }
 
-.tool-card h3 {
+::deep fluent-card.tool-card h3 {
     margin: 0;
     font-size: 1.2rem;
     color: #f9fafb;
 }
 
-.tool-card p {
+::deep fluent-card.tool-card p {
     margin: 0;
     font-size: 0.88rem;
     color: var(--dh-neutral);
@@ -82,11 +47,3 @@
     border-radius: 8px;
 }
 
-.animate-fade {
-    animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
-}

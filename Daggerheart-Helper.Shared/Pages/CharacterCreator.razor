@@ -11,9 +11,10 @@
 
 <PageTitle>Create Character</PageTitle>
 
+<PageHeader Title="Character Creator" Subtitle="Create your Daggerheart character" />
+
 <a @ref="_wizardTop"></a>
-<FluentCard Style="max-width: 960px; margin: 2rem auto; padding: 2rem;">
-    @if (!string.IsNullOrEmpty(_characterName) || _selectedClass != null || _selectedAncestry != null)
+@if (!string.IsNullOrEmpty(_characterName) || _selectedClass != null || _selectedAncestry != null)
     {
         <FluentStack Class="character-summary" Orientation="Orientation.Horizontal" Wrap="true" Gap="8px">
             @if (!string.IsNullOrEmpty(_characterName))
@@ -41,7 +42,7 @@
     <FluentWizard Value="@_currentStep" ValueChanged="@OnStepChange" OnFinish="SaveCharacter" StepperPosition="StepperPosition.Top" Width="100%" Height="auto" Border="WizardBorder.None" StepperBulletSpace="140px">
         <Steps>
 
-            <FluentWizardStep Label="Class" Summary="Pick a class and subclass" OnChange="@ValidateStep">
+        <FluentWizardStep Label="Class" Summary="Pick a class and subclass" OnChange="@ValidateStep">
                 <h3>Character Name</h3>
                 <FluentTextField @bind-Value="_characterName" Placeholder="Vaelen, Arcela, Gealovan .." Required="true" Style="width: 100%; margin-bottom: 1.5rem;" />
                 <FluentDivider />
@@ -308,7 +309,7 @@
                             @foreach (var bonus in _pool)
                             {
                                 <FluentDropZone TItem="BonusChip" Draggable="true" Droppable="false" Item="@bonus">
-                                    <div style="display: inline-block; padding: 8px 20px; background: color-mix(in srgb, var(--dh-purple) 15%, transparent); border: 1px solid color-mix(in srgb, var(--dh-purple) 40%, transparent); border-radius: 8px; cursor: grab; user-select: none; font-weight: 600; font-size: 1.05rem;">
+                                    <div style="display: inline-block; padding: 8px 20px; background: color-mix(in srgb, var(--dh-fear) 15%, transparent); border: 1px solid color-mix(in srgb, var(--dh-fear) 40%, transparent); border-radius: 8px; cursor: grab; user-select: none; font-weight: 600; font-size: 1.05rem;">
                                         @bonus.Label
                                     </div>
                                 </FluentDropZone>
@@ -784,7 +785,6 @@
             <span>@_errorMessage</span>
         </FluentMessageBar>
     }
-</FluentCard>
 
 @code {
     private int _currentStep;

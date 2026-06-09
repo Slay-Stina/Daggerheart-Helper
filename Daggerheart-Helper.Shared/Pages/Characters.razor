@@ -5,15 +5,11 @@
 
 <PageTitle>My Characters</PageTitle>
 
-<div class="dashboard-container">
-    <div class="dashboard-header">
-        <div class="header-text">
-            <h2>My Characters</h2>
-        </div>
-        <FluentButton Appearance="Appearance.Accent" IconStart="@(new Icons.Filled.Size20.PersonAdd())" @onClick="CreateNew">
-            Create new character
-        </FluentButton>
-    </div>
+<PageHeader Title="My Characters">
+    <FluentButton Appearance="Appearance.Accent" IconStart="@(new Icons.Filled.Size20.PersonAdd())" @onclick="CreateNew">
+        Create new character
+    </FluentButton>
+</PageHeader>
 
     @if (_loading)
     {
@@ -35,142 +31,42 @@
     }
     else
     {
-        <div class="character-grid animate-fade">
+        <FluentGrid Spacing="3" Class="animate-fade">
             @foreach (var ch in _characters)
             {
-                <div class="character-card" @onclick="@(() => NavigateTo(ch.Id))" @onclick:stopPropagation>
-                    <div class="card-accent"></div>
-                    <div class="card-header">
-                        <div class="char-title">
-                            <h3>@ch.Name</h3>
-                            <span class="char-class">Level @ch.Level @ch.GameClass.Name (@ch.Subclass.Name)</span>
-                        </div>
-                        <span @onclick:stopPropagation>
-                            <FluentButton
-                                Appearance="Appearance.Stealth" 
-                                IconStart="@(new Icons.Filled.Size20.Eye())" 
-                                OnClick="@(() => NavigationManager.NavigateTo($"/QuickView/{ch.Id}"))" 
-                                Title="Quick View"
-                                Style="color: var(--dh-neutral); margin-right: 4px;" />
-                        </span>
-                        <span @onclick:stopPropagation>
-                            <FluentButton
-                                Appearance="Appearance.Stealth" 
-                                IconStart="@(new Icons.Filled.Size20.Delete())" 
-                                OnClick="@(() => ConfirmDelete(ch.Id))" 
-                                Disabled="@_isDeleting"
-                                Title="Delete character"
-                                Style="color: var(--dh-negative);" />
-                        </span>
-                    </div>
+                <FluentGridItem xs="12" sm="6" lg="4" xl="3">
+                    <div>
+                        <FluentCard Class="character-card" @onclick="@(() => NavigateTo(ch.Id))"> 
+                            <CardHeader Title="@ch.Name" Subtitle="@($"Level {ch.Level} {ch.Subclass.Name} {ch.GameClass.Name} {ch.Community.Name} {ch.Ancestry.Name}")">
+                                <span @onclick:stopPropagation>
+                                    <FluentButton
+                                        Appearance="Appearance.Stealth" 
+                                        IconStart="@(new Icons.Filled.Size20.Delete())" 
+                                        OnClick="@(() => ConfirmDelete(ch.Id))" 
+                                        Disabled="@_isDeleting"
+                                        Title="Delete character"
+                                        Style="color: var(--dh-negative);" />
+                                </span>
+                            </CardHeader>
 
-                    <div class="card-body">
-                        <!-- Heritage -->
-                        <div class="meta-section">
-                            <span class="meta-label">Heritage:</span>
-                            <span class="meta-val">@ch.Ancestry.Name, @ch.Community.Name</span>
-                        </div>
-
-                        <!-- Stats Pools -->
-                        <div class="pools-grid">
-                            <div class="pool-badge hp">
-                                <span class="pool-name">Hitpoints</span>
-                                <span class="pool-val">@ch.HitPoints.Current / @ch.HitPoints.Max</span>
-                            </div>
-                            <div class="pool-badge stress">
-                                <span class="pool-name">Stress</span>
-                                <span class="pool-val">@ch.Stress.Current / @ch.Stress.Max</span>
-                            </div>
-                            <div class="pool-badge hope">
-                                <span class="pool-name">Hope</span>
-                                <span class="pool-val">@ch.Hope.Current / @ch.Hope.Max</span>
-                            </div>
-                            <div class="pool-badge armor-slots">
-                                <span class="pool-name">Armor</span>
-                                <span class="pool-val">@ch.ArmorSlots.Current / @ch.ArmorSlots.Max</span>
-                            </div>
-                        </div>
-
-                        <!-- Calculated Stats -->
-                        <div class="combat-stats">
-                            <div class="combat-stat">
-                                <strong>@ch.Evasion</strong>
-                                <span>Evasion</span>
-                            </div>
-                            <div class="combat-stat">
-                                <strong>@(ch.EquippedArmor?.ArmorScore ?? 0)</strong>
-                                <span>Armor Score</span>
-                            </div>
-                            <div class="combat-stat thresholds">
-                                <strong>@ch.DamageThresholds.Major / @ch.DamageThresholds.Severe</strong>
-                                <span>Damage Thresholds (Major/Severe)</span>
-                            </div>
-                        </div>
-
-                        <!-- Traits -->
-                        <div class="traits-summary">
-                            <div class="trait-chip">AGILITY <span>@FormatVal(ch.Traits.Agility)</span></div>
-                            <div class="trait-chip">STRENGTH <span>@FormatVal(ch.Traits.Strength)</span></div>
-                            <div class="trait-chip">FINESSE <span>@FormatVal(ch.Traits.Finesse)</span></div>
-                            <div class="trait-chip">INSTINCT <span>@FormatVal(ch.Traits.Instinct)</span></div>
-                            <div class="trait-chip">PRESENCE <span>@FormatVal(ch.Traits.Presence)</span></div>
-                            <div class="trait-chip">KNOWLEDGE <span>@FormatVal(ch.Traits.Knowledge)</span></div>
-                        </div>
-
-                        <!-- Equipment -->
-                        <div class="gear-section">
-                            <strong>Equipment:</strong>
-                            <div class="gear-item">
-                                <FluentIcon Value="@(new Icons.Filled.Size16.Shield())" Color="Color.Accent" />
-                                <span>Armor: @(ch.EquippedArmor?.Name ?? "No armor")</span>
-                            </div>
-                            <div class="gear-item">
-                                <FluentIcon Value="@(new Icons.Filled.Size16.Flash())" Color="Color.Accent" />
-                                <span>Primary: @(ch.PrimaryWeapon?.Name ?? "No weapon") (@FormatWeaponDamage(ch.PrimaryWeapon))</span>
-                            </div>
-                            @if (ch.SecondaryWeapon != null)
-                            {
-                                <div class="gear-item">
-                                    <FluentIcon Value="@(new Icons.Filled.Size16.Flash())" Color="Color.Accent" />
-                                    <span>Secondary: @ch.SecondaryWeapon.Name (@FormatWeaponDamage(ch.SecondaryWeapon))</span>
-                                </div>
-                            }
-                        </div>
-
-                        <!-- Experiences -->
-                        @if (ch.Experiences.Count > 0)
-                        {
-                            <div class="exp-section">
-                                <strong>Experiences:</strong>
-                                <div class="exp-list">
-                                    @foreach (var exp in ch.Experiences)
-                                    {
-                                        <span class="exp-chip">@exp (+2)</span>
-                                    }
-                                </div>
-                            </div>
-                        }
-
-                        <!-- Background -->
-                        @if (ch.BackgroundAnswers.Any(a => !string.IsNullOrWhiteSpace(a)))
-                        {
-                            <div class="bg-section">
-                                <strong>Background:</strong>
-                                @for (int i = 0; i < ch.BackgroundAnswers.Count; i++)
+                        <div class="card-body">
+                            <div class="quick-stats">
+                                <FluentBadge Fill="hp">@ch.HitPoints.Current/@ch.HitPoints.Max HP</FluentBadge>
+                                <FluentBadge Fill="stress">@ch.Stress.Current/@ch.Stress.Max Stress</FluentBadge>
+                                <FluentBadge Fill="hope">@ch.Hope.Current/@ch.Hope.Max Hope</FluentBadge>
+                                <FluentBadge Fill="evasion">Evasion @ch.Evasion</FluentBadge>
+                                @if (ch.EquippedArmor != null) 
                                 {
-                                    if (!string.IsNullOrWhiteSpace(ch.BackgroundAnswers[i]))
-                                    {
-                                        <p class="bg-answer">@ch.BackgroundAnswers[i]</p>
-                                    }
+                                    <FluentBadge Fill="armor">Armor @ch.EquippedArmor.ArmorScore</FluentBadge>
                                 }
                             </div>
-                        }
+                        </div>
+                    </FluentCard>
                     </div>
-                </div>
+                </FluentGridItem>
             }
-        </div>
+        </FluentGrid>
     }
-</div>
 
 @code {
     private List<Character> _characters = new();
@@ -238,14 +134,4 @@
         NavigationManager.NavigateTo($"/character/{id}");
     }
 
-    private string FormatVal(int val)
-    {
-        return val >= 0 ? $"+{val}" : val.ToString();
-    }
-
-    private string FormatWeaponDamage(Weapon? wp)
-    {
-        if (wp == null) return "0";
-        return $"{wp.Damage.NumberOfDice}d{wp.Damage.NumberOfSides}{(wp.Damage.Bonus > 0 ? "+" + wp.Damage.Bonus : "")} {wp.Damage.Type}";
-    }
 }

@@ -1,23 +1,24 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="background-container">
-    <FluentMainLayout NavMenuTitle="Navigation menu">
-        <Header><h3>Daggerheart Helper</h3></Header>
-        <NavMenuContent>
-            <FluentNavLink Href="/" IconStart="@(new Icons.Filled.Size20.Home())">Home</FluentNavLink>
-            <FluentNavLink Href="/CharacterCreator" IconStart="@(new Icons.Filled.Size20.PersonAdd())">Character Creator</FluentNavLink>
-            <FluentNavLink Href="/Characters" IconStart="@(new Icons.Filled.Size20.PeopleCommunity())">My Characters</FluentNavLink>
-            <FluentNavLink Href="/dm-tools" IconStart="@(new Icons.Filled.Size20.PersonLightning())">DM Tools</FluentNavLink>
-        </NavMenuContent>
-        <Body>
+<FluentMainLayout NavMenuTitle="Navigation menu">
+    <Header><h3>Daggerheart Helper</h3></Header>
+    <NavMenuContent>
+        <FluentNavLink Href="/" IconStart="@(new Icons.Filled.Size20.Home())">Home</FluentNavLink>
+        <FluentNavLink Href="/CharacterCreator" IconStart="@(new Icons.Filled.Size20.PersonAdd())">Character Creator</FluentNavLink>
+        <FluentNavLink Href="/Characters" IconStart="@(new Icons.Filled.Size20.PeopleCommunity())">My Characters</FluentNavLink>
+        <FluentNavLink Href="/dm-tools" IconStart="@(new Icons.Filled.Size20.PersonLightning())">DM Tools</FluentNavLink>
+    </NavMenuContent>
+    <Body>
+        <div class="dashboard-container">
             @Body
-            <FluentToastProvider />
-            <FluentDialogProvider />
-            <FluentTooltipProvider />
-            <FluentMessageBarProvider />
-        </Body>
-    </FluentMainLayout>
-</div>
+        </div>
+        <FluentToastProvider />
+        <FluentDialogProvider />
+        <FluentTooltipProvider />
+        <FluentMessageBarProvider />
+        <FluentMenuProvider />
+    </Body>
+</FluentMainLayout>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
