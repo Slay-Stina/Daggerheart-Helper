@@ -7,6 +7,7 @@
 @inject IWeaponCatalogQueries WeaponQueries
 @inject NavigationManager NavigationManager
 
+<FluentStack Orientation="Orientation.Vertical">
 <PageHeader Title="Reference Catalog" Subtitle="Browse all SRD reference data">
     <BackButton>
         <FluentButton Appearance="Appearance.Stealth"
@@ -268,7 +269,7 @@
                         {
                             <div class="feature-block">
                                 <strong>@_selectedWeapon.Feature.Name</strong>
-                                <p>@_selectedWeapon.Feature.Description</p>
+                                <p>@_selectedWeapon.Feature.Description</p> 
                             </div>
                         }
                     </FluentCard>
@@ -276,7 +277,7 @@
             }
         </div>
     }
-
+</FluentStack>
 @code {
     private bool _loading = true;
     private string _activeTabId = "abilities";

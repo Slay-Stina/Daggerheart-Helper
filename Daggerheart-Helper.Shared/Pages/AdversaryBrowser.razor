@@ -3,7 +3,7 @@
 @inject NavigationManager NavigationManager
 
 <PageTitle>Adversary Browser — DM Tools</PageTitle>
-
+<FluentStack Orientation="Orientation.Vertical">
 <PageHeader Title="Adversary Browser" Subtitle="Browse and search Daggerheart adversaries from the SRD">
     <BackButton>
         <FluentButton Appearance="Appearance.Stealth"
@@ -129,7 +129,7 @@
         </FluentCard>
     </div>
 }
-
+</FluentStack>
 @code {
     private record FilterOption(string Value, string Text);
 

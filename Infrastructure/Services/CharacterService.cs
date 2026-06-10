@@ -70,7 +70,9 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
                 .FirstOrDefaultAsync(c => c.Id == character.Id, cancellationToken)
                 ?? throw new KeyNotFoundException($"Character '{character.Id}' was not found.");
 
+            var currentRowVersion = existing.RowVersion;
             context.Entry(existing).CurrentValues.SetValues(character);
+            existing.RowVersion = currentRowVersion;
 
             existing.Traits = character.Traits;
             existing.DamageThresholds = character.DamageThresholds;

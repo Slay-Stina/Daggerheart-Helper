@@ -133,6 +133,7 @@ code {
     justify-content: space-between;
     align-items: center;
     gap: 8px;
+    width: inherit;
 }
 
 .page-title {
@@ -157,6 +158,8 @@ code {
     color: #f0f0f5;
     max-width: 1200px;
     margin: 0 auto;
+    display: flex;
+    justify-content: center;
 }
 
 /* Page */

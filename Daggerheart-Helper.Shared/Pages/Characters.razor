@@ -4,7 +4,7 @@
 @inject NavigationManager NavigationManager
 
 <PageTitle>My Characters</PageTitle>
-
+<FluentStack Orientation="Orientation.Vertical" HorizontalAlignment="HorizontalAlignment.Stretch">
 <PageHeader Title="My Characters">
     <FluentButton Appearance="Appearance.Accent" IconStart="@(new Icons.Filled.Size20.PersonAdd())" @onclick="CreateNew">
         Create new character
@@ -31,7 +31,7 @@
     }
     else
     {
-        <FluentGrid Spacing="3" Class="animate-fade">
+        <FluentGrid Spacing="3">
             @foreach (var ch in _characters)
             {
                 <FluentGridItem xs="12" sm="6" lg="4" xl="3">
@@ -67,7 +67,7 @@
             }
         </FluentGrid>
     }
-
+</FluentStack>
 @code {
     private List<Character> _characters = new();
     private bool _loading = true;

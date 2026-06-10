@@ -1,6 +1,7 @@
 @page "/dm-tools"
 @inject NavigationManager NavigationManager
 
+<FluentStack Orientation="Orientation.Vertical">
 <PageHeader Title="DM Tools" Subtitle="Resources and references for Game Masters" />
 
 <FluentGrid>
@@ -33,6 +34,7 @@
         </div>
     </FluentGridItem>
 </FluentGrid>
+</FluentStack>
 
 @code {
     private void GoToAdversaries()

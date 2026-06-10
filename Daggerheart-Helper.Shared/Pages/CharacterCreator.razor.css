@@ -39,7 +39,7 @@
 .selected-class-title {
     margin: 4px 0 8px 0;
     font-size: 1.3rem;
-    color: var(--dh-fear);
+    color: var(--dh-purple);
 }
 
 /* Accordion nested inside accordion content override */
