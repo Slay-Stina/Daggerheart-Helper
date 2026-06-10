@@ -37,7 +37,7 @@ public class Character
     public int Proficiency => 1 + (Level >= 2 ? 1 : 0) + (Level >= 5 ? 1 : 0) + (Level >= 8 ? 1 : 0) + ProficiencyBonus;
 
     public List<string> Experiences { get; set; } = new();
-    public List<string> BackgroundAnswers { get; set; } = new();
+    public Dictionary<string, string> BackgroundAnswers { get; set; } = new();
     public List<Item> Inventory { get; set; } = new();
     public int GoldHandfuls { get; set; } = 1;
     public string? SpellFocus { get; set; }
