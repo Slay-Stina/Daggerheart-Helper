@@ -40,7 +40,7 @@ public static class MappingExtensions
             CharacterAbilities = summary.CharacterAbilities.Select(a => new CharacterAbility
             {
                 AbilityId = a.Id,
-                IsVaulted = false,
+                IsVaulted = a.IsVaulted,
             }).ToList(),
         };
     }

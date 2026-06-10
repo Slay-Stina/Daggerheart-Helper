@@ -36,11 +36,21 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
             .Include(c => c.GameClass)
             .ThenInclude(c => c.ClassFeatures)
             .Include(c => c.Subclass)
+            .ThenInclude(sc => sc.Foundation)
+            .Include(c => c.Subclass)
+            .ThenInclude(sc => sc.Specialization)
+            .Include(c => c.Subclass)
+            .ThenInclude(sc => sc.Mastery)
             .Include(c => c.Ancestry)
+            .ThenInclude(h => h.Features)
             .Include(c => c.Community)
+            .ThenInclude(h => h.Features)
             .Include(c => c.EquippedArmor)
+            .ThenInclude(a => a.Feature)
             .Include(c => c.PrimaryWeapon)
+            .ThenInclude(w => w.Feature)
             .Include(c => c.SecondaryWeapon)
+            .ThenInclude(w => w.Feature)
             .Include(c => c.CharacterAbilities)
             .ThenInclude(ca => ca.Ability)
             .Include(c => c.Inventory)
@@ -52,40 +62,27 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
     {
         await using var context = await factory.CreateDbContextAsync(cancellationToken);
 
-        var isNew = summary.Id == Guid.Empty;
-        if (isNew)
-        {
-            context.Characters.Add(summary.ToNewCharacter() ?? throw new InvalidOperationException());
-        }
-        else
-        {
-            var existing = await context.Characters
-                .Include(c => c.CharacterAbilities)
-                .Include(c => c.Inventory)
-                .FirstOrDefaultAsync(c => c.Id == summary.Id, cancellationToken)
-                ?? throw new KeyNotFoundException($"Character '{summary.Id}' was not found.");
+        var existingItemIds = await context.Items
+            .Where(i => summary.Inventory.Select(x => x.Id).Contains(i.Id))
+            .Select(i => i.Id)
+            .ToHashSetAsync(cancellationToken);
 
-            existing.Name = summary.Name;
-            existing.Pronouns = summary.Pronouns;
-            existing.DescriptionEyes = summary.DescriptionEyes;
-            existing.DescriptionBody = summary.DescriptionBody;
-            existing.DescriptionClothes = summary.DescriptionClothes;
-            existing.DescriptionSkin = summary.DescriptionSkin;
-            existing.DescriptionAttitude = summary.DescriptionAttitude;
-            existing.Traits = summary.Traits;
-            existing.DamageThresholds = summary.DamageThresholds;
-            existing.HitPoints = summary.HitPoints;
-            existing.Stress = summary.Stress;
-            existing.Hope = summary.Hope;
-            existing.ArmorSlots = summary.ArmorSlots;
-            existing.EquippedArmorId = summary.EquippedArmor?.Id;
-            existing.PrimaryWeaponId = summary.PrimaryWeapon?.Id;
-            existing.SecondaryWeaponId = summary.SecondaryWeapon?.Id;
-            existing.Experiences = summary.Experiences.ToList();
-            existing.GoldHandfuls = summary.GoldHandfuls;
-            existing.SpellFocus = summary.SpellFocus;
-            existing.BackgroundAnswers = summary.BackgroundAnswers;
+        if (await context.Characters.AnyAsync(c => c.Id == summary.Id, cancellationToken))
+        {
+            await context.Database.ExecuteSqlRawAsync(
+                "DELETE FROM CharacterAbilities WHERE CharacterId = @p0", [summary.Id], cancellationToken);
+            await context.Database.ExecuteSqlRawAsync(
+                "DELETE FROM CharacterItems WHERE CharacterId = @p0", [summary.Id], cancellationToken);
+            await context.Database.ExecuteSqlRawAsync(
+                "DELETE FROM Characters WHERE Id = @p0", [summary.Id], cancellationToken);
         }
+
+        var entity = summary.ToNewCharacter();
+        entity.Id = summary.Id == Guid.Empty ? entity.Id : summary.Id;
+        foreach (var item in entity.Inventory)
+            if (existingItemIds.Contains(item.Id))
+                context.Entry(item).State = EntityState.Unchanged;
+        context.Characters.Add(entity);
 
         await context.SaveChangesAsync(cancellationToken);
     }
@@ -113,7 +110,8 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
         foreach (var ca in abilities)
         {
             ca.CharacterId = characterId;
-            context.Entry(ca.Ability).State = EntityState.Unchanged;
+            if (ca.Ability != null)
+                context.Entry(ca.Ability).State = EntityState.Unchanged;
             context.CharacterAbilities.Add(ca);
         }
 

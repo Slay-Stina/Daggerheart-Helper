@@ -66,8 +66,8 @@ public class DaggerheartDbContext(DbContextOptions<DaggerheartDbContext> options
                 .HasConversion<JsonStringListConverter>()
                 .Metadata.SetValueComparer(GetListValueComparer());
             entity.Property(x => x.BackgroundAnswers)
-                .HasConversion<JsonStringListConverter>()
-                .Metadata.SetValueComparer(GetListValueComparer());
+                .HasConversion<JsonStringDictionaryConverter>()
+                .Metadata.SetValueComparer(GetDictionaryValueComparer());
             entity.HasMany(x => x.Inventory)
                 .WithMany()
                 .UsingEntity<Dictionary<string, object>>(
@@ -405,4 +405,16 @@ public class DaggerheartDbContext(DbContextOptions<DaggerheartDbContext> options
     private class JsonStringListConverter() : ValueConverter<List<string>, string>(
         v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
         v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null!) ?? new List<string>());
+
+    private class JsonStringDictionaryConverter() : ValueConverter<Dictionary<string, string>, string>(
+        v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null!),
+        v => JsonSerializer.Deserialize<Dictionary<string, string>>(v, (JsonSerializerOptions)null!) ?? new Dictionary<string, string>());
+
+    private static ValueComparer<Dictionary<string, string>> GetDictionaryValueComparer()
+    {
+        return new ValueComparer<Dictionary<string, string>>(
+            (a, b) => (a ?? new()).SequenceEqual(b ?? new()),
+            c => c.Aggregate(0, (h, v) => HashCode.Combine(h, v.Key.GetHashCode(), v.Value.GetHashCode())),
+            c => c.ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
+    }
 }
