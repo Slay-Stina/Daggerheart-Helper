@@ -11,4 +11,5 @@ public sealed record WeaponSummary(
     Burden Burden,
     RangeType RangeType,
     TraitType Trait,
-    WeaponPriority Category);
+    WeaponPriority Category,
+    FeatureSummary? Feature = null);

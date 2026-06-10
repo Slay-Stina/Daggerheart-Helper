@@ -22,6 +22,6 @@ public sealed class AbilityCatalogQueries(DaggerheartDbContext context) : IAbili
             .AsNoTracking()
             .Where(a => a.DomainType == domain && a.Level == level)
             .Select(a => new AbilitySummary(
-                a.Id, a.Title, a.DomainType, a.Level, a.RecallCost, a.Type, a.FeatureDescription))
+                a.Id, a.Title, a.DomainType, a.Level, a.RecallCost, a.Type, a.FeatureDescription, false))
             .ToListAsync();
 }

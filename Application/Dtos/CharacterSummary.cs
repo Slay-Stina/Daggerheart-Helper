@@ -1,0 +1,38 @@
+using Core.ValueObjects;
+
+namespace Application.Dtos;
+
+public sealed record CharacterSummary(
+    Guid Id,
+    int Level,
+    string Name,
+    string? Pronouns,
+    string? DescriptionEyes,
+    string? DescriptionBody,
+    string? DescriptionClothes,
+    string? DescriptionSkin,
+    string? DescriptionAttitude,
+    ClassCardSummary Class,
+    SubclassSummary Subclass,
+    ClassCardSummary? Multiclass,
+    SubclassSummary? MulticlassSubclass,
+    HeritageSummary Ancestry,
+    HeritageSummary Community,
+    TraitScores Traits,
+    DamageThresholds DamageThresholds,
+    int Evasion,
+    int Proficiency,
+    IEnumerable<string> Experiences,
+    Dictionary<string, string> BackgroundAnswers,
+    IEnumerable<ItemSummary> Inventory,
+    int GoldHandfuls,
+    string? SpellFocus,
+    ArmorSummary? EquippedArmor,
+    WeaponSummary? PrimaryWeapon,
+    WeaponSummary? SecondaryWeapon,
+    IEnumerable<AbilitySummary> CharacterAbilities,
+    ResourcePool HitPoints,
+    ResourcePool Stress,
+    ResourcePool Hope,
+    ResourcePool ArmorSlots,
+    byte[] RowVersion);

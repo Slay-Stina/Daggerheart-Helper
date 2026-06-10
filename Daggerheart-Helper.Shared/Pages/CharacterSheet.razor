@@ -39,7 +39,7 @@
                     <span class="header-subtitle">
                         @_character.Ancestry.Name
                         @_character.Subclass.Name
-                        @_character.GameClass.Name
+                        @_character.Class.Name
                         — Level @_character.Level
                     </span>
                 </div>
@@ -187,8 +187,8 @@
                             <FluentGridItem xs="8">
 
                                 <FluentCard class="pool">
-                                    <div class="text-hope">@_character.GameClass.HopeFeature.Name</div>
-                                    <div class="text-neutral">@_character.GameClass.HopeFeature.Description.ToMarkdownHtml()</div>
+                                    <div class="text-hope">@_character.Class.HopeFeature.Name</div>
+                                    <div class="text-neutral">@_character.Class.HopeFeature.Description.ToMarkdownHtml()</div>
                                 </FluentCard>
                                 
                             </FluentGridItem>
@@ -269,7 +269,7 @@
                             }
                             else
                             {
-                                @if (_character.Experiences.Count > 0)
+                                @if (_character.Experiences.Any())
                                 {
                                     <FluentStack Wrap="true">
                                         @foreach (var exp in _character.Experiences)
@@ -288,7 +288,7 @@
                     <FluentGridItem xs="12" sm="12">
                         <FluentCard>
                             <div class="section-title">Class Features</div>
-                            @foreach (var cf in _character.GameClass.ClassFeatures)
+                            @foreach (var cf in _character.Class.ClassFeatures!)
                             {
                                 <div class="ability-card">
                                     <div class="ability-header">
@@ -378,7 +378,7 @@
                                     </div>
                                     <div class="inventory-section"> 
                                         <div class="text-accent">Items</div>
-                                        @if (_character.Inventory.Count > 0)
+                                        @if (_character.Inventory.Any())
                                         {
                                             <FluentStack Orientation="Orientation.Vertical">
                                                 @foreach (var item in _character.Inventory)
@@ -500,11 +500,11 @@
                                 {
                                     <div class="ability-card">
                                         <div class="ability-header">
-                                            <span class="ability-name">@ca.Ability.Title</span>
-                                            <FluentBadge Appearance="Appearance.Neutral">@ca.Ability.Type · Recall @ca.Ability.RecallCost</FluentBadge>
+                                            <span class="ability-name">@ca.Title</span>
+                                            <FluentBadge Appearance="Appearance.Neutral">@ca.Type · Recall @ca.RecallCost</FluentBadge>
                                         </div>
                                         <div class="ability-desc">
-                                            @ca.Ability.FeatureDescription.ToMarkdownHtml()
+                                            @ca.FeatureDescription.ToMarkdownHtml()
                                         </div>
                                     </div>
                                 }
@@ -519,15 +519,13 @@
             </FluentGridItem>
  
             @* Background Questions *@
-            @if (_character.BackgroundAnswers.Any(a => !string.IsNullOrWhiteSpace(a)))
+            @if (_character.BackgroundAnswers.Any(a => !string.IsNullOrWhiteSpace(a.Key) || !string.IsNullOrWhiteSpace(a.Value)))
             {
                 <FluentCard class="section-card full-width">
                     <div class="section-title">Background</div>
                     <div class="bg-list">
-                        @for (int i = 0; i < _character.BackgroundAnswers.Count; i += 2)
+                        @foreach (var (question, answer) in _character.BackgroundAnswers)
                         {
-                            var question = _character.BackgroundAnswers[i];
-                            var answer = i + 1 < _character.BackgroundAnswers.Count ? _character.BackgroundAnswers[i + 1] : null;
                             if (!string.IsNullOrWhiteSpace(question))
                             {
                                 <div class="bg-item">
@@ -569,7 +567,7 @@
 @code {
     [Parameter] public Guid Id { get; set; }
 
-    private Character? _character;
+    private CharacterSummary? _character;
     private bool _loading = true;
     private bool _isEditing;
     private string _errorMessage = string.Empty;
@@ -643,16 +641,16 @@
             })
             .ToList();
         _editExperiences = _character.Experiences.ToList();
-        _editEquippedArmorId = _character.EquippedArmorId;
-        _editPrimaryWeaponId = _character.PrimaryWeaponId;
-        _editSecondaryWeaponId = _character.SecondaryWeaponId;
+        _editEquippedArmorId = _character.EquippedArmor?.Id;
+        _editPrimaryWeaponId = _character.PrimaryWeapon?.Id;
+        _editSecondaryWeaponId = _character.SecondaryWeapon?.Id;
         _editActiveAbilities = _character.CharacterAbilities
             .Where(ca => !ca.IsVaulted)
-            .Select(ca => new CharacterAbility { AbilityId = ca.AbilityId, IsVaulted = false, Ability = ca.Ability })
+            .Select(ca => new CharacterAbility { AbilityId = ca.Id, IsVaulted = false, Ability = new Ability { Id = ca.Id, Title = ca.Title, DomainType = ca.DomainType, Level = ca.Level, RecallCost = ca.RecallCost, Type = ca.Type, FeatureDescription = ca.FeatureDescription } })
             .ToList();
         _editVaultAbilities = _character.CharacterAbilities
             .Where(ca => ca.IsVaulted)
-            .Select(ca => new CharacterAbility { AbilityId = ca.AbilityId, IsVaulted = true, Ability = ca.Ability })
+            .Select(ca => new CharacterAbility { AbilityId = ca.Id, IsVaulted = true, Ability = new Ability { Id = ca.Id, Title = ca.Title, DomainType = ca.DomainType, Level = ca.Level, RecallCost = ca.RecallCost, Type = ca.Type, FeatureDescription = ca.FeatureDescription } })
             .ToList();
 
         await Task.WhenAll(LoadEquipmentCatalogAsync(), LoadDomainAbilitiesAsync());
@@ -670,24 +668,31 @@
     {
         try
         {
-            _character!.HitPoints = new ResourcePool(_editHpCurrent, _editHpMax);
-            _character.Stress = new ResourcePool(_editStressCurrent, _editStressMax);
-            _character.Hope = new ResourcePool(_editHopeCurrent, _editHopeMax);
-            _character.ArmorSlots = new ResourcePool(_editArmorCurrent, _editArmorMax);
-            _character.GoldHandfuls = _editGold;
-            _character.Inventory = _editInventory
-                .Where(e => string.IsNullOrWhiteSpace(e.SlotType))
-                .Select(e => new Item { Id = Guid.NewGuid(), Name = e.Name, Description = "" })
-                .ToList();
-            _character.Experiences = _editExperiences;
-            _character.EquippedArmorId = _editEquippedArmorId;
-            _character.PrimaryWeaponId = _editPrimaryWeaponId;
-            _character.SecondaryWeaponId = _editSecondaryWeaponId;
-            _character.CharacterAbilities = _editActiveAbilities
-                .Concat(_editVaultAbilities)
+            var abilities = _editActiveAbilities
+                .Select(a => new AbilitySummary(a.AbilityId, a.Ability!.Title, a.Ability.DomainType, a.Ability.Level, a.Ability.RecallCost, a.Ability.Type, a.Ability.FeatureDescription, false))
+                .Concat(_editVaultAbilities
+                    .Select(a => new AbilitySummary(a.AbilityId, a.Ability!.Title, a.Ability.DomainType, a.Ability.Level, a.Ability.RecallCost, a.Ability.Type, a.Ability.FeatureDescription, true)))
                 .ToList();
 
-            await CharacterService.SaveAsync(_character);
+            var updated = new CharacterSummary(
+                _character!.Id, _character.Level, _character.Name,
+                _character.Pronouns, _character.DescriptionEyes, _character.DescriptionBody,
+                _character.DescriptionClothes, _character.DescriptionSkin, _character.DescriptionAttitude,
+                _character.Class, _character.Subclass, _character.Multiclass, _character.MulticlassSubclass,
+                _character.Ancestry, _character.Community,
+                _character.Traits, _character.DamageThresholds, _character.Evasion, _character.Proficiency,
+                _character.Experiences, _character.BackgroundAnswers,
+                _character.Inventory,
+                _editGold, _character.SpellFocus,
+                _character.EquippedArmor, _character.PrimaryWeapon, _character.SecondaryWeapon,
+                abilities,
+                new ResourcePool(_editHpCurrent, _editHpMax),
+                new ResourcePool(_editStressCurrent, _editStressMax),
+                new ResourcePool(_editHopeCurrent, _editHopeMax),
+                new ResourcePool(_editArmorCurrent, _editArmorMax),
+                _character.RowVersion);
+
+            await CharacterService.SaveAsync(updated);
             await LoadCharacter();
             _isEditing = false;
             _errorMessage = string.Empty;
@@ -743,8 +748,16 @@
     private async Task LevelUp()
     {
         if (_character!.Level >= 10) return;
-        _character.Level++;
-        _domainAbilities = await CharacterService.GetAvailableAbilitiesAsync(_character.Id);
+        var c = _character;
+        _character = new CharacterSummary(
+            c.Id, c.Level + 1, c.Name, c.Pronouns,
+            c.DescriptionEyes, c.DescriptionBody, c.DescriptionClothes, c.DescriptionSkin, c.DescriptionAttitude,
+            c.Class, c.Subclass, c.Multiclass, c.MulticlassSubclass,
+            c.Ancestry, c.Community, c.Traits, c.DamageThresholds, c.Evasion, c.Proficiency,
+            c.Experiences, c.BackgroundAnswers, c.Inventory, c.GoldHandfuls, c.SpellFocus,
+            c.EquippedArmor, c.PrimaryWeapon, c.SecondaryWeapon, c.CharacterAbilities,
+            c.HitPoints, c.Stress, c.Hope, c.ArmorSlots, c.RowVersion);
+        _domainAbilities = await CharacterService.GetAvailableAbilitiesAsync(c.Id);
     }
 
     private void CancelEdit()
@@ -773,13 +786,13 @@
         return val > 0 ? "text-positive" : val < 0 ? "text-negative" : "text-neutral";
     }
 
-    private string FormatWeaponDamage(Weapon? wp)
+    private string FormatWeaponDamage(WeaponSummary? wp)
     {
         if (wp == null) return "";
         return $"{wp.Damage.NumberOfDice}d{wp.Damage.NumberOfSides}{(wp.Damage.Bonus > 0 ? "+" + wp.Damage.Bonus : "")} {wp.Damage.Type}";
     }
     
-    private string FormatArmorThresholds(Armor? armor)
+    private string FormatArmorThresholds(ArmorSummary? armor)
     {
         if (armor == null) return "";
         return $"{armor.DamageThresholds.Major} / {armor.DamageThresholds.Severe}";

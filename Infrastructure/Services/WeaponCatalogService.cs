@@ -35,6 +35,7 @@ public sealed class WeaponCatalogQueries(DaggerheartDbContext context) : IWeapon
                 w.Burden,
                 w.RangeType,
                 w.Trait,
-                w.Category))
+                w.Category,
+                w.Feature != null ? new FeatureSummary(w.Feature.Id, w.Feature.Name, w.Feature.Description) : null))
             .ToListAsync();
 }

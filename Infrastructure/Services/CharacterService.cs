@@ -9,10 +9,10 @@ namespace Infrastructure.Services;
 
 public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> factory) : ICharacterService
 {
-    public async Task<List<Character>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<List<CharacterSummary>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         await using var context = await factory.CreateDbContextAsync(cancellationToken);
-        return await context.Characters
+        var characters = await context.Characters
             .AsNoTracking()
             .Include(c => c.GameClass)
             .Include(c => c.Subclass)
@@ -23,12 +23,13 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
             .Include(c => c.SecondaryWeapon)
             .Include(c => c.Inventory)
             .ToListAsync(cancellationToken);
+        return characters.Select(MapToSummary).ToList();
     }
 
-    public async Task<Character?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<CharacterSummary?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         await using var context = await factory.CreateDbContextAsync(cancellationToken);
-        return await context.Characters
+        var character = await context.Characters
             .AsNoTracking()
             .Include(c => c.GameClass)
             .ThenInclude(c => c.HopeFeature)
@@ -44,53 +45,82 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
             .ThenInclude(ca => ca.Ability)
             .Include(c => c.Inventory)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        return character is null ? null : MapToSummary(character);
     }
 
-    public async Task SaveAsync(Character character, CancellationToken cancellationToken = default)
+    public async Task SaveAsync(CharacterSummary summary, CancellationToken cancellationToken = default)
     {
         await using var context = await factory.CreateDbContextAsync(cancellationToken);
-        var existingItemIds = await LoadExistingInventoryItemIdsAsync(character.Inventory, context, cancellationToken);
 
-        var isNew = character.Id == Guid.Empty;
+        var isNew = summary.Id == Guid.Empty;
         if (isNew)
         {
-            character.Id = Guid.NewGuid();
+            var character = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = summary.Name,
+                Pronouns = summary.Pronouns,
+                DescriptionEyes = summary.DescriptionEyes,
+                DescriptionBody = summary.DescriptionBody,
+                DescriptionClothes = summary.DescriptionClothes,
+                DescriptionSkin = summary.DescriptionSkin,
+                DescriptionAttitude = summary.DescriptionAttitude,
+                Level = summary.Level,
+                GameClassId = summary.Class.Id,
+                SubclassId = summary.Subclass.Id,
+                AncestryId = summary.Ancestry.Id,
+                CommunityId = summary.Community.Id,
+                EquippedArmorId = summary.EquippedArmor?.Id,
+                PrimaryWeaponId = summary.PrimaryWeapon?.Id,
+                SecondaryWeaponId = summary.SecondaryWeapon?.Id,
+                Traits = summary.Traits,
+                DamageThresholds = summary.DamageThresholds,
+                Evasion = summary.Evasion,
+                Experiences = summary.Experiences.ToList(),
+                BackgroundAnswers = summary.BackgroundAnswers.SelectMany(kvp => new[] { kvp.Key, kvp.Value }).ToList(),
+                GoldHandfuls = summary.GoldHandfuls,
+                SpellFocus = summary.SpellFocus,
+                HitPoints = summary.HitPoints,
+                Stress = summary.Stress,
+                Hope = summary.Hope,
+                ArmorSlots = summary.ArmorSlots,
+                Inventory = summary.Inventory.Select(i => new Item { Id = i.Id, Name = i.Name, Description = "" }).ToList(),
+                CharacterAbilities = summary.CharacterAbilities.Select(a => new CharacterAbility
+                {
+                    AbilityId = a.Id,
+                    IsVaulted = false,
+                }).ToList(),
+            };
             context.Characters.Add(character);
-            foreach (var item in character.Inventory)
-                if (item.Id != Guid.Empty
-                    && existingItemIds.Contains(item.Id)
-                    && context.Entry(item).State == EntityState.Added)
-                    context.Entry(item).State = EntityState.Unchanged;
         }
         else
         {
             var existing = await context.Characters
                 .Include(c => c.CharacterAbilities)
                 .Include(c => c.Inventory)
-                .FirstOrDefaultAsync(c => c.Id == character.Id, cancellationToken)
-                ?? throw new KeyNotFoundException($"Character '{character.Id}' was not found.");
+                .FirstOrDefaultAsync(c => c.Id == summary.Id, cancellationToken)
+                ?? throw new KeyNotFoundException($"Character '{summary.Id}' was not found.");
 
-            var currentRowVersion = existing.RowVersion;
-            context.Entry(existing).CurrentValues.SetValues(character);
-            existing.RowVersion = currentRowVersion;
-
-            existing.Traits = character.Traits;
-            existing.DamageThresholds = character.DamageThresholds;
-            existing.HitPoints = character.HitPoints;
-            existing.Stress = character.Stress;
-            existing.Hope = character.Hope;
-            existing.ArmorSlots = character.ArmorSlots;
-
-            existing.GameClassId = character.GameClassId;
-            existing.SubclassId = character.SubclassId;
-            existing.AncestryId = character.AncestryId;
-            existing.CommunityId = character.CommunityId;
-            existing.EquippedArmorId = character.EquippedArmorId;
-            existing.PrimaryWeaponId = character.PrimaryWeaponId;
-            existing.SecondaryWeaponId = character.SecondaryWeaponId;
-
-            SyncCharacterAbilities(existing, character, context);
-            SyncInventory(existing, character, context, existingItemIds);
+            existing.Name = summary.Name;
+            existing.Pronouns = summary.Pronouns;
+            existing.DescriptionEyes = summary.DescriptionEyes;
+            existing.DescriptionBody = summary.DescriptionBody;
+            existing.DescriptionClothes = summary.DescriptionClothes;
+            existing.DescriptionSkin = summary.DescriptionSkin;
+            existing.DescriptionAttitude = summary.DescriptionAttitude;
+            existing.Traits = summary.Traits;
+            existing.DamageThresholds = summary.DamageThresholds;
+            existing.HitPoints = summary.HitPoints;
+            existing.Stress = summary.Stress;
+            existing.Hope = summary.Hope;
+            existing.ArmorSlots = summary.ArmorSlots;
+            existing.EquippedArmorId = summary.EquippedArmor?.Id;
+            existing.PrimaryWeaponId = summary.PrimaryWeapon?.Id;
+            existing.SecondaryWeaponId = summary.SecondaryWeapon?.Id;
+            existing.Experiences = summary.Experiences.ToList();
+            existing.GoldHandfuls = summary.GoldHandfuls;
+            existing.SpellFocus = summary.SpellFocus;
+            existing.BackgroundAnswers = summary.BackgroundAnswers.SelectMany(kvp => new[] { kvp.Key, kvp.Value }).ToList();
         }
 
         await context.SaveChangesAsync(cancellationToken);
@@ -154,7 +184,7 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
             .ThenBy(a => a.DomainType)
             .ThenBy(a => a.Title)
             .Select(a => new AbilitySummary(
-                a.Id, a.Title, a.DomainType, a.Level, a.RecallCost, a.Type, a.FeatureDescription))
+                a.Id, a.Title, a.DomainType, a.Level, a.RecallCost, a.Type, a.FeatureDescription, false))
             .ToListAsync(cancellationToken);
     }
 
@@ -235,6 +265,53 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
             .Where(i => incomingIds.Contains(i.Id))
             .Select(i => i.Id)
             .ToHashSetAsync(cancellationToken);
+    }
+
+    private static CharacterSummary MapToSummary(Character c)
+    {
+        return new CharacterSummary(
+            c.Id, c.Level, c.Name, c.Pronouns,
+            c.DescriptionEyes, c.DescriptionBody, c.DescriptionClothes, c.DescriptionSkin, c.DescriptionAttitude,
+            new ClassCardSummary(c.GameClass.Id, c.GameClass.Name, c.GameClass.Description, c.GameClass.Domain1, c.GameClass.Domain2,
+                c.GameClass.BaseEvasion, c.GameClass.BaseHealth,
+                c.GameClass.ClassFeatures.Select(f => new FeatureSummary(f.Id, f.Name, f.Description)).ToList(),
+                new FeatureSummary(c.GameClass.HopeFeature.Id, c.GameClass.HopeFeature.Name, c.GameClass.HopeFeature.Description)),
+            new SubclassSummary(c.Subclass.Id, c.Subclass.Name, c.Subclass.Description,
+                new FeatureSummary(c.Subclass.Foundation.Id, c.Subclass.Foundation.Name, c.Subclass.Foundation.Description),
+                new FeatureSummary(c.Subclass.Specialization.Id, c.Subclass.Specialization.Name, c.Subclass.Specialization.Description),
+                new FeatureSummary(c.Subclass.Mastery.Id, c.Subclass.Mastery.Name, c.Subclass.Mastery.Description)),
+            null, null,
+            new HeritageSummary(c.Ancestry.Id, c.Ancestry.Name, c.Ancestry.Description, c.Ancestry.HeritageType,
+                c.Ancestry.Features.Select(f => new FeatureSummary(f.Id, f.Name, f.Description)).ToList()),
+            new HeritageSummary(c.Community.Id, c.Community.Name, c.Community.Description, c.Community.HeritageType,
+                c.Community.Features.Select(f => new FeatureSummary(f.Id, f.Name, f.Description)).ToList()),
+            c.Traits, c.DamageThresholds, c.Evasion, c.Proficiency,
+            c.Experiences,
+            BuildBackgroundDictionary(c.BackgroundAnswers),
+            c.Inventory.Select(i => new ItemSummary(i.Id, i.Name, i.Description)).ToList(),
+            c.GoldHandfuls, c.SpellFocus,
+            c.EquippedArmor is not null
+                ? new ArmorSummary(c.EquippedArmor.Id, c.EquippedArmor.Name, c.EquippedArmor.Tier, c.EquippedArmor.ArmorScore, c.EquippedArmor.DamageThresholds,
+                    c.EquippedArmor.Feature is not null ? new FeatureSummary(c.EquippedArmor.Feature.Id, c.EquippedArmor.Feature.Name, c.EquippedArmor.Feature.Description) : null)
+                : null,
+            c.PrimaryWeapon is not null
+                ? new WeaponSummary(c.PrimaryWeapon.Id, c.PrimaryWeapon.Name, c.PrimaryWeapon.Tier, c.PrimaryWeapon.Damage, c.PrimaryWeapon.Burden, c.PrimaryWeapon.RangeType, c.PrimaryWeapon.Trait, c.PrimaryWeapon.Category,
+                    c.PrimaryWeapon.Feature is not null ? new FeatureSummary(c.PrimaryWeapon.Feature.Id, c.PrimaryWeapon.Feature.Name, c.PrimaryWeapon.Feature.Description) : null)
+                : null,
+            c.SecondaryWeapon is not null
+                ? new WeaponSummary(c.SecondaryWeapon.Id, c.SecondaryWeapon.Name, c.SecondaryWeapon.Tier, c.SecondaryWeapon.Damage, c.SecondaryWeapon.Burden, c.SecondaryWeapon.RangeType, c.SecondaryWeapon.Trait, c.SecondaryWeapon.Category,
+                    c.SecondaryWeapon.Feature is not null ? new FeatureSummary(c.SecondaryWeapon.Feature.Id, c.SecondaryWeapon.Feature.Name, c.SecondaryWeapon.Feature.Description) : null)
+                : null,
+            c.CharacterAbilities.Select(ca => new AbilitySummary(ca.AbilityId, ca.Ability!.Title, ca.Ability.DomainType, ca.Ability.Level, ca.Ability.RecallCost, ca.Ability.Type, ca.Ability.FeatureDescription, ca.IsVaulted)),
+            c.HitPoints, c.Stress, c.Hope, c.ArmorSlots, c.RowVersion);
+    }
+
+    private static Dictionary<string, string> BuildBackgroundDictionary(List<string> answers)
+    {
+        var dict = new Dictionary<string, string>();
+        for (int i = 0; i < answers.Count - 1; i += 2)
+            dict[answers[i]] = answers[i + 1];
+        return dict;
     }
 
     private static async Task<Character> EnsureCharacterExistsAsync(Guid characterId, CancellationToken cancellationToken,

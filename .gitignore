@@ -67,4 +67,4 @@ nunit-agent.*
 
 # Database
 *.db
-*.sqlite
+*.sqlite*.db-shm\n*.db-wal\n

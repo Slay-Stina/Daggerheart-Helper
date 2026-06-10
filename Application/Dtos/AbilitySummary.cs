@@ -9,4 +9,5 @@ public sealed record AbilitySummary(
     int Level,
     int RecallCost,
     AbilityType Type,
-    string FeatureDescription);
+    string FeatureDescription,
+    bool IsVaulted = false);
