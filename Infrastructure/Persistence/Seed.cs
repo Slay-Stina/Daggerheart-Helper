@@ -1,5 +1,6 @@
 using Application.Services;
 using Core.Entities;
+using Core.Enums;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -193,6 +194,13 @@ public class Seed
         if (await service.GetAllAsync() is { Count: > 0 })
             return;
 
+        var gameClass = await context.GameClasses.FirstAsync(g => g.Name == "Guardian");
+        var subclass = await context.Subclasses.FirstAsync(s => s.Name == "Stalwart");
+        var ancestry = await context.Heritages.FirstAsync(h => h.Name == "Dwarf" && h.HeritageType == HeritageType.Ancestry);
+        var community = await context.Heritages.FirstAsync(h => h.Name == "Ridgeborne" && h.HeritageType == HeritageType.Community);
+        var armor = await context.Armors.FirstAsync(a => a.Name == "Chainmail Armor");
+        var weapon = await context.Weapons.FirstAsync(w => w.Name == "Longsword" && w.Tier == 1);
+
         var itemNames = new[] { "Torch", "50 ft rope", "Basic supplies", "Minor Health Potion" };
         var catalogItems = await context.Items
             .Where(i => itemNames.Contains(i.Name))
@@ -206,12 +214,12 @@ public class Seed
             Name = "Borin Ironhide",
             Pronouns = "he/him",
             Level = 1,
-            GameClassId = Guid.Parse("D17B68ED-FBBA-4F49-8C8D-5D372871593A"),
-            SubclassId = Guid.Parse("8847BD64-62C5-45C9-9FE3-EAEBA6CF7DD1"),
-            AncestryId = Guid.Parse("C3C7D875-B717-437C-88CD-77D049452FFB"),
-            CommunityId = Guid.Parse("1A996A6E-1381-4384-B370-436FEA5EF74E"),
-            EquippedArmorId = Guid.Parse("748526B9-AF83-4C61-B864-91376AF6791A"),
-            PrimaryWeaponId = Guid.Parse("DB5D5C9C-2B28-4C36-A536-C4DCEB59B747"),
+            GameClassId = gameClass.Id,
+            SubclassId = subclass.Id,
+            AncestryId = ancestry.Id,
+            CommunityId = community.Id,
+            EquippedArmorId = armor.Id,
+            PrimaryWeaponId = weapon.Id,
             Traits = new TraitScores(Agility: 1, Strength: 2, Finesse: -1, Instinct: 0, Presence: 0, Knowledge: 1),
             DamageThresholds = new DamageThresholds(Major: 5, Severe: 3),
             Evasion = 10,
@@ -230,8 +238,8 @@ public class Seed
             Inventory = inventoryItems,
             CharacterAbilities = new List<CharacterAbility>
             {
-                new() { AbilityId = Guid.Parse("C017284D-B04D-4C0B-90EA-95C31C869F63"), IsVaulted = false },
-                new() { AbilityId = Guid.Parse("BA159592-DFF9-4A48-8D3A-C2BB25A7B12B"), IsVaulted = false },
+                new() { AbilityId = (await context.Abilities.FirstAsync(a => a.Title == "I Am Your Shield")).Id, IsVaulted = false },
+                new() { AbilityId = (await context.Abilities.FirstAsync(a => a.Title == "Not Good Enough")).Id, IsVaulted = false },
             },
         };
 
