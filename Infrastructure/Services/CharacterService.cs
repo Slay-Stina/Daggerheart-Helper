@@ -1,7 +1,7 @@
 using Application.Dtos;
 using Application.Services;
 using Core.Entities;
-using Core.Enums;
+using Infrastructure.Extensions;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,10 +9,10 @@ namespace Infrastructure.Services;
 
 public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> factory) : ICharacterService
 {
-    public async Task<List<Character>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<List<CharacterSummary>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         await using var context = await factory.CreateDbContextAsync(cancellationToken);
-        return await context.Characters
+        var characters = await context.Characters
             .AsNoTracking()
             .Include(c => c.GameClass)
             .Include(c => c.Subclass)
@@ -23,75 +23,66 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
             .Include(c => c.SecondaryWeapon)
             .Include(c => c.Inventory)
             .ToListAsync(cancellationToken);
+        return characters.Select(c => c.ToSummary()).ToList();
     }
 
-    public async Task<Character?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<CharacterSummary?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         await using var context = await factory.CreateDbContextAsync(cancellationToken);
-        return await context.Characters
+        var character = await context.Characters
             .AsNoTracking()
             .Include(c => c.GameClass)
             .ThenInclude(c => c.HopeFeature)
             .Include(c => c.GameClass)
             .ThenInclude(c => c.ClassFeatures)
             .Include(c => c.Subclass)
+            .ThenInclude(sc => sc.Foundation)
+            .Include(c => c.Subclass)
+            .ThenInclude(sc => sc.Specialization)
+            .Include(c => c.Subclass)
+            .ThenInclude(sc => sc.Mastery)
             .Include(c => c.Ancestry)
+            .ThenInclude(h => h.Features)
             .Include(c => c.Community)
+            .ThenInclude(h => h.Features)
             .Include(c => c.EquippedArmor)
+            .ThenInclude(a => a.Feature)
             .Include(c => c.PrimaryWeapon)
+            .ThenInclude(w => w.Feature)
             .Include(c => c.SecondaryWeapon)
+            .ThenInclude(w => w.Feature)
             .Include(c => c.CharacterAbilities)
             .ThenInclude(ca => ca.Ability)
             .Include(c => c.Inventory)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        return character?.ToSummary();
     }
 
-    public async Task SaveAsync(Character character, CancellationToken cancellationToken = default)
+    public async Task SaveAsync(CharacterSummary summary, CancellationToken cancellationToken = default)
     {
         await using var context = await factory.CreateDbContextAsync(cancellationToken);
-        var existingItemIds = await LoadExistingInventoryItemIdsAsync(character.Inventory, context, cancellationToken);
 
-        var isNew = character.Id == Guid.Empty;
-        if (isNew)
+        var existingItemIds = await context.Items
+            .Where(i => summary.Inventory.Select(x => x.Id).Contains(i.Id))
+            .Select(i => i.Id)
+            .ToHashSetAsync(cancellationToken);
+
+        if (await context.Characters.AnyAsync(c => c.Id == summary.Id, cancellationToken))
         {
-            character.Id = Guid.NewGuid();
-            context.Characters.Add(character);
-            foreach (var item in character.Inventory)
-                if (item.Id != Guid.Empty
-                    && existingItemIds.Contains(item.Id)
-                    && context.Entry(item).State == EntityState.Added)
-                    context.Entry(item).State = EntityState.Unchanged;
+            await context.Database.ExecuteSqlRawAsync(
+                "DELETE FROM CharacterAbilities WHERE CharacterId = @p0", [summary.Id], cancellationToken);
+            await context.Database.ExecuteSqlRawAsync(
+                "DELETE FROM CharacterItems WHERE CharacterId = @p0", [summary.Id], cancellationToken);
+            await context.Database.ExecuteSqlRawAsync(
+                "DELETE FROM Characters WHERE Id = @p0", [summary.Id], cancellationToken);
         }
-        else
-        {
-            var existing = await context.Characters
-                .Include(c => c.CharacterAbilities)
-                .Include(c => c.Inventory)
-                .FirstOrDefaultAsync(c => c.Id == character.Id, cancellationToken)
-                ?? throw new KeyNotFoundException($"Character '{character.Id}' was not found.");
 
-            var currentRowVersion = existing.RowVersion;
-            context.Entry(existing).CurrentValues.SetValues(character);
-            existing.RowVersion = currentRowVersion;
-
-            existing.Traits = character.Traits;
-            existing.DamageThresholds = character.DamageThresholds;
-            existing.HitPoints = character.HitPoints;
-            existing.Stress = character.Stress;
-            existing.Hope = character.Hope;
-            existing.ArmorSlots = character.ArmorSlots;
-
-            existing.GameClassId = character.GameClassId;
-            existing.SubclassId = character.SubclassId;
-            existing.AncestryId = character.AncestryId;
-            existing.CommunityId = character.CommunityId;
-            existing.EquippedArmorId = character.EquippedArmorId;
-            existing.PrimaryWeaponId = character.PrimaryWeaponId;
-            existing.SecondaryWeaponId = character.SecondaryWeaponId;
-
-            SyncCharacterAbilities(existing, character, context);
-            SyncInventory(existing, character, context, existingItemIds);
-        }
+        var entity = summary.ToNewCharacter();
+        entity.Id = summary.Id == Guid.Empty ? entity.Id : summary.Id;
+        foreach (var item in entity.Inventory)
+            if (existingItemIds.Contains(item.Id))
+                context.Entry(item).State = EntityState.Unchanged;
+        context.Characters.Add(entity);
 
         await context.SaveChangesAsync(cancellationToken);
     }
@@ -154,7 +145,7 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
             .ThenBy(a => a.DomainType)
             .ThenBy(a => a.Title)
             .Select(a => new AbilitySummary(
-                a.Id, a.Title, a.DomainType, a.Level, a.RecallCost, a.Type, a.FeatureDescription))
+                a.Id, a.Title, a.DomainType, a.Level, a.RecallCost, a.Type, a.FeatureDescription, false))
             .ToListAsync(cancellationToken);
     }
 
@@ -164,8 +155,7 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
 
         foreach (var ca in incoming.CharacterAbilities)
         {
-            if (ca.Ability != null)
-                context.Entry(ca.Ability).State = EntityState.Unchanged;
+            context.Entry(ca.Ability).State = EntityState.Unchanged;
 
             existing.CharacterAbilities.Add(new CharacterAbility
             {
@@ -181,7 +171,7 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
     {
         var incomingIds = incoming.Inventory.Select(i => i.Id).ToHashSet();
 
-        // Snapshot of all currently-tracked items before removal
+        // Snapshot of all currently tracked items before removal
         var allTrackedById = existing.Inventory.ToDictionary(i => i.Id);
 
         // Remove items no longer in the incoming list
@@ -205,7 +195,7 @@ public sealed class CharacterService(IDbContextFactory<DaggerheartDbContext> fac
             }
             else if (allTrackedById.TryGetValue(item.Id, out var tracked))
             {
-                // Re-add a previously-removed item — reuse the tracked instance
+                // Re-add a previously removed item — reuse the tracked instance
                 existing.Inventory.Add(tracked);
             }
             else

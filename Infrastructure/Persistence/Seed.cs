@@ -1,3 +1,4 @@
+using Application.Dtos;
 using Application.Services;
 using Core.Entities;
 using Core.Enums;
@@ -209,41 +210,39 @@ public class Seed
             .Select(name => catalogItems.FirstOrDefault(i => i.Name == name) ?? new Item { Name = name, Description = "" })
             .ToList();
 
-        var character = new Character
-        {
-            Name = "Borin Ironhide",
-            Pronouns = "he/him",
-            Level = 1,
-            GameClassId = gameClass.Id,
-            SubclassId = subclass.Id,
-            AncestryId = ancestry.Id,
-            CommunityId = community.Id,
-            EquippedArmorId = armor.Id,
-            PrimaryWeaponId = weapon.Id,
-            Traits = new TraitScores(Agility: 1, Strength: 2, Finesse: -1, Instinct: 0, Presence: 0, Knowledge: 1),
-            DamageThresholds = new DamageThresholds(Major: 5, Severe: 3),
-            Evasion = 10,
-            HitPoints = new ResourcePool(7, 7),
-            Stress = new ResourcePool(0, 6),
-            Hope = new ResourcePool(2, 6),
-            ArmorSlots = new ResourcePool(4, 4),
-            GoldHandfuls = 1,
-            Experiences = new List<string> { "Survived the Goblin Wars", "Guardian of the Mountain Pass" },
-            BackgroundAnswers = new List<string>
-            {
-                "Where were you born?", "The Ironforge Mountains",
-                "Why did you become an adventurer?", "To protect my homeland from the darkness",
-                "What was your childhood like?", "Harsh but honorable, trained in the Forgehold garrison"
-            },
-            Inventory = inventoryItems,
-            CharacterAbilities = new List<CharacterAbility>
-            {
-                new() { AbilityId = (await context.Abilities.FirstAsync(a => a.Title == "I Am Your Shield")).Id, IsVaulted = false },
-                new() { AbilityId = (await context.Abilities.FirstAsync(a => a.Title == "Not Good Enough")).Id, IsVaulted = false },
-            },
-        };
+        var feat = (Guid id, string name) => new FeatureSummary(id, name, "");
+        var ability1 = await context.Abilities.FirstAsync(a => a.Title == "I Am Your Shield");
+        var ability2 = await context.Abilities.FirstAsync(a => a.Title == "Not Good Enough");
 
-        await service.SaveAsync(character);
+        var summary = new CharacterSummary(
+            Guid.NewGuid(), 1, "Borin Ironhide", "he/him", null, null, null, null, null,
+            new ClassCardSummary(gameClass.Id, gameClass.Name, gameClass.Description, gameClass.Domain1, gameClass.Domain2,
+                gameClass.BaseEvasion, gameClass.BaseHealth, [], feat(gameClass.HopeFeatureId, gameClass.HopeFeature.Name)),
+            new SubclassSummary(subclass.Id, subclass.Name, subclass.Description, feat(subclass.Foundation.Id, subclass.Foundation.Name),
+                feat(subclass.Specialization.Id, subclass.Specialization.Name), feat(subclass.Mastery.Id, subclass.Mastery.Name)),
+            null, null,
+            new HeritageSummary(ancestry.Id, ancestry.Name, ancestry.Description, ancestry.HeritageType, []),
+            new HeritageSummary(community.Id, community.Name, community.Description, community.HeritageType, []),
+            new TraitScores(1, 2, -1, 0, 0, 1),
+            new DamageThresholds(5, 3), 10, 0,
+            new[] { "Survived the Goblin Wars", "Guardian of the Mountain Pass" },
+            new Dictionary<string, string>
+            {
+                ["Where were you born?"] = "The Ironforge Mountains",
+                ["Why did you become an adventurer?"] = "To protect my homeland from the darkness",
+                ["What was your childhood like?"] = "Harsh but honorable, trained in the Forgehold garrison"
+            },
+            inventoryItems.Cast<ItemSummary>().ToList(), 1, null,
+            new ArmorSummary(armor.Id, armor.Name, armor.Tier, armor.ArmorScore, armor.DamageThresholds,
+                armor.Feature is not null ? new FeatureSummary(armor.Feature.Id, armor.Feature.Name, armor.Feature.Description) : null),
+            new WeaponSummary(weapon.Id, weapon.Name, weapon.Tier, weapon.Damage, weapon.Burden, weapon.RangeType, weapon.Trait, weapon.Category),
+            null,
+            new[] { new AbilitySummary(ability1.Id, ability1.Title, ability1.DomainType, ability1.Level, ability1.RecallCost, ability1.Type, ability1.FeatureDescription, false),
+                    new AbilitySummary(ability2.Id, ability2.Title, ability2.DomainType, ability2.Level, ability2.RecallCost, ability2.Type, ability2.FeatureDescription, false) },
+            new ResourcePool(7, 7), new ResourcePool(0, 6), new ResourcePool(2, 6), new ResourcePool(4, 4),
+            Array.Empty<byte>());
+
+        await service.SaveAsync(summary);
     }
 
     public static async Task EnsureConcurrencyTriggersAsync(DaggerheartDbContext context)

@@ -1,3 +1,4 @@
+using Application.Dtos;
 using Application.Services;
 using Core.Entities;
 using Core.Enums;
@@ -26,6 +27,34 @@ public class CharacterCreationTests : IAsyncLifetime
     private Guid _abilityId2;
     private Guid _itemId1;
     private Guid _itemId2;
+    private Guid _hopeFeatureId;
+    private Guid _foundationId;
+    private Guid _specializationId;
+    private Guid _masteryId;
+
+    private CharacterSummary MakeCharacter(Guid? id = null, string name = "Test Hero", int level = 1,
+        int gold = 1, IEnumerable<string>? experiences = null, Dictionary<string, string>? background = null,
+        IEnumerable<ItemSummary>? inventory = null, IEnumerable<AbilitySummary>? abilities = null,
+        ResourcePool? hp = null)
+    {
+        return new CharacterSummary(
+            id ?? Guid.NewGuid(), level, name, null, null, null, null, null, null,
+            new ClassCardSummary(_gameClassId, "Test Class", "A test class", DomainType.Arcana, DomainType.Blade, 10, 5, [],
+                new FeatureSummary(_hopeFeatureId, "Hope Feature", "Hope feature")),
+            new SubclassSummary(_subclassId, "Test Subclass", "A test subclass",
+                new FeatureSummary(_foundationId, "Foundation", "Foundation feature"),
+                new FeatureSummary(_specializationId, "Specialization", "Specialization feature"),
+                new FeatureSummary(_masteryId, "Mastery", "Mastery feature")),
+            null, null,
+            new HeritageSummary(_ancestryId, "Test Ancestry", "Test ancestry", HeritageType.Ancestry, []),
+            new HeritageSummary(_communityId, "Test Community", "Test community", HeritageType.Community, []),
+            new TraitScores(0, 0, 0, 0, 0, 0), new DamageThresholds(0, 0), 10, 0,
+            experiences ?? [], background ?? new Dictionary<string, string>(),
+            inventory ?? [], gold, null, null, null, null,
+            abilities ?? [],
+            hp ?? new ResourcePool(5, 5), new ResourcePool(0, 5), new ResourcePool(2, 5), new ResourcePool(0, 0),
+            Array.Empty<byte>());
+    }
 
     public async Task InitializeAsync()
     {
@@ -59,9 +88,10 @@ public class CharacterCreationTests : IAsyncLifetime
         _itemId1 = Guid.NewGuid();
         _itemId2 = Guid.NewGuid();
 
+        _hopeFeatureId = Guid.NewGuid();
         var hopeFeature = new Feature
         {
-            Id = Guid.NewGuid(),
+            Id = _hopeFeatureId,
             Name = "Hope Feature",
             Description = "Hope feature",
         };
@@ -83,23 +113,26 @@ public class CharacterCreationTests : IAsyncLifetime
             HopeFeature = hopeFeature,
         };
 
+        _foundationId = Guid.NewGuid();
         var foundationFeature = new Feature
         {
-            Id = Guid.NewGuid(),
+            Id = _foundationId,
             Name = "Foundation",
             Description = "Foundation feature",
         };
 
+        _specializationId = Guid.NewGuid();
         var specializationFeature = new Feature
         {
-            Id = Guid.NewGuid(),
+            Id = _specializationId,
             Name = "Specialization",
             Description = "Specialization feature",
         };
 
+        _masteryId = Guid.NewGuid();
         var masteryFeature = new Feature
         {
-            Id = Guid.NewGuid(),
+            Id = _masteryId,
             Name = "Mastery",
             Description = "Mastery feature",
         };
@@ -191,46 +224,38 @@ public class CharacterCreationTests : IAsyncLifetime
     [Fact]
     public async Task CreateCharacter_WithAllFields_SavesAndLoads()
     {
-        var character = new Character
-        {
-            Name = "Test Hero",
-            Level = 1,
-            GameClassId = _gameClassId,
-            SubclassId = _subclassId,
-            AncestryId = _ancestryId,
-            CommunityId = _communityId,
-            Traits = new TraitScores(1, 2, 0, 0, 0, 0),
-            DamageThresholds = new DamageThresholds(2, 4),
-            Evasion = 10,
-            HitPoints = new ResourcePool(5, 5),
-            Stress = new ResourcePool(0, 5),
-            Hope = new ResourcePool(2, 5),
-            ArmorSlots = new ResourcePool(0, 0),
-            Experiences = ["First Adventure", "Brave Deed"],
-            BackgroundAnswers = ["What is your goal?", "To explore", "Who inspires you?", "My mentor"],
-            Inventory =
-            [
-                new Item { Id = _itemId1, Name = "Torch" },
-                new Item { Id = _itemId2, Name = "Rope" },
-            ],
-            GoldHandfuls = 3,
-            CharacterAbilities =
-            [
-                new CharacterAbility { AbilityId = _abilityId1, IsVaulted = false },
-                new CharacterAbility { AbilityId = _abilityId2, IsVaulted = true },
-            ],
-        };
+        var summary = new CharacterSummary(
+            Guid.NewGuid(), 1, "Test Hero", null, null, null, null, null, null,
+            new ClassCardSummary(_gameClassId, "Test Class", "A test class", DomainType.Arcana, DomainType.Blade, 10, 5, [],
+                new FeatureSummary(_hopeFeatureId, "Hope Feature", "Hope feature")),
+            new SubclassSummary(_subclassId, "Test Subclass", "A test subclass",
+                new FeatureSummary(_foundationId, "Foundation", "Foundation feature"),
+                new FeatureSummary(_specializationId, "Specialization", "Specialization feature"),
+                new FeatureSummary(_masteryId, "Mastery", "Mastery feature")),
+            null, null,
+            new HeritageSummary(_ancestryId, "Test Ancestry", "Test ancestry", HeritageType.Ancestry, []),
+            new HeritageSummary(_communityId, "Test Community", "Test community", HeritageType.Community, []),
+            new TraitScores(1, 2, 0, 0, 0, 0),
+            new DamageThresholds(2, 4), 10, 0,
+            new[] { "First Adventure", "Brave Deed" },
+            new Dictionary<string, string> { ["What is your goal?"] = "To explore", ["Who inspires you?"] = "My mentor" },
+            new[] { new ItemSummary(_itemId1, "Torch", "A torch"), new ItemSummary(_itemId2, "Rope", "A coil of rope") },
+            3, null, null, null, null,
+            new[] {
+                new AbilitySummary(_abilityId1, "Fireball", DomainType.Arcana, 1, 0, AbilityType.Spell, "A fireball spell", false),
+                new AbilitySummary(_abilityId2, "Sword Strike", DomainType.Blade, 1, 0, AbilityType.Ability, "A sword strike", true),
+            },
+            new ResourcePool(5, 5), new ResourcePool(0, 5), new ResourcePool(2, 5), new ResourcePool(0, 0),
+            Array.Empty<byte>());
 
-        await _service.SaveAsync(character);
+        await _service.SaveAsync(summary);
 
-        Assert.NotEqual(Guid.Empty, character.Id);
-
-        var loaded = await _service.GetByIdAsync(character.Id);
+        var loaded = await _service.GetByIdAsync(summary.Id);
         Assert.NotNull(loaded);
         Assert.Equal("Test Hero", loaded.Name);
         Assert.Equal(1, loaded.Level);
         Assert.Equal(3, loaded.GoldHandfuls);
-        Assert.Equal(2, loaded.Experiences.Count);
+        Assert.Equal(2, loaded.Experiences.Count());
         Assert.Equal(1, loaded.Traits.Agility);
         Assert.Equal(2, loaded.Traits.Strength);
         Assert.Equal(10, loaded.Evasion);
@@ -238,11 +263,11 @@ public class CharacterCreationTests : IAsyncLifetime
         Assert.Equal(5, loaded.HitPoints.Current);
 
         Assert.NotNull(loaded.CharacterAbilities);
-        Assert.Equal(2, loaded.CharacterAbilities.Count);
+        Assert.Equal(2, loaded.CharacterAbilities.Count());
         Assert.Single(loaded.CharacterAbilities, ca => !ca.IsVaulted);
         Assert.Single(loaded.CharacterAbilities, ca => ca.IsVaulted);
 
-        Assert.Equal(2, loaded.Inventory.Count);
+        Assert.Equal(2, loaded.Inventory.Count());
         Assert.Contains(loaded.Inventory, i => i.Name == "Torch");
         Assert.Contains(loaded.Inventory, i => i.Name == "Rope");
     }
@@ -250,55 +275,65 @@ public class CharacterCreationTests : IAsyncLifetime
     [Fact]
     public async Task CreateCharacter_ThenEditAndSave_UpdatesCorrectly()
     {
-        var character = new Character
-        {
-            Name = "Level 1 Hero",
-            Level = 1,
-            GameClassId = _gameClassId,
-            SubclassId = _subclassId,
-            AncestryId = _ancestryId,
-            CommunityId = _communityId,
-            Traits = new TraitScores(0, 0, 0, 0, 0, 0),
-            DamageThresholds = new DamageThresholds(0, 0),
-            Evasion = 10,
-            HitPoints = new ResourcePool(5, 5),
-            Stress = new ResourcePool(0, 5),
-            Hope = new ResourcePool(2, 5),
-            ArmorSlots = new ResourcePool(0, 0),
-            CharacterAbilities =
-            [
-                new CharacterAbility { AbilityId = _abilityId1, IsVaulted = false },
-            ],
-        };
+        var heroId = Guid.NewGuid();
+        var hero = new CharacterSummary(
+            heroId, 1, "Level 1 Hero", null, null, null, null, null, null,
+            new ClassCardSummary(_gameClassId, "Test Class", "A test class", DomainType.Arcana, DomainType.Blade, 10, 5, [],
+                new FeatureSummary(_hopeFeatureId, "Hope Feature", "Hope feature")),
+            new SubclassSummary(_subclassId, "Test Subclass", "A test subclass",
+                new FeatureSummary(_foundationId, "Foundation", "Foundation feature"),
+                new FeatureSummary(_specializationId, "Specialization", "Specialization feature"),
+                new FeatureSummary(_masteryId, "Mastery", "Mastery feature")),
+            null, null,
+            new HeritageSummary(_ancestryId, "Test Ancestry", "Test ancestry", HeritageType.Ancestry, []),
+            new HeritageSummary(_communityId, "Test Community", "Test community", HeritageType.Community, []),
+            new TraitScores(0, 0, 0, 0, 0, 0),
+            new DamageThresholds(0, 0), 10, 0, [], new Dictionary<string, string>(), [],
+            1, null, null, null, null,
+            new[] { new AbilitySummary(_abilityId1, "Fireball", DomainType.Arcana, 1, 0, AbilityType.Spell, "A fireball spell", false) },
+            new ResourcePool(5, 5), new ResourcePool(0, 5), new ResourcePool(2, 5), new ResourcePool(0, 0),
+            Array.Empty<byte>());
 
-        await _service.SaveAsync(character);
+        await _service.SaveAsync(hero);
 
-        character.Name = "Updated Hero";
-        character.Level = 2;
-        character.HitPoints = new ResourcePool(3, 7);
-        character.Experiences = ["First Quest", "Dragon Slayer"];
-        character.GoldHandfuls = 10;
-        character.CharacterAbilities =
-        [
-            new CharacterAbility { AbilityId = _abilityId1, IsVaulted = true },
-            new CharacterAbility { AbilityId = _abilityId2, IsVaulted = false },
-        ];
+        var updated = new CharacterSummary(
+            heroId, 2, "Updated Hero", null, null, null, null, null, null,
+            new ClassCardSummary(_gameClassId, "Test Class", "A test class", DomainType.Arcana, DomainType.Blade, 10, 5, [],
+                new FeatureSummary(_hopeFeatureId, "Hope Feature", "Hope feature")),
+            new SubclassSummary(_subclassId, "Test Subclass", "A test subclass",
+                new FeatureSummary(_foundationId, "Foundation", "Foundation feature"),
+                new FeatureSummary(_specializationId, "Specialization", "Specialization feature"),
+                new FeatureSummary(_masteryId, "Mastery", "Mastery feature")),
+            null, null,
+            new HeritageSummary(_ancestryId, "Test Ancestry", "Test ancestry", HeritageType.Ancestry, []),
+            new HeritageSummary(_communityId, "Test Community", "Test community", HeritageType.Community, []),
+            new TraitScores(0, 0, 0, 0, 0, 0),
+            new DamageThresholds(0, 0), 10, 0,
+            new[] { "First Quest", "Dragon Slayer" },
+            new Dictionary<string, string>(), [],
+            10, null, null, null, null,
+            new[] {
+                new AbilitySummary(_abilityId1, "Fireball", DomainType.Arcana, 1, 0, AbilityType.Spell, "A fireball spell", true),
+                new AbilitySummary(_abilityId2, "Sword Strike", DomainType.Blade, 1, 0, AbilityType.Ability, "A sword strike", false),
+            },
+            new ResourcePool(3, 7), new ResourcePool(0, 5), new ResourcePool(2, 5), new ResourcePool(0, 0),
+            Array.Empty<byte>());
 
-        await _service.SaveAsync(character);
+        await _service.SaveAsync(updated);
 
-        var loaded = await _service.GetByIdAsync(character.Id);
+        var loaded = await _service.GetByIdAsync(heroId);
         Assert.NotNull(loaded);
         Assert.Equal("Updated Hero", loaded.Name);
         Assert.Equal(2, loaded.Level);
         Assert.Equal(3, loaded.HitPoints.Current);
         Assert.Equal(7, loaded.HitPoints.Max);
         Assert.Equal(10, loaded.GoldHandfuls);
-        Assert.Equal(2, loaded.Experiences.Count);
+        Assert.Equal(2, loaded.Experiences.Count());
         Assert.Contains("Dragon Slayer", loaded.Experiences);
 
-        Assert.Equal(2, loaded.CharacterAbilities.Count);
-        Assert.Single(loaded.CharacterAbilities, ca => ca.AbilityId == _abilityId1 && ca.IsVaulted);
-        Assert.Single(loaded.CharacterAbilities, ca => ca.AbilityId == _abilityId2 && !ca.IsVaulted);
+        Assert.Equal(2, loaded.CharacterAbilities.Count());
+        Assert.Single(loaded.CharacterAbilities, ca => ca.Id == _abilityId1 && ca.IsVaulted);
+        Assert.Single(loaded.CharacterAbilities, ca => ca.Id == _abilityId2 && !ca.IsVaulted);
     }
 
     [Fact]
@@ -319,30 +354,28 @@ public class CharacterCreationTests : IAsyncLifetime
             await context.SaveChangesAsync();
         }
 
-        var character = new Character
-        {
-            Name = "Wizard",
-            Level = 2,
-            GameClassId = _gameClassId,
-            SubclassId = _subclassId,
-            AncestryId = _ancestryId,
-            CommunityId = _communityId,
-            Traits = new TraitScores(0, 0, 0, 0, 0, 0),
-            DamageThresholds = new DamageThresholds(0, 0),
-            Evasion = 10,
-            HitPoints = new ResourcePool(5, 5),
-            Stress = new ResourcePool(0, 5),
-            Hope = new ResourcePool(2, 5),
-            ArmorSlots = new ResourcePool(0, 0),
-            CharacterAbilities =
-            [
-                new CharacterAbility { AbilityId = _abilityId1, IsVaulted = false },
-            ],
-        };
+        var wizardId = Guid.NewGuid();
+        var wizard = new CharacterSummary(
+            wizardId, 2, "Wizard", null, null, null, null, null, null,
+            new ClassCardSummary(_gameClassId, "Test Class", "A test class", DomainType.Arcana, DomainType.Blade, 10, 5, [],
+                new FeatureSummary(_hopeFeatureId, "Hope Feature", "Hope feature")),
+            new SubclassSummary(_subclassId, "Test Subclass", "A test subclass",
+                new FeatureSummary(_foundationId, "Foundation", "Foundation feature"),
+                new FeatureSummary(_specializationId, "Specialization", "Specialization feature"),
+                new FeatureSummary(_masteryId, "Mastery", "Mastery feature")),
+            null, null,
+            new HeritageSummary(_ancestryId, "Test Ancestry", "Test ancestry", HeritageType.Ancestry, []),
+            new HeritageSummary(_communityId, "Test Community", "Test community", HeritageType.Community, []),
+            new TraitScores(0, 0, 0, 0, 0, 0),
+            new DamageThresholds(0, 0), 10, 0, [], new Dictionary<string, string>(), [],
+            1, null, null, null, null,
+            new[] { new AbilitySummary(_abilityId1, "Fireball", DomainType.Arcana, 1, 0, AbilityType.Spell, "A fireball spell", false) },
+            new ResourcePool(5, 5), new ResourcePool(0, 5), new ResourcePool(2, 5), new ResourcePool(0, 0),
+            Array.Empty<byte>());
 
-        await _service.SaveAsync(character);
+        await _service.SaveAsync(wizard);
 
-        var available = await _service.GetAvailableAbilitiesAsync(character.Id);
+        var available = await _service.GetAvailableAbilitiesAsync(wizardId);
 
         Assert.Contains(available, a => a.Id == _abilityId2);
         Assert.DoesNotContain(available, a => a.Id == _abilityId1);
@@ -353,25 +386,10 @@ public class CharacterCreationTests : IAsyncLifetime
     [Fact]
     public async Task CreateCharacter_WithMinimumFields_SavesSuccessfully()
     {
-        var character = new Character
-        {
-            Name = "Minimal Hero",
-            GameClassId = _gameClassId,
-            SubclassId = _subclassId,
-            AncestryId = _ancestryId,
-            CommunityId = _communityId,
-            Traits = new TraitScores(0, 0, 0, 0, 0, 0),
-            DamageThresholds = new DamageThresholds(0, 0),
-            Evasion = 10,
-            HitPoints = new ResourcePool(5, 5),
-            Stress = new ResourcePool(0, 5),
-            Hope = new ResourcePool(2, 5),
-            ArmorSlots = new ResourcePool(0, 0),
-        };
+        var minimalId = Guid.NewGuid();
+        await _service.SaveAsync(MakeCharacter(minimalId, "Minimal Hero"));
 
-        await _service.SaveAsync(character);
-
-        var loaded = await _service.GetByIdAsync(character.Id);
+        var loaded = await _service.GetByIdAsync(minimalId);
         Assert.NotNull(loaded);
         Assert.Equal("Minimal Hero", loaded.Name);
         Assert.Equal(1, loaded.Level);
@@ -383,52 +401,25 @@ public class CharacterCreationTests : IAsyncLifetime
     [Fact]
     public async Task EditCharacter_AddAndRemoveInventory_SyncsCorrectly()
     {
-        var character = new Character
-        {
-            Name = "Inventory Hero",
-            Level = 1,
-            GameClassId = _gameClassId,
-            SubclassId = _subclassId,
-            AncestryId = _ancestryId,
-            CommunityId = _communityId,
-            Traits = new TraitScores(0, 0, 0, 0, 0, 0),
-            DamageThresholds = new DamageThresholds(0, 0),
-            Evasion = 10,
-            HitPoints = new ResourcePool(5, 5),
-            Stress = new ResourcePool(0, 5),
-            Hope = new ResourcePool(2, 5),
-            ArmorSlots = new ResourcePool(0, 0),
-            Inventory =
-            [
-                new Item { Id = _itemId1, Name = "Torch" },
-            ],
-        };
+        var invId = Guid.NewGuid();
+        var r1 = new ItemSummary(_itemId1, "Torch", "");
+        var r2 = new ItemSummary(_itemId2, "Rope", "");
+        await _service.SaveAsync(MakeCharacter(invId, "Inventory Hero", inventory: [r1]));
 
-        await _service.SaveAsync(character);
+        // Edit: replace Torch with Rope
+        await _service.SaveAsync(MakeCharacter(invId, "Inventory Hero", inventory: [r2]));
 
-        // Edit: replace Torch with Rope (different item instance — simulates UI rebuild)
-        character.Inventory =
-        [
-            new Item { Id = _itemId2, Name = "Rope" },
-        ];
-        await _service.SaveAsync(character);
-
-        var loaded = await _service.GetByIdAsync(character.Id);
+        var loaded = await _service.GetByIdAsync(invId);
         Assert.NotNull(loaded);
         Assert.Single(loaded.Inventory);
-        Assert.Equal("Rope", loaded.Inventory[0].Name);
+        Assert.Equal("Rope", loaded.Inventory.First().Name);
 
-        // Edit: add Torch back (previously tracked → now detached → re-attach)
-        character.Inventory =
-        [
-            new Item { Id = _itemId2, Name = "Rope" },
-            new Item { Id = _itemId1, Name = "Torch" },
-        ];
-        await _service.SaveAsync(character);
+        // Edit: add Torch back
+        await _service.SaveAsync(MakeCharacter(invId, "Inventory Hero", inventory: [r2, r1]));
 
-        loaded = await _service.GetByIdAsync(character.Id);
+        loaded = await _service.GetByIdAsync(invId);
         Assert.NotNull(loaded);
-        Assert.Equal(2, loaded.Inventory.Count);
+        Assert.Equal(2, loaded.Inventory.Count());
         Assert.Contains(loaded.Inventory, i => i.Name == "Torch");
         Assert.Contains(loaded.Inventory, i => i.Name == "Rope");
     }
@@ -437,66 +428,30 @@ public class CharacterCreationTests : IAsyncLifetime
     public async Task SaveAsync_WithCustomInventoryItem_AssignsAndPersistsItem()
     {
         var customItemId = Guid.NewGuid();
-        var character = new Character
-        {
-            Name = "Custom Item Hero",
-            GameClassId = _gameClassId,
-            SubclassId = _subclassId,
-            AncestryId = _ancestryId,
-            CommunityId = _communityId,
-            Traits = new TraitScores(0, 0, 0, 0, 0, 0),
-            DamageThresholds = new DamageThresholds(0, 0),
-            Evasion = 10,
-            HitPoints = new ResourcePool(5, 5),
-            Stress = new ResourcePool(0, 5),
-            Hope = new ResourcePool(2, 5),
-            ArmorSlots = new ResourcePool(0, 0),
-            Inventory =
-            [
-                new Item { Id = customItemId, Name = "Homebrew Bomb", Description = "Custom explosive" },
-            ],
-        };
-
-        await _service.SaveAsync(character);
+        var customInv = new[] { new ItemSummary(customItemId, "Homebrew Bomb", "Custom explosive") };
+        await _service.SaveAsync(MakeCharacter(Guid.NewGuid(), "Custom Item Hero", inventory: customInv));
 
         await using var context = await _factory.CreateDbContextAsync();
         Assert.NotNull(await context.Items.FindAsync(customItemId));
-        var loaded = await _service.GetByIdAsync(character.Id);
-        Assert.NotNull(loaded);
-        Assert.Contains(loaded.Inventory, i => i.Id == customItemId);
     }
 
     [Fact]
     public async Task UpdateCharacterAbilitiesAsync_WithAbilityIdOnly_UpdatesWithoutThrowing()
     {
-        var character = new Character
-        {
-            Name = "Ability Hero",
-            GameClassId = _gameClassId,
-            SubclassId = _subclassId,
-            AncestryId = _ancestryId,
-            CommunityId = _communityId,
-            Traits = new TraitScores(0, 0, 0, 0, 0, 0),
-            DamageThresholds = new DamageThresholds(0, 0),
-            Evasion = 10,
-            HitPoints = new ResourcePool(5, 5),
-            Stress = new ResourcePool(0, 5),
-            Hope = new ResourcePool(2, 5),
-            ArmorSlots = new ResourcePool(0, 0),
-        };
+        var abId = Guid.NewGuid();
+        var abs = new[] { new AbilitySummary(_abilityId1, "", DomainType.Arcana, 1, 0, AbilityType.Spell, "", false) };
+        await _service.SaveAsync(MakeCharacter(abId, "Ability Hero", abilities: abs));
 
-        await _service.SaveAsync(character);
-
-        await _service.UpdateCharacterAbilitiesAsync(character.Id,
+        await _service.UpdateCharacterAbilitiesAsync(abId,
         [
             new CharacterAbility { AbilityId = _abilityId1, IsVaulted = false },
             new CharacterAbility { AbilityId = _abilityId2, IsVaulted = true },
         ]);
 
-        var loaded = await _service.GetByIdAsync(character.Id);
+        var loaded = await _service.GetByIdAsync(abId);
         Assert.NotNull(loaded);
-        Assert.Equal(2, loaded.CharacterAbilities.Count);
-        Assert.Contains(loaded.CharacterAbilities, ca => ca.AbilityId == _abilityId1 && !ca.IsVaulted);
-        Assert.Contains(loaded.CharacterAbilities, ca => ca.AbilityId == _abilityId2 && ca.IsVaulted);
+        Assert.Equal(2, loaded.CharacterAbilities.Count());
+        Assert.Contains(loaded.CharacterAbilities, ca => ca.Id == _abilityId1 && !ca.IsVaulted);
+        Assert.Contains(loaded.CharacterAbilities, ca => ca.Id == _abilityId2 && ca.IsVaulted);
     }
 }

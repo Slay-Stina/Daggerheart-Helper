@@ -991,7 +991,7 @@
             // Load extra class data for upcoming steps
             _classSetupData = await ClassQueries.GetClassSetupDataAsync(_selectedClass.Id);
             _backgroundEntries = _classSetupData.BackgroundQuestions
-                .Select(q => new BackgroundEntry { Question = q, Answer = string.Empty })
+                .Select(q => new BackgroundEntry { Question = q })
                 .ToList();
         }
         else if (_currentStep == 1)
@@ -1287,31 +1287,30 @@
             if (_equipmentTask is { IsCompleted: false })
                 await _equipmentTask;
 
-            var charEntity = new Character
-            {
-                Name = _characterName,
-                Pronouns = string.IsNullOrWhiteSpace(_pronouns) ? null : _pronouns,
-                DescriptionEyes = string.IsNullOrWhiteSpace(_descriptionEyes) ? null : _descriptionEyes,
-                DescriptionBody = string.IsNullOrWhiteSpace(_descriptionBody) ? null : _descriptionBody,
-                DescriptionClothes = string.IsNullOrWhiteSpace(_descriptionClothes) ? null : _descriptionClothes,
-                DescriptionSkin = string.IsNullOrWhiteSpace(_descriptionSkin) ? null : _descriptionSkin,
-                DescriptionAttitude = string.IsNullOrWhiteSpace(_descriptionAttitude) ? null : _descriptionAttitude,
-                Level = 1,
-                GameClassId = _selectedClass!.Id,
-                SubclassId = _selectedSubclass!.Id,
-                AncestryId = _selectedAncestry!.Id,
-                CommunityId = _selectedCommunity!.Id,
-                Experiences = new[] { _experience1, _experience2 }.Where(e => !string.IsNullOrWhiteSpace(e)).ToList(),
-                BackgroundAnswers = _backgroundEntries.SelectMany(e => new[] { e.Question, e.Answer }).ToList(),
-                Inventory = new[] { "Torch", "50 ft rope", "Basic supplies", _selectedPotion!, _selectedClassItem! }
-                    .Where(x => !string.IsNullOrEmpty(x))
-                    .Select(name => _itemCatalog.FirstOrDefault(i => i.Name == name))
-                    .Where(i => i is not null)
-                    .Cast<Item>()
-                    .ToList(),
-                GoldHandfuls = 1,
-                SpellFocus = string.IsNullOrWhiteSpace(_spellFocus) ? null : _spellFocus,
-                Traits = new TraitScores(
+            var inventoryItems = new[] { "Torch", "50 ft rope", "Basic supplies", _selectedPotion!, _selectedClassItem! }
+                .Where(x => !string.IsNullOrEmpty(x))
+                .Select(name => _itemCatalog.FirstOrDefault(i => i.Name == name))
+                .Where(i => i is not null)
+                .Select(i => new ItemSummary(i.Id, i.Name, i.Description))
+                .ToList();
+
+            var charEntity = new CharacterSummary(
+                Guid.NewGuid(),
+                1,
+                _characterName,
+                string.IsNullOrWhiteSpace(_pronouns) ? null : _pronouns,
+                string.IsNullOrWhiteSpace(_descriptionEyes) ? null : _descriptionEyes,
+                string.IsNullOrWhiteSpace(_descriptionBody) ? null : _descriptionBody,
+                string.IsNullOrWhiteSpace(_descriptionClothes) ? null : _descriptionClothes,
+                string.IsNullOrWhiteSpace(_descriptionSkin) ? null : _descriptionSkin,
+                string.IsNullOrWhiteSpace(_descriptionAttitude) ? null : _descriptionAttitude,
+                _selectedClass!, 
+                _selectedSubclass!,
+                null,
+                null,
+                _selectedAncestry!,
+                _selectedCommunity!,
+                new TraitScores(
                     _traitSlots.First(s => s.Key == TraitKey.Agility).AssignedChip?.Value ?? 0,
                     _traitSlots.First(s => s.Key == TraitKey.Strength).AssignedChip?.Value ?? 0,
                     _traitSlots.First(s => s.Key == TraitKey.Finesse).AssignedChip?.Value ?? 0,
@@ -1319,21 +1318,24 @@
                     _traitSlots.First(s => s.Key == TraitKey.Presence).AssignedChip?.Value ?? 0,
                     _traitSlots.First(s => s.Key == TraitKey.Knowledge).AssignedChip?.Value ?? 0
                 ),
-                Evasion = CalculateEvasion(),
-                DamageThresholds = new DamageThresholds(CalculateMajorThreshold(), CalculateSevereThreshold()),
-                EquippedArmorId = _selectedArmor?.Id,
-                PrimaryWeaponId = _selectedPrimaryWeapon?.Id,
-                SecondaryWeaponId = _selectedSecondaryWeapon?.Id,
-                CharacterAbilities = _selectedDomainAbilities.Select(ab => new CharacterAbility
-                {
-                    AbilityId = ab.Id,
-                    IsVaulted = false,
-                }).ToList(),
-                HitPoints = new ResourcePool(_selectedClass.BaseHealth, _selectedClass.BaseHealth),
-                Stress = new ResourcePool(0, 6),
-                Hope = new ResourcePool(2, 6),
-                ArmorSlots = new ResourcePool(_selectedArmor?.ArmorScore ?? 0, _selectedArmor?.ArmorScore ?? 0)
-            };
+                new DamageThresholds(CalculateMajorThreshold(), CalculateSevereThreshold()),
+                CalculateEvasion(),
+                1,
+                new[] { _experience1, _experience2 }.Where(e => !string.IsNullOrWhiteSpace(e)).ToList(),
+                _backgroundEntries.ToDictionary(e => e.Question, e => e.Answer),
+                inventoryItems,
+                1,
+                string.IsNullOrWhiteSpace(_spellFocus) ? null : _spellFocus,
+                _selectedArmor,
+                _selectedPrimaryWeapon,
+                _selectedSecondaryWeapon,
+                _selectedDomainAbilities,
+                new ResourcePool(_selectedClass.BaseHealth, _selectedClass.BaseHealth),
+                new ResourcePool(0, 6),
+                new ResourcePool(2, 6),
+                new ResourcePool(_selectedArmor?.ArmorScore ?? 0, _selectedArmor?.ArmorScore ?? 0),
+                Array.Empty<byte>()
+            );
 
             await CharacterService.SaveAsync(charEntity);
             NavigationManager.NavigateTo("/Characters");
