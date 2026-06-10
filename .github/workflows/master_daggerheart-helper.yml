@@ -1,0 +1,37 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore Daggerheart-Helper.Web/Daggerheart-Helper.Web.csproj
+
+      - name: Publish Web project
+        run: dotnet publish Daggerheart-Helper.Web/Daggerheart-Helper.Web.csproj -c Release -o publish --no-restore
+
+      - name: Deploy to Azure
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: daggerheart-helper
+          slot-name: production
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: publish
